@@ -17,6 +17,7 @@ public class Poses {
     public static Pose start = new Pose(0, 0, 0);
 
     public static Pose blueGoal = new Pose(16, 132);
+    public static Pose redGoal = new Pose(128, 132);
 
 
 

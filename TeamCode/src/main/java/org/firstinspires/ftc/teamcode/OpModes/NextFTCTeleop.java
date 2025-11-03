@@ -200,7 +200,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         launcherController.update(launcher.getVelocity());
         launcher.setPower(launcherController.runPDFL(.05));
 
-        distanceToGoalInMeters = getDistanceToGoalInMeters();
+        distanceToGoalInMeters = getDistanceToGoalInMeters(color);
         turretTargetAngle = 0; //Vision.getTargetAngle
 
         ballServo.setPosition(servoPos);
@@ -279,18 +279,24 @@ public class NextFTCTeleop extends NextFTCOpMode {
     }
 
 
-    public double getDistanceToGoalInMeters() {
+    public double getDistanceToGoalInMeters(UniConstants.teamColor color) {
+        double x = 0,y = 1;
+        switch (color){
+            case BLUE:
+                x = follower.getPose().getX() - Poses.blueGoal.getX();
+                y = follower.getPose().getY() - Poses.blueGoal.getY();
+                break;
+            case RED:
+                x = follower.getPose().getX() - Poses.redGoal.getX();
+                y = follower.getPose().getY() - Poses.redGoal.getY();
+        }
 
-        double x = follower.getPose().getX() - Poses.blueGoal.getX();
-        double y = follower.getPose().getY() - Poses.blueGoal.getY();
         turretTargetAngle = Math.toDegrees(Math.atan(x / y));
         return (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))) / 39.37;
 
 
 
     }
-
-
 
     public double getTurretTargetPosition(double turretTargetAngle){
 
