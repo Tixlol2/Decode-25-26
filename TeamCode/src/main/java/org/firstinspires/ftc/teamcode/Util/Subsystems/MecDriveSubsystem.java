@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Util.Poses;
@@ -11,12 +12,17 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
+
+//TODO: Tune all constants to ensure correctness awesome
 public class MecDriveSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
     UniConstants.teamColor color;
     public static boolean debug = false;
     private Follower follower;
+
+    //For ensuring that PP is reset
+    public static GoBildaPinpointDriver pinpoint;
 
     //For calculated turret angle
     private static double changeInTurretAngle = 0;
@@ -26,6 +32,7 @@ public class MecDriveSubsystem implements Subsystem {
         this.color = color;
         this.telemetry = telemetry;
         follower = Constants.createFollower(hardwareMap);
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, UniConstants.PINPOINT_STRING);
         follower.setPose(new Pose());
         follower.update();
 
@@ -61,13 +68,17 @@ public class MecDriveSubsystem implements Subsystem {
                 y = follower.getPose().getY() - Poses.redGoal.getY();
         }
 
-        changeInTurretAngle = (Math.toDegrees(Math.atan2(x,y))) + follower.getHeading();
+        changeInTurretAngle = (Math.toDegrees(Math.atan2(x,y))) + Math.toDegrees(follower.getPose().getHeading());
         return Math.hypot(x,y) / 39.37;
 
     }
 
     public double getCalculatedTurretAngle(){
-        return changeInTurretAngle;
+        return color == UniConstants.teamColor.RED ? -changeInTurretAngle : changeInTurretAngle;
+    }
+
+    public void resetPinpoint(){
+        pinpoint.resetPosAndIMU();
     }
 
     public void sendTelemetry(UniConstants.loggingState state){

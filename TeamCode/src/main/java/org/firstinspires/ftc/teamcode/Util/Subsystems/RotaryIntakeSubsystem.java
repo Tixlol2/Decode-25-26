@@ -121,7 +121,6 @@ public class RotaryIntakeSubsystem implements Subsystem {
 
     public void passServo(){
         servoTarget = UniConstants.SERVO_PASS;
-
     }
 
     public void transferServo(){

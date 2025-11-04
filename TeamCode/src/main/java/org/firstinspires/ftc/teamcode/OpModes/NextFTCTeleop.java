@@ -2,20 +2,16 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 
 import com.bylazar.configurables.annotations.Configurable;
-
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.RotaryIntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
-
-import java.util.ArrayList;
 
 import dev.nextftc.ftc.NextFTCOpMode;
 
@@ -32,9 +28,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     UniConstants.teamColor color = UniConstants.teamColor.BLUE;
 
-    boolean isSlowed = false;
+    static boolean isSlowed = false;
 
-    double distanceToGoalInMeters = 0.0;
+    static double distanceToGoalInMeters = 0.0;
 
     public static UniConstants.loggingState logState = UniConstants.loggingState.ENABLED;
 
@@ -62,6 +58,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
             rotaryIntake = new RotaryIntakeSubsystem(hardwareMap, joinedTelemetry, color);
             outtake = new OuttakeSubsystem(hardwareMap, joinedTelemetry, color);
             mecDrive = new MecDriveSubsystem(hardwareMap, joinedTelemetry, color);
+            mecDrive.resetPinpoint();
         }
 
 
@@ -80,6 +77,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         mecDrive.startTele();
+
 
     }
 
@@ -119,8 +117,8 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
         rotaryIntake.periodic(); //Updater for rotary + intake
         outtake.periodic(); //updater for launcher and turret
-        vision.periodic();
-        mecDrive.periodic();
+        vision.periodic(); //updater for vision
+        mecDrive.periodic(); //updater for Mecanum drive and follower
 
         rotaryIntake.sendTelemetry(logState);
         outtake.sendTelemetry(logState);

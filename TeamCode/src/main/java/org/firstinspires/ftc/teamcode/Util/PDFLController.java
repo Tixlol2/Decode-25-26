@@ -42,8 +42,6 @@ public class PDFLController {
         double returnVal = (error*p) + (dError*d);
         dir = error > 0 ? 1 : error < 0 ? -1 : 0;
 
-
-
         if (Math.abs(error) <= errorMin) {
             atTarget = true;
             return f;

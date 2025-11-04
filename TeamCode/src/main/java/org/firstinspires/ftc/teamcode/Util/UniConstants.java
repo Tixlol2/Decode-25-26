@@ -14,7 +14,10 @@ import org.firstinspires.ftc.vision.opencv.ImageRegion;
 @Configurable
 public class UniConstants {
 
-/*CONFIG
+/*
+CONFIG
+
+//Control Hub
     //CHM0 = ACTIVE
     //CHM1 = ROTA
     //CHM2 = FLM
@@ -25,7 +28,7 @@ public class UniConstants {
     //CHI2C2 = CSL
     //CHI2C3 = pp
 
-
+//Expansion Hub
     //EHM0 = FR
     //EHM1 = BR
     //EHM2 = TURR
