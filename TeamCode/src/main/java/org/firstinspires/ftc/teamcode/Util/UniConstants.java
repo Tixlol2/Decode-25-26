@@ -45,10 +45,10 @@ CONFIG
     public static final String DRIVE_FRONT_RIGHT_STRING = "FRM";
     public static final String DRIVE_BACK_LEFT_STRING = "BLM";
     public static final String DRIVE_BACK_RIGHT_STRING = "BRM";
-    public static final DcMotorEx.Direction DRIVE_FRONT_LEFT_DIRECTION = DcMotorEx.Direction.FORWARD;
-    public static final DcMotorEx.Direction DRIVE_FRONT_RIGHT_DIRECTION = DcMotorEx.Direction.FORWARD;
-    public static final DcMotorEx.Direction DRIVE_BACK_LEFT_DIRECTION = DcMotorEx.Direction.REVERSE;
-    public static final DcMotorEx.Direction DRIVE_BACK_RIGHT_DIRECTION = DcMotorEx.Direction.FORWARD;
+    public static final DcMotorEx.Direction DRIVE_FRONT_LEFT_DIRECTION = DcMotorEx.Direction.REVERSE;
+    public static final DcMotorEx.Direction DRIVE_FRONT_RIGHT_DIRECTION = DcMotorEx.Direction.REVERSE;
+    public static final DcMotorEx.Direction DRIVE_BACK_LEFT_DIRECTION = DcMotorEx.Direction.FORWARD;
+    public static final DcMotorEx.Direction DRIVE_BACK_RIGHT_DIRECTION = DcMotorEx.Direction.REVERSE;
     public static final String PINPOINT_STRING = "pp";
 
     //Enums
@@ -94,44 +94,44 @@ CONFIG
     public static final double ANGLE_OF_LAUNCHER_IN_DEGREES = 35;
     public static  final double HEIGHT_OF_ROBOT_IN_METERS = 0.35; //TODO: Check to make sure this is right
     public static  final double HEIGHT_TO_GOAL_WITH_CLEARANCE_METERS = (1.11125) - (HEIGHT_OF_ROBOT_IN_METERS);
-    public static  final double MOTOR_TO_TURRET_RATIO = (double) 24 /155; //Motor to Turret
-    public static  final double TURRET_TICKS_PER_DEGREE = 537.7/360;
+    public static double MOTOR_TO_TURRET_RATIO =  ((double) 45 / 115); //Motor to Turret
+    public static double TURRET_TICKS_PER_DEGREE = (360/537.7) * (1/ MOTOR_TO_TURRET_RATIO);
 
 
 
-    //Artifact locator processors
-    public static final ColorBlobLocatorProcessor colorLocatorGreen = new ColorBlobLocatorProcessor.Builder()
-            .setTargetColorRange(ColorRange.ARTIFACT_GREEN)   // Use a predefined color match
-            .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-            .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-            .setDrawContours(true)   // Show contours on the Stream Preview
-            .setBoxFitColor(0)       // Disable the drawing of rectangles
-            .setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
-            .setBlurSize(5)          // Smooth the transitions between different colors in image
-
-            // the following options have been added to fill in perimeter holes.
-            .setDilateSize(15)       // Expand blobs to fill any divots on the edges
-            .setErodeSize(15)        // Shrink blobs back to original size
-            .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
-
-            .build();
-
-    public static final ColorBlobLocatorProcessor colorLocatorPurple = new ColorBlobLocatorProcessor.Builder()
-            .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
-            .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-            .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-            .setDrawContours(true)   // Show contours on the Stream Preview
-            .setBoxFitColor(0)       // Disable the drawing of rectangles
-            .setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
-            .setBlurSize(5)          // Smooth the transitions between different colors in image
-
-            // the following options have been added to fill in perimeter holes.
-            .setDilateSize(15)       // Expand blobs to fill any divots on the edges
-            .setErodeSize(15)        // Shrink blobs back to original size
-            .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
-
-            .build();
-
-
+//    //Artifact locator processors
+//    public static final ColorBlobLocatorProcessor colorLocatorGreen = new ColorBlobLocatorProcessor.Builder()
+//            .setTargetColorRange(ColorRange.ARTIFACT_GREEN)   // Use a predefined color match
+//            .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+//            .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+//            .setDrawContours(true)   // Show contours on the Stream Preview
+//            .setBoxFitColor(0)       // Disable the drawing of rectangles
+//            .setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+//            .setBlurSize(5)          // Smooth the transitions between different colors in image
+//
+//            // the following options have been added to fill in perimeter holes.
+//            .setDilateSize(15)       // Expand blobs to fill any divots on the edges
+//            .setErodeSize(15)        // Shrink blobs back to original size
+//            .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+//
+//            .build();
+//
+//    public static final ColorBlobLocatorProcessor colorLocatorPurple = new ColorBlobLocatorProcessor.Builder()
+//            .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
+//            .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+//            .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+//            .setDrawContours(true)   // Show contours on the Stream Preview
+//            .setBoxFitColor(0)       // Disable the drawing of rectangles
+//            .setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+//            .setBlurSize(5)          // Smooth the transitions between different colors in image
+//
+//            // the following options have been added to fill in perimeter holes.
+//            .setDilateSize(15)       // Expand blobs to fill any divots on the edges
+//            .setErodeSize(15)        // Shrink blobs back to original size
+//            .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+//
+//            .build();
+//
+//
 
 }

@@ -7,7 +7,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
-import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
+//import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.RotaryIntakeSubsystem;
@@ -38,7 +38,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
 
     //All different subsystems
-    private static BetterVisionTM vision;
+//    private static BetterVisionTM vision;
     private static RotaryIntakeSubsystem rotaryIntake;
     private static OuttakeSubsystem outtake;
     private static MecDriveSubsystem mecDrive;
@@ -46,7 +46,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
-        vision = new BetterVisionTM(hardwareMap, joinedTelemetry, logState);
+//        vision = new BetterVisionTM(hardwareMap, joinedTelemetry, logState);
     }
 
     @Override public void onWaitForStart() {
@@ -54,28 +54,28 @@ public class NextFTCTeleop extends NextFTCOpMode {
             color = UniConstants.teamColor.RED;
         }else if (gamepad1.b){
             color = UniConstants.teamColor.BLUE;
-        } else if (gamepad1.y){
-            rotaryIntake = new RotaryIntakeSubsystem(hardwareMap, joinedTelemetry, color);
-            outtake = new OuttakeSubsystem(hardwareMap, joinedTelemetry, color);
-            mecDrive = new MecDriveSubsystem(hardwareMap, joinedTelemetry, color);
-            mecDrive.resetPinpoint();
         }
-
-
 
         joinedTelemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
         joinedTelemetry.addLine("B for Blue, A for Red ");
         joinedTelemetry.addData("Current Team Color ", color);
-        joinedTelemetry.addLine("IF correct color selected; press Y");
         joinedTelemetry.update();
     }
 
+
     @Override
     public void onStartButtonPressed() {
+
+
+        rotaryIntake = new RotaryIntakeSubsystem(hardwareMap, joinedTelemetry, color);
+        outtake = new OuttakeSubsystem(hardwareMap, joinedTelemetry, color);
+        mecDrive = new MecDriveSubsystem(hardwareMap, joinedTelemetry, color);
+        mecDrive.resetPinpoint();
+
         for (ColorSensor sensor : rotaryIntake.colorSensors) {
             sensor.enableLed(true);
         }
-
+        outtake.resetMotors();
         mecDrive.startTele();
 
 
@@ -104,20 +104,20 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
 
         outtake.setLauncherTargetVelo(outtake.getTargetVelocity(mecDrive.updateDistanceAndAngle(color)));
-        outtake.setTurretTargetAngle(mecDrive.getCalculatedTurretAngle());
+//        outtake.setTurretTargetAngle(mecDrive.getCalculatedTurretAngle() );
         distanceToGoalInMeters = mecDrive.updateDistanceAndAngle(color);
 
 
         mecDrive.updateTeleop(
-                gamepad1.left_stick_y * (isSlowed ? .5 : 1), //Forward/Backward
-                gamepad1.left_stick_x * (isSlowed ? .5 : 1), //Left/Right Rotation
-                gamepad1.right_stick_x * (isSlowed ? .5 : 1), //Left/Right Strafe
+                -gamepad1.left_stick_y * (isSlowed ? .5 : 1), //Forward/Backward
+                -gamepad1.left_stick_x * (isSlowed ? .5 : 1), //Left/Right Rotation
+                -gamepad1.right_stick_x * (isSlowed ? .5 : 1), //Left/Right Strafe
                 true
         );
 
         rotaryIntake.periodic(); //Updater for rotary + intake
         outtake.periodic(); //updater for launcher and turret
-        vision.periodic(); //updater for vision
+//        vision.periodic(); //updater for vision
         mecDrive.periodic(); //updater for Mecanum drive and follower
 
         rotaryIntake.sendTelemetry(logState);

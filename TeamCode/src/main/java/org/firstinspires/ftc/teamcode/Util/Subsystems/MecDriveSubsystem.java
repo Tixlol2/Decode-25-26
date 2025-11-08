@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
-
+@Configurable
 //TODO: Tune all constants to ensure correctness awesome
 public class MecDriveSubsystem implements Subsystem {
     //Class variables
@@ -89,7 +90,7 @@ public class MecDriveSubsystem implements Subsystem {
                 telemetry.addLine("START OF MEC DRIVE LOG");
                 telemetry.addData("Pose X ", follower.getPose().getX());
                 telemetry.addData("Pose Y ", follower.getPose().getY());
-                telemetry.addData("Pose Heading ", follower.getPose().getHeading());
+                telemetry.addData("Pose Heading Degrees ", Math.toDegrees(follower.getPose().getHeading()));
                 telemetry.addLine("END OF MEC DRIVE LOG");
                 break;
             case EXTREME:

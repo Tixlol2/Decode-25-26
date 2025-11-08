@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
+@Configurable
 public class OuttakeSubsystem implements Subsystem {
     //Necessary
     JoinedTelemetry telemetry;
@@ -37,6 +39,8 @@ public class OuttakeSubsystem implements Subsystem {
     private static double turretCurrentAngle = 0;
     //Debug turret things
     public static double turretPower = 0;
+    private static double turretTargetAngleDebug = 0;
+
 
 
 
@@ -56,14 +60,14 @@ public class OuttakeSubsystem implements Subsystem {
     @Override
     public void periodic(){
 
-        if(debug){
-            turretController.setPDFL(pT, dT, fT, lT);
-            launcherController.setPDFL(pL, dL, fL, lL);
-        }
 
+        turretController.setPDFL(pT, dT, fT, lT);
+        launcherController.setPDFL(pL, dL, fL, lL);
+        if(debug) {
+            setTurretTargetAngle(turretTargetAngleDebug);
+        }
         launcherCurrentVelo = launcher.getVelocity();
 
-        turretTargetPosition = getTurretTargetPosition(turretTargetAngle);
         turretCurrentPositon = turret.getCurrentPosition();
         turretCurrentAngle = getTurretCurrentAngle(turretCurrentPositon);
 
@@ -77,13 +81,20 @@ public class OuttakeSubsystem implements Subsystem {
         launcherController.setTarget(debug ? launcherTargetVeloDebug : launcherTargetVelo);
         launcherController.update(launcherCurrentVelo);
         launcher.setPower(debug ? launcherPowerDebug : (launcherPower += launcherController.runPDFL(.05)));
+
+
+
+
+        turretTargetPosition = getTurretTargetPosition(turretTargetAngle);
+
+
     }
 
     public  double getTurretTargetPosition(double turretTargetAngle){
 
         //Ratio given in terms of motor/turret
 
-        return (turretTargetAngle / UniConstants.MOTOR_TO_TURRET_RATIO) * UniConstants.TURRET_TICKS_PER_DEGREE;
+        return Math.max(Math.min(-400,turretTargetAngle * UniConstants.TURRET_TICKS_PER_DEGREE),400);
 
     }
 
@@ -96,7 +107,14 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
     public  void setTurretTargetAngle(double target){
-        turretTargetAngle = target;
+        turretTargetAngle = Math.max(35,Math.min(debug ? turretTargetAngleDebug :target, 35));
+    }
+
+    public void resetMotors(){
+        launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public  double getTargetVelocity(double distanceToGoalInMeters) {

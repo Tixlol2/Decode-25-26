@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 
 import dev.nextftc.core.subsystems.Subsystem;
 
+@Configurable
 public class RotaryIntakeSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
