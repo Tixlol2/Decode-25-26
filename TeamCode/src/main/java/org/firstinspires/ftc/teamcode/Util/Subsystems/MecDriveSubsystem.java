@@ -61,15 +61,15 @@ public class MecDriveSubsystem implements Subsystem {
         double x = 0,y = 1;
         switch (color){
             case BLUE:
-                x = follower.getPose().getX() - Poses.blueGoal.getX();
-                y = follower.getPose().getY() - Poses.blueGoal.getY();
+                x = Poses.blueGoal.getX() - follower.getPose().getX();
+                y = Poses.blueGoal.getY() - follower.getPose().getY();
                 break;
             case RED:
-                x = follower.getPose().getX() - Poses.redGoal.getX();
-                y = follower.getPose().getY() - Poses.redGoal.getY();
+                x =  Poses.redGoal.getX() - follower.getPose().getX();
+                y =  Poses.redGoal.getY() - follower.getPose().getY();
         }
 
-        changeInTurretAngle = (Math.toDegrees(Math.atan2(x,y))) + Math.toDegrees(follower.getPose().getHeading());
+        changeInTurretAngle = 180 + (-(Math.toDegrees(Math.atan2(x,y))) - Math.toDegrees(follower.getPose().getHeading()));
         return Math.hypot(x,y) / 39.37;
 
     }
@@ -86,6 +86,10 @@ public class MecDriveSubsystem implements Subsystem {
         this.color = color;
     }
 
+    public void setPose(Pose pose) {
+        follower.setPose(pose);
+    }
+
     public void sendTelemetry(UniConstants.loggingState state){
         switch(state){
             case DISABLED:
@@ -95,6 +99,7 @@ public class MecDriveSubsystem implements Subsystem {
                 telemetry.addData("Pose X ", follower.getPose().getX());
                 telemetry.addData("Pose Y ", follower.getPose().getY());
                 telemetry.addData("Pose Heading Degrees ", Math.toDegrees(follower.getPose().getHeading()));
+                telemetry.addData("Calculated Angle ", getCalculatedTurretAngle());
                 telemetry.addLine("END OF MEC DRIVE LOG");
                 break;
             case EXTREME:

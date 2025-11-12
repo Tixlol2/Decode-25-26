@@ -23,11 +23,11 @@ public class Constants {
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
-            .centripetalScaling(0.0005)
+            .centripetalScaling(0.0003)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0, 0))
             .headingPIDFCoefficients(new PIDFCoefficients(.7, 0, 0, 0.02))
             .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(0.008, 0, 0.0002, 0, 0)
+                    new FilteredPIDFCoefficients(0.005, 0, 0.000, 0, 0)
             );
 
     public static MecanumConstants driveConstants = new MecanumConstants()
@@ -50,7 +50,7 @@ public class Constants {
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName(UniConstants.PINPOINT_STRING)
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
     public static PathConstraints pathConstraints = new PathConstraints(

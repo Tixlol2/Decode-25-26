@@ -31,7 +31,7 @@ public class OuttakeSubsystem implements Subsystem {
 
     //Actual turret things
     DcMotorEx turret;
-    public static double pT = 0, dT = 0, lT = 0, fT = 0;
+    public static double pT = 0.0018, dT = 0, lT = 0.087, fT = 0;
     PDFLController turretController = new PDFLController(pT, dT, fT, lT);
     private static double turretTargetPosition = 0;
     private static double turretCurrentPositon = 0;
@@ -63,10 +63,8 @@ public class OuttakeSubsystem implements Subsystem {
 
         turretController.setPDFL(pT, dT, fT, lT);
         launcherController.setPDFL(pL, dL, fL, lL);
-        if(debug) {
-            setTurretTargetAngle(turretTargetAngleDebug);
-        }
-        turretTargetPosition = getTurretTargetPosition(turretTargetAngle);
+
+        turretTargetPosition = debug ? getTurretTargetPosition(turretTargetAngleDebug) : getTurretTargetPosition(turretTargetAngle);
         launcherCurrentVelo = launcher.getVelocity();
 
         turretCurrentPositon = turret.getCurrentPosition();
@@ -76,7 +74,7 @@ public class OuttakeSubsystem implements Subsystem {
         //TODO: Needs to be tuned for PDFL
         turretController.setTarget(turretTargetPosition);
         turretController.update(turretCurrentPositon);
-        turret.setPower(debug ? turretPower : turretController.runPDFL(5));
+        turret.setPower(debug ? turretPower : turretController.runPDFL(2));
 
         //TODO: Tune for PDFL
         launcherController.setTarget(debug ? launcherTargetVeloDebug : launcherTargetVelo);
@@ -94,7 +92,7 @@ public class OuttakeSubsystem implements Subsystem {
 
         //Ratio given in terms of motor/turret
 
-        return Math.max(Math.min(-400,turretTargetAngle * UniConstants.TURRET_TICKS_PER_DEGREE),400);
+        return (turretTargetAngle * UniConstants.TURRET_TICKS_PER_DEGREE) * 2;
 
     }
 
@@ -107,7 +105,7 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
     public  void setTurretTargetAngle(double target){
-        turretTargetAngle = Math.max(35,Math.min(debug ? turretTargetAngleDebug :target, 35));
+        turretTargetAngle = target;
     }
 
     public void resetMotors(){

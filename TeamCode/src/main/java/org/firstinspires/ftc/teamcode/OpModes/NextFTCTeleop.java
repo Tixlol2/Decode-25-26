@@ -4,12 +4,14 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.RotaryIntakeSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -34,6 +36,8 @@ public class NextFTCTeleop extends NextFTCOpMode {
     public static UniConstants.loggingState logState = UniConstants.loggingState.ENABLED;
 
     JoinedTelemetry joinedTelemetry;
+
+    Timer rotaryTimer = new Timer();
 
 
     //All different subsystems
@@ -74,6 +78,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         outtake.setColor(color);
         mecDrive.setColor(color);
         mecDrive.startTele();
+        mecDrive.setPose(new Pose(72, 72, Math.toRadians(90)));
 
 
     }
@@ -87,11 +92,8 @@ public class NextFTCTeleop extends NextFTCOpMode {
         if (gamepad1.a && !rotaryIntake.allFull()) {
             rotaryIntake.forwardIntake();
             rotaryIntake.enableActive();
-            if (rotaryIntake.isFull(rotaryIntake.slots.get(0))) {
-                if (!(rotaryIntake.getError() > 50)) {
-                    rotaryIntake.setRotaryTargetPosition(rotaryIntake.getRotaryCurrentPosition() + UniConstants.SPACE_BETWEEN_ROTARY_SLOTS);
-                }
-            }
+
+
         } else {
             rotaryIntake.disableActive();
         }
@@ -131,7 +133,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
             rotaryIntake.setRotaryDirection(-1);
         }
 
-
+        if(rotaryIntake.isAtPosition()){
+            rotaryTimer.reset();
+        }
 
 
 
