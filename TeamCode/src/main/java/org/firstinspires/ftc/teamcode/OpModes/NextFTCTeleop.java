@@ -19,7 +19,7 @@ import dev.nextftc.ftc.NextFTCOpMode;
 
 //Written by Noah Nottingham - 6566 Circuit Breakers
 
-@TeleOp(name = "Functional Teleop", group = "Driver") //The name and group
+@TeleOp(name = "Functional Teleop", group = "Main") //The name and group
 @Configurable
 public class NextFTCTeleop extends NextFTCOpMode {
 
