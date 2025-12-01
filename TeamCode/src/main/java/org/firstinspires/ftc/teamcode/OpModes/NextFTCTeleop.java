@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
@@ -114,11 +113,11 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
         if (gamepad1.right_bumper && rotaryTimer.getTimeSeconds() > 1) {
             //Transfer command here
-            rotaryIntake.toggleServo();
-            rotaryTimer.reset();
+//            rotaryIntake.toggleServo();
+//            rotaryTimer.reset();
         }
 
-        if(rotaryIntake.state == RotaryIntakeSubsystem.servoState.OUTTAKE){
+        if(rotaryIntake.stateFront == RotaryIntakeSubsystem.servoState.OUTTAKE){
             gamepad1.rumble(250);
         } else {
             gamepad1.stopRumble();

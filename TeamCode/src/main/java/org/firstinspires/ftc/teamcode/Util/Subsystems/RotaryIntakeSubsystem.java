@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.sun.tools.javac.util.List;
 
-import org.firstinspires.ftc.teamcode.Util.PDFLControllerRadial;
+import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -33,21 +33,20 @@ public class RotaryIntakeSubsystem implements Subsystem {
     DcMotorEx active;
 
     //Servo to let balls pass or force into launcher
-    Servo ballServo;
+    Servo flickerServoFront;
+    Servo flickerServoRight;
+    Servo flickerServoLeft;
     public static double testServoPos = 0;
-    private static double servoTarget = 0;
+
 
     //Rotary motor and controller
-    DcMotorEx rotary;
-    public static double pR = 0, dR = 0, lR = 0.1, fR = 0;
-    PDFLController rotaryController = new PDFLController(pR, dR, fR, lR);
-    public static int rotaryTargetPosition = 0;
-    private int rotaryCurrentPosition = 0;
-    private int rotaryDirection = 1;
+
     //Debug rotary
     public static double rotaryPower = 0;
 
-    public servoState state = servoState.INTAKE;
+    public servoState stateFront = servoState.INTAKE;
+    public servoState stateRight = servoState.INTAKE;
+    public servoState stateLeft = servoState.INTAKE;
 
     public RotaryIntakeSubsystem(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.teamColor color){
         this.telemetry = telemetry;
@@ -59,13 +58,12 @@ public class RotaryIntakeSubsystem implements Subsystem {
         active.setDirection(UniConstants.ACTIVE_DIRECTION);
 
         //Ball servo
-        ballServo = hardwareMap.get(Servo.class, UniConstants.BALL_SERVO_STRING);
+        flickerServoFront = hardwareMap.get(Servo.class, UniConstants.FLICKER_FRONT_STRING);
+        flickerServoRight = hardwareMap.get(Servo.class, UniConstants.FLICKER_RIGHT_STRING);
+        flickerServoLeft = hardwareMap.get(Servo.class, UniConstants.FLICKER_LEFT_STRING);
 
 
-        //Rotary Setup
-        rotary = hardwareMap.get(DcMotorEx.class, UniConstants.ROTARY_STRING);
-        rotary.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rotary.setDirection(UniConstants.ROTARY_DIRECTION);
+
 
         //Color Sensors Setup
         colorSensors.addAll(
@@ -81,24 +79,17 @@ public class RotaryIntakeSubsystem implements Subsystem {
     @Override
     public void periodic() {
 
-        rotaryController.setPDFL(pR, dR, fR, lR);
+
 
         //readSlots();
-        //rotaryCurrentPosition = rotary.getCurrentPosition();
-
-
-        //TODO: Needs to be tuned for PDFL
-        rotaryController.setTarget(rotaryTargetPosition);
-        rotaryController.update(rotaryCurrentPosition);
-        rotary.setPower(0);
-
         active.setPower(isEnabled ? (isReversed ? -1 : 1) : 0);
 
-        if(state == servoState.OUTTAKE){
-            active.setPower(1);
-        }
 
-        ballServo.setPosition(debug ? testServoPos : (state == servoState.INTAKE ? UniConstants.SERVO_INTAKE : UniConstants.SERVO_OUTTAKE));
+
+        //Flicker Servos
+        flickerServoFront.setPosition(debug ? testServoPos : (stateFront == servoState.INTAKE ? UniConstants.FLICKER_DOWN : UniConstants.FLICKER_UP));
+        flickerServoRight.setPosition(debug ? testServoPos : (stateRight == servoState.INTAKE ? UniConstants.FLICKER_DOWN : UniConstants.FLICKER_UP));
+        flickerServoLeft.setPosition(debug ? testServoPos : (stateLeft == servoState.INTAKE ? UniConstants.FLICKER_DOWN : UniConstants.FLICKER_UP));
 
     }
 
@@ -117,30 +108,9 @@ public class RotaryIntakeSubsystem implements Subsystem {
         isReversed = false;
     }
 
-    public void setRotaryTargetPosition(int target){
-        rotaryTargetPosition = target;
-    }
 
-    public int getRotaryTargetPosition(){
-        return rotaryTargetPosition;
-    }
 
-    public int getRotaryCurrentPosition(){
-        return rotaryCurrentPosition;
-    }
 
-    public int getError(){
-        return Math.abs(rotaryTargetPosition - rotaryCurrentPosition);
-    }
-
-    public void toggleServo(){
-        if(state == servoState.INTAKE){
-            state = servoState.OUTTAKE;
-        }
-        else {
-            state = servoState.INTAKE;
-        }
-    }
 
     public void readSlots() {
         for (int i = 0; i < 3; i++) {
@@ -165,12 +135,8 @@ public class RotaryIntakeSubsystem implements Subsystem {
         return (slot == UniConstants.slotState.PURPLE) || (slot == UniConstants.slotState.GREEN);
     }
 
-    public void setRotaryPower(double power){
-        rotaryPower = power;
-    }
-    public void setRotaryDirection(int direction){
-        rotaryDirection = direction;
-    }
+
+
 
     public void setColor(UniConstants.teamColor color){
         this.color = color;
@@ -186,13 +152,9 @@ public class RotaryIntakeSubsystem implements Subsystem {
         return true;
     }
 
-    public boolean isAtPosition(){
-        return getError() <= 5;
-    }
 
-    public void setServoState(servoState state){
-        servoTarget = (state == servoState.INTAKE ? UniConstants.SERVO_INTAKE : UniConstants.SERVO_OUTTAKE );
-    }
+
+
 
 
     public void sendTelemetry(UniConstants.loggingState state){
@@ -201,8 +163,6 @@ public class RotaryIntakeSubsystem implements Subsystem {
                 break;
             case ENABLED:
                 telemetry.addLine("START OF ROTARY LOG");
-                telemetry.addData("Rotary Current Pos ", rotaryCurrentPosition);
-                telemetry.addData("Rotary Target Pos ", rotaryTargetPosition);
                 telemetry.addLine();
                 telemetry.addData("Slot Front State ", slots.get(0));
                 telemetry.addData("Slot Right State ", slots.get(1));
@@ -212,9 +172,6 @@ public class RotaryIntakeSubsystem implements Subsystem {
                 break;
             case EXTREME:
                 telemetry.addLine("START OF ROTARY LOG");
-                telemetry.addData("Rotary Current Pos ", rotaryCurrentPosition);
-                telemetry.addData("Rotary Target Pos ", rotaryTargetPosition);
-                telemetry.addData("Rotary Error ", getError());
                 telemetry.addData("Rotary Power Debug ", rotaryPower);
                 telemetry.addLine();
                 telemetry.addData("Slot Front State ", slots.get(0));

@@ -33,7 +33,7 @@ CONFIG
 
     //EHI2C0 = CSR
 
-    //EHS5 = BS
+    //EHS5 =
 
 */
 
@@ -76,12 +76,12 @@ CONFIG
     //Rotary Subsystem
     public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
     public static final DcMotorSimple.Direction ACTIVE_DIRECTION = DcMotorSimple.Direction.REVERSE;
-    public static final String ROTARY_STRING = "ROTARY";
-    public static final DcMotorSimple.Direction ROTARY_DIRECTION = DcMotorSimple.Direction.REVERSE;
-    public static final int SPACE_BETWEEN_ROTARY_SLOTS = 225;
-    public static final String BALL_SERVO_STRING = "BS";
-    public static final double SERVO_OUTTAKE = 1;
-    public static final double SERVO_INTAKE = .6;
+
+    public static final String FLICKER_FRONT_STRING = "F1S";
+    public static final String FLICKER_RIGHT_STRING = "F2S";
+    public static final String FLICKER_LEFT_STRING = "F3S";
+    public static final double FLICKER_UP = 1;
+    public static final double FLICKER_DOWN = 0;
     //Color sensors
     public static final String COLOR_SENSOR_SLOT_FRONT_STRING = "CSF";
     public static final String COLOR_SENSOR_SLOT_RIGHT_STRING = "CSR";
