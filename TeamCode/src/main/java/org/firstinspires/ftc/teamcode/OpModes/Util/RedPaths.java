@@ -36,7 +36,7 @@ public class RedPaths {
     Path3 = follower
       .pathBuilder()
       .addPath(
-        new BezierLine(new Pose(93.000, 83.000), new Pose(125.000, 83.000))
+        new BezierLine(new Pose(93.000, 83.000), new Pose(120.000, 83.000))
       )
       .setConstantHeadingInterpolation(Math.toRadians(0))
       .build();
@@ -44,7 +44,7 @@ public class RedPaths {
     Path4 = follower
       .pathBuilder()
       .addPath(
-        new BezierLine(new Pose(125.000, 83.000), new Pose(93.000, 105.000))
+        new BezierLine(new Pose(120.000, 83.000), new Pose(93.000, 105.000))
       )
       .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(36))
       .build();

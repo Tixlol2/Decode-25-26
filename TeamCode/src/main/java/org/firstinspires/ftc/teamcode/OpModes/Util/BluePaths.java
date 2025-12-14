@@ -14,6 +14,8 @@ public class BluePaths{
     public PathChain Path5;
     public PathChain Path6;
     public PathChain Path7;
+    public PathChain Path8;
+
 
     public BluePaths(Follower follower) {
         Path1 = follower
@@ -70,6 +72,12 @@ public class BluePaths{
                         new BezierLine(new Pose(20.000, 60.000), new Pose(45.000, 100.000))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+                .build();
+        Path8 = follower.pathBuilder()
+                .addPath(
+                        new BezierLine(new Pose(45, 10), new Pose(37, 135))
+                )
+                .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
                 .build();
     }
 }

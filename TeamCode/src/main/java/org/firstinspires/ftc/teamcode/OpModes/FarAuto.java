@@ -5,7 +5,6 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathBuilder;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -16,11 +15,10 @@ import org.firstinspires.ftc.teamcode.Util.Subsystems.RotaryIntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
-import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 
-@Autonomous(name = "backup")
-public class Auton extends NextFTCOpMode {
+@Autonomous(name = "far auto")
+public class FarAuto extends NextFTCOpMode {
 
     {
         addComponents();
@@ -55,7 +53,7 @@ public class Auton extends NextFTCOpMode {
         //mecDrive.resetPinpoint();
         outtake.resetMotors();
 
-        buildPaths(mecDrive.getFollower());
+//        buildPaths(mecDrive.getFollower());
 
     }
 
@@ -80,7 +78,7 @@ public class Auton extends NextFTCOpMode {
         rotaryIntake.setColor(color);
         outtake.setColor(color);
         mecDrive.setColor(color);
-        mecDrive.setPose(color == UniConstants.teamColor.BLUE ? new Pose(22, 125, Math.toRadians(144)) : new Pose(122, 125, Math.toRadians(36)));
+        mecDrive.setPose(color == UniConstants.teamColor.BLUE ? new Pose(49, 8.5, Math.toRadians(90)) : new Pose(95, 8.5, Math.toRadians(90)));
 
         setPathState(0);
 
@@ -108,22 +106,24 @@ public class Auton extends NextFTCOpMode {
                 break;
             case 1:
                 if(!mecDrive.getFollower().isBusy() && pathTimer.getTimeSeconds() > 7.5){
-                    rotaryIntake.enableActive();
-//                    ballServo.setPosition(UniConstants.SERVO_OUTTAKE);
-                    rotaryIntake.toggleServo();
 
-                    if(pathTimer.getTimeSeconds() > 10 ){
+                    if(pathTimer.getTimeSeconds() > 8 && pathTimer.getTimeSeconds() < 10) {
+                        rotaryIntake.enableActive();
+//                    ballServo.setPosition(UniConstants.SERVO_OUTTAKE);
+                        rotaryIntake.toggleServo();
+                    }
+                    else if(pathTimer.getTimeSeconds() > 10  && pathTimer.getTimeSeconds() < 12.5){
                         rotaryIntake.toggleServo();
                     }
 
-                    if(pathTimer.getTimeSeconds() > 12.5){
+                    else if(pathTimer.getTimeSeconds() > 12.5){
                         rotaryIntake.toggleServo();
                         setPathState(2);
                     }
                 }
                 break;
             case 2:
-                if(pathTimer.getTimeSeconds() > 7.5){
+                if(pathTimer.getTimeSeconds() > 3.5){
                     rotaryIntake.disableActive();
 //                    ballServo.setPosition(UniConstants.SERVO_INTAKE);
                     rotaryIntake.toggleServo();
@@ -147,14 +147,14 @@ public class Auton extends NextFTCOpMode {
         path1 = follower.pathBuilder()
                 .addPath(
                         // Line 1
-                        new BezierLine(new Pose(22.000, 124.000), new Pose(45, 100))
+                        new BezierLine(new Pose(49, 8.5), new Pose(45, 100))
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(144))
+                .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(144))
                 .build();
 
         path2 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(45, 10), new Pose(37, 135))
+                        new BezierLine(new Pose(45, 100), new Pose(37, 135))
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
                 .build();
@@ -163,9 +163,9 @@ public class Auton extends NextFTCOpMode {
             path1 = follower.pathBuilder()
                     .addPath(
                             // Line 1
-                            new BezierLine(new Pose(122, 125.000), new Pose(93, 105))
+                            new BezierLine(new Pose(95, 8.5), new Pose(93, 105))
                     )
-                    .setConstantHeadingInterpolation(Math.toRadians(36))
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(36))
                     .build();
 
             path2 = follower.pathBuilder()

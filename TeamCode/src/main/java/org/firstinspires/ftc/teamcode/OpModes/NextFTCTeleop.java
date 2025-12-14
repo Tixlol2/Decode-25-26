@@ -45,6 +45,8 @@ public class NextFTCTeleop extends NextFTCOpMode {
     private static OuttakeSubsystem outtake;
     private static MecDriveSubsystem mecDrive;
 
+    Timer turnTimer = new Timer();
+
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
@@ -112,15 +114,13 @@ public class NextFTCTeleop extends NextFTCOpMode {
             outtake.setPower(0);
         }
 
-        if (gamepad1.right_bumper && rotaryTimer.getTimeSeconds() > 1.5) {
+        if (gamepad1.right_bumper && rotaryTimer.getTimeSeconds() > .5) {
             rotaryIntake.toggleServo();
             rotaryTimer.reset();
 
         }
 
-        if(gamepad1.y){
-            mecDrive.getFollower().turnToDegrees(color == UniConstants.teamColor.RED ? 36 : 144);
-        }
+
 
 
 

@@ -97,6 +97,11 @@ CONFIG
     public static double MOTOR_TO_TURRET_RATIO =  ((double) 1 /2); //Motor to Turret
     public static double TURRET_TICKS_PER_DEGREE = (360/537.7) * (1/ MOTOR_TO_TURRET_RATIO);
 
+
+    public static final double SERVO_OUTTAKE = 1;
+
+
+    public static final double SERVO_INTAKE = .6;
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
 
 

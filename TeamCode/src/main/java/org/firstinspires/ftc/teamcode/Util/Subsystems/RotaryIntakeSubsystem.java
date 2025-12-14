@@ -102,7 +102,7 @@ public class RotaryIntakeSubsystem implements Subsystem {
             active.setPower(1);
         }
 
-//        ballServo.setPosition(debug ? testServoPos : (state == servoState.INTAKE ? UniConstants.SERVO_INTAKE : UniConstants.SERVO_OUTTAKE));
+        ballServo.setPosition((state == servoState.INTAKE ? UniConstants.SERVO_INTAKE : UniConstants.SERVO_OUTTAKE));
 
     }
 
