@@ -22,16 +22,17 @@ public class BetterVisionTM implements Subsystem {
     private final VisionPortal visionPortal;
     private final JoinedTelemetry telemetry;
     private UniConstants.loggingState state;
+    private UniConstants.teamColor color;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
     private ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
 
     private Timer timer = new Timer();
 
-    public BetterVisionTM(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.loggingState state) {
+    public BetterVisionTM(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.loggingState state, UniConstants.teamColor color) {
         this.telemetry = telemetry;
         this.state = state;
-
+        this.color = color;
 
 
         // Build AprilTag processor
@@ -82,6 +83,7 @@ public class BetterVisionTM implements Subsystem {
             double x = tagData.ftcPose.x;
             double y = tagData.ftcPose.y;
             double yaw = tagData.ftcPose.yaw;
+            double pitch = tagData.ftcPose.pitch;
             double realYaw = Math.toDegrees(Math.atan2(x,y));
 
             double hypotenuse = Math.hypot(x, y);
@@ -96,6 +98,7 @@ public class BetterVisionTM implements Subsystem {
                 telemetry.addData("Tag ID: ", tagData.id);
                 telemetry.addData("X: ", x);
                 telemetry.addData("Y: ", y);
+                telemetry.addData("Pitch: ", pitch);
                 telemetry.addData("Yaw: ", yaw);
                 telemetry.addData("Real Yaw: ", realYaw);
                 telemetry.addData("Hypotenuse: ", hypotenuse);
@@ -159,4 +162,6 @@ public class BetterVisionTM implements Subsystem {
         }
 
     }
+
+    public void setColor(UniConstants.teamColor col){color = col;}
 }

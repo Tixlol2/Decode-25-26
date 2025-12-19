@@ -71,17 +71,21 @@ CONFIG
 
     //Outtake Subsystem
     public static final String LAUNCHER_STRING  = "LAUNCHER";
-    public static final String TURRET_ROTATION_STRING = "TURR";
+
 
     //Rotary Subsystem
     public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
-    public static final DcMotorSimple.Direction ACTIVE_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
+    //Flickers
     public static final String FLICKER_FRONT_STRING = "F1S";
     public static final String FLICKER_RIGHT_STRING = "F2S";
     public static final String FLICKER_LEFT_STRING = "F3S";
     public static  double FLICKER_UP = .75;
     public static  double FLICKER_DOWN = 0.5;
+
+    //Turret Control
+    public static final String TURRET_STRING = "TURR";
+
 
     //Color sensors
     public static final String COLOR_SENSOR_SLOT_FRONT_STRING = "CSF";
