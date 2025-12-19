@@ -3,49 +3,53 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.sun.tools.javac.util.List;
 
-import org.firstinspires.ftc.teamcode.Util.PDFLController;
-import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
+
 
 import java.util.ArrayList;
 
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.hardware.impl.MotorEx;
+import dev.nextftc.hardware.impl.ServoEx;
 
 @Configurable
-public class RotaryIntakeSubsystem implements Subsystem {
+public class IntakeSortingSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
-    UniConstants.teamColor color;
     public static boolean debug = false;
     public static boolean isEnabled = false;
     public static boolean isReversed = false;
 
-    //Arraylists
+
     public ArrayList<ColorSensor> colorSensors = new ArrayList<>();
+    //Front Left Right
     public ArrayList<UniConstants.slotState> slots = new ArrayList<>(List.of(UniConstants.slotState.EMPTY, UniConstants.slotState.EMPTY, UniConstants.slotState.EMPTY));
 
     //Active motor
-    DcMotorEx active;
+    MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
     public servoState state = servoState.INTAKE;
 
+    //Servo Init
+    public ServoEx frontServo = new ServoEx(UniConstants.FLICKER_FRONT_STRING);
+    public ServoEx rightServo = new ServoEx(UniConstants.FLICKER_RIGHT_STRING);
+    public ServoEx leftServo = new ServoEx(UniConstants.FLICKER_LEFT_STRING);
+
+    public ArrayList<ServoEx> servos = new ArrayList<>(List.of(frontServo, leftServo, rightServo));
 
 
-    public RotaryIntakeSubsystem(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.teamColor color){
+    double frontTarget = UniConstants.FLICKER_DOWN, rightTarget = UniConstants.FLICKER_DOWN, leftTarget = UniConstants.FLICKER_DOWN;
+
+
+
+    public IntakeSortingSubsystem(HardwareMap hardwareMap, JoinedTelemetry telemetry){
         this.telemetry = telemetry;
-        this.color = color;
-
-        //Active Intake Setup
-        active = hardwareMap.get(DcMotorEx.class, UniConstants.ACTIVE_INTAKE_STRING);
-        active.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        active.setDirection(UniConstants.ACTIVE_DIRECTION);
-
         //Color Sensors Setup
         colorSensors.addAll(
                 List.of(
@@ -57,27 +61,41 @@ public class RotaryIntakeSubsystem implements Subsystem {
 
     }
 
+
+
     @Override
     public void periodic() {
 
+        //if ANY servos are up, set state to OUTTAKE so the active is running
+        //TODO: Make sure the flicker up and down are the right values for all servos
+        if(frontTarget != UniConstants.FLICKER_UP && rightTarget != UniConstants.FLICKER_UP && leftTarget != UniConstants.FLICKER_UP){
+            state = servoState.INTAKE;
+        } else{
+            state = servoState.OUTTAKE;
+        }
 
-
-        //readSlots();
-
-
-
-
-
+        readSlots();
         active.setPower(isEnabled ? (isReversed ? -1 : 1) : 0);
 
         if(state == servoState.OUTTAKE){
             active.setPower(1);
         }
 
-
+        frontServo.setPosition(frontTarget);
+        leftServo.setPosition(leftTarget);
+        rightServo.setPosition(rightTarget);
 
     }
 
+    //Util
+    public enum servoState{
+        INTAKE,
+        OUTTAKE
+    }
+
+
+
+    //Active Methods
     public void disableActive(){
         isEnabled = false;
     }
@@ -89,16 +107,45 @@ public class RotaryIntakeSubsystem implements Subsystem {
     public void reverseIntake(){
         isReversed = true;
     }
+
     public void forwardIntake(){
         isReversed = false;
     }
 
+    //Command Testing
+    public Command setServoState(ServoEx servo, double target){
+        return new LambdaCommand()
+                .setStart(() -> {
+                    // Runs on start
+                    servo.setPosition(target);
+
+                })
+                .setUpdate(() -> {
+                    // Runs on update
+                })
+                .setStop(interrupted -> {
+                    // Runs on stop
+                    servo.setPosition(UniConstants.FLICKER_DOWN);
+                })
+                .setIsDone(() -> true) // Returns if the command has finished
+                .requires(this)
+                .setInterruptible(false)
+                .named("Set Servo State"); // sets the name of the command; optional
+    }
+
+    public Command launchInPattern(ServoEx firstServo, ServoEx secondServo, ServoEx thirdServo){
+        return new SequentialGroup(
+                setServoState(firstServo, UniConstants.FLICKER_UP),
+                new Delay(.25),
+                setServoState(secondServo, UniConstants.FLICKER_UP),
+                new Delay(.25),
+                setServoState(thirdServo, UniConstants.FLICKER_UP)
+        );
+    }
 
 
-
-
-
-
+    //Color Sensor Methods
+    //TODO: god i have to refine this cause it lowkey dont work
     public void readSlots() {
         for (int i = 0; i < 3; i++) {
             double red = colorSensors.get(i).red();
@@ -122,12 +169,6 @@ public class RotaryIntakeSubsystem implements Subsystem {
         return (slot == UniConstants.slotState.PURPLE) || (slot == UniConstants.slotState.GREEN);
     }
 
-
-
-    public void setColor(UniConstants.teamColor color){
-        this.color = color;
-    }
-
     public boolean allFull() {
 
         for (UniConstants.slotState slot : slots) {
@@ -139,21 +180,19 @@ public class RotaryIntakeSubsystem implements Subsystem {
     }
 
 
-
-
-
-
     public void sendTelemetry(UniConstants.loggingState state){
         switch(state){
             case DISABLED:
                 break;
             case ENABLED:
-                telemetry.addLine("START OF ROTARY LOG");
+                telemetry.addLine("START OF SORTING LOG");
+                telemetry.addData("Intake Enabled ", isEnabled);
+                telemetry.addData("Intake Reversed ", isReversed);
                 telemetry.addLine();
                 telemetry.addData("Slot Front State ", slots.get(0));
                 telemetry.addData("Slot Right State ", slots.get(1));
                 telemetry.addData("Slot Left State ", slots.get(2));
-                telemetry.addLine("END OF ROTARY LOG");
+                telemetry.addLine("END OF SORTING LOG");
                 telemetry.addLine();
                 break;
             case EXTREME:
@@ -182,10 +221,7 @@ public class RotaryIntakeSubsystem implements Subsystem {
         }
     }
 
-    public enum servoState{
-        INTAKE,
-        OUTTAKE
-    }
+
 
 
 }
