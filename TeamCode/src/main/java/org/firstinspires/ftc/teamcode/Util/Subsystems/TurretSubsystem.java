@@ -55,7 +55,7 @@ public class TurretSubsystem implements Subsystem {
     }
 
     public Command commandTargetAngleDegrees(double degrees){
-        return new RunToPosition(turretControl, degrees, new KineticState(0));
+        return new RunToPosition(turretControl, degrees, new KineticState(1.5));
     }
 
 
