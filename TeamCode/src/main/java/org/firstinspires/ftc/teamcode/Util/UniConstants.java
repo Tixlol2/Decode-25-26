@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Util;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,8 @@ public class UniConstants {
 
 /*
 CONFIG
+
+//TODO: Update all of this ASAP
 
 //Control Hub
     //CHM0 = ACTIVE
@@ -67,6 +68,10 @@ CONFIG
         BLUE
     }
 
+    public enum servoState{
+        DOWN,
+        UP
+    }
 
 
     //Outtake Subsystem
@@ -101,6 +106,7 @@ CONFIG
 
 
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
+
 
 
 

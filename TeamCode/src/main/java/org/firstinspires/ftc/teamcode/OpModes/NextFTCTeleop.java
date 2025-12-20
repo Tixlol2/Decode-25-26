@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
+import java.util.ArrayList;
+
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -31,30 +33,34 @@ public class NextFTCTeleop extends NextFTCOpMode {
     static boolean isSlowed = false;
 
     static double distanceToGoalInMeters = 0.0;
+    static double deltaAngle = 0.0;
 
     public static UniConstants.loggingState logState = UniConstants.loggingState.ENABLED;
 
     JoinedTelemetry joinedTelemetry;
 
-    Timer rotaryTimer = new Timer();
-
-
-
+    public static boolean usingVision = false;
+    public static boolean botCentric = false;
 
     //All different subsystems
     private static BetterVisionTM vision;
     private static IntakeSortingSubsystem intake;
-    private static TurretSubsystem outtake;
+    private static TurretSubsystem turret;
     private static MecDriveSubsystem mecDrive;
 
+    ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
 
+    Timer driverTimer = new Timer();
+    Timer shooterTimer = new Timer();
 
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
 
         intake = new IntakeSortingSubsystem(hardwareMap, joinedTelemetry);
-
+        turret = new TurretSubsystem(hardwareMap, joinedTelemetry, color);
+        vision = new BetterVisionTM(hardwareMap, joinedTelemetry, logState, color);
+        mecDrive = new MecDriveSubsystem(hardwareMap, joinedTelemetry, color);
     }
 
     @Override
@@ -75,6 +81,11 @@ public class NextFTCTeleop extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
 
+        vision.setColor(color);
+        mecDrive.setColor(color);
+        turret.setColor(color);
+
+        turret.setTargetVelocity(2200);
 
 
     }
@@ -98,27 +109,62 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         if(gamepad1.a){
-            intake.setServoState(intake.frontServo, UniConstants.FLICKER_UP).schedule();
+            turret.setTargetVelocity(2200);
         }
 
         if(gamepad1.b){
-            intake.setServoState(intake.frontServo, UniConstants.FLICKER_DOWN).schedule();
+            turret.setTargetVelocity(0);
+        }
+
+        //Able to switch between driver and robot centric
+        if(gamepad1.y && driverTimer.getTimeSeconds() > .5){
+            botCentric = !botCentric;
+            driverTimer.reset();
         }
 
         //Shooting command
-        if (gamepad1.right_bumper ) {
+        if (gamepad1.right_bumper && shooterTimer.getTimeSeconds() > 1.5) {
 
-
+            intake.shoot(pattern).schedule();
+            shooterTimer.reset();
         }
 
-
+        //If pattern hasn't been assigned yet
+        if(pattern.contains(null)){
+            pattern = vision.getPattern();
         }
+
+        //TODO: Determine what is better
+        if(usingVision){
+            distanceToGoalInMeters = vision.getDistanceToGoal();
+            deltaAngle = vision.getDeltaAngle();
+        }
+        else{
+            distanceToGoalInMeters = mecDrive.updateDistanceAndAngle();
+            deltaAngle = mecDrive.getCalculatedTurretAngle();
+        }
+
+        //TODO: Still have to integrate look up table or linreg for power as a function of distance
+        //TODO: Integrate actual turret control, right now I believe it will not work (also its not even being set)
+
+        mecDrive.updateTeleop(
+                -gamepad1.left_stick_y * (isSlowed ? .25 : 1), //Forward/Backward
+                -gamepad1.left_stick_x * (isSlowed ? .25 : 1), //Left/Right Rotation
+                -gamepad1.right_stick_x * (isSlowed ? .25 : 1), //Left/Right Strafe
+                botCentric
+        );
+
+
+        joinedTelemetry.addData("Bot Centric ", botCentric);
+        joinedTelemetry.update();
+
+    }
 
 
     {
         addComponents(
                 CommandManager.INSTANCE,
-                new SubsystemComponent(intake, outtake, mecDrive)
+                new SubsystemComponent(intake, turret, mecDrive)
         ); //Subsystems
     }
 

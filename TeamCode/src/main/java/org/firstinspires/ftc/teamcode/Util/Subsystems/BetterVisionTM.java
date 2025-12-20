@@ -26,6 +26,8 @@ public class BetterVisionTM implements Subsystem {
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
     private ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
+    private double distanceToGoal = 0;
+    private double deltaAngle = 0;
 
     private Timer timer = new Timer();
 
@@ -50,6 +52,13 @@ public class BetterVisionTM implements Subsystem {
                 .enableLiveView(true)
                 .build();
     }
+
+    //21 - 23 for obelisk
+    //20 for blue goal
+    //24 for red goal
+
+
+
 
 
 
@@ -79,14 +88,20 @@ public class BetterVisionTM implements Subsystem {
         AprilTagDetection tagData = getFirstTagData();
         if (tagData != null) {
             // Logic to determine position based on tag ID
-            // determine position if blue tag is seen
+
             double x = tagData.ftcPose.x;
             double y = tagData.ftcPose.y;
+            double dist = tagData.ftcPose.range;
             double yaw = tagData.ftcPose.yaw;
             double pitch = tagData.ftcPose.pitch;
             double realYaw = Math.toDegrees(Math.atan2(x,y));
 
             double hypotenuse = Math.hypot(x, y);
+
+            if((color == UniConstants.teamColor.BLUE && tagData.id == 20) || (color == UniConstants.teamColor.RED && tagData.id == 24)){
+                distanceToGoal = dist;
+            }
+
 
             if (state == UniConstants.loggingState.ENABLED) {
                 telemetry.addData("Tag ID: ", tagData.id);
@@ -108,6 +123,20 @@ public class BetterVisionTM implements Subsystem {
         }
     }
 
+    public void quickAnalyzeGoal(){
+        getDetections();
+        for(AprilTagDetection detection : detections){
+            double dist = detection.ftcPose.range;
+            double pitch = detection.ftcPose.pitch;
+
+            if((color == UniConstants.teamColor.BLUE && detection.id == 20) || (color == UniConstants.teamColor.RED && detection.id == 24)){
+                distanceToGoal = dist;
+                deltaAngle = pitch;
+            }
+
+        }
+    }
+
     public ArrayList<Integer> getDetectionIDs(){
         ArrayList<Integer> ids = new ArrayList<>();
         for (AprilTagDetection detection : detections){
@@ -117,7 +146,7 @@ public class BetterVisionTM implements Subsystem {
     }
 
     public int getObeliskID() {
-        if(detectionIDs.contains(23) || detectionIDs.contains(21) || detectionIDs.contains(22)){
+        if(detectionIDs.contains(21) || detectionIDs.contains(22) || detectionIDs.contains(23)){
             for(int id : detectionIDs){
                 if ((id == 21) || (id == 22) || (id == 23)){
                     return id;
@@ -141,9 +170,17 @@ public class BetterVisionTM implements Subsystem {
     public void periodic() {
         if (timer.getTimeSeconds() == 1) {
             detections = getDetections();
-            detectionIDs = getDetectionIDs();
+            quickAnalyzeGoal();
             timer.reset();
         }
+    }
+
+    public double getDistanceToGoal(){
+        return distanceToGoal;
+    }
+
+    public double getDeltaAngle(){
+        return deltaAngle;
     }
 
     public void obeliskTargetPattern(int ID){

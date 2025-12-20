@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
@@ -12,9 +13,7 @@ import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.RunToPosition;
 import dev.nextftc.hardware.controllable.RunToVelocity;
-import dev.nextftc.hardware.impl.CRServoEx;
 import dev.nextftc.hardware.impl.MotorEx;
-import dev.nextftc.hardware.impl.ServoEx;
 
 @Configurable
 public class TurretSubsystem implements Subsystem {
@@ -22,12 +21,19 @@ public class TurretSubsystem implements Subsystem {
     JoinedTelemetry telemetry;
     UniConstants.teamColor color;
 
-    private MotorEx launcher = new MotorEx(UniConstants.LAUNCHER_STRING).floatMode();
-    private ControlSystem launcherControl;
+    MotorEx launcher = new MotorEx(UniConstants.LAUNCHER_STRING).floatMode();
+    public static ControlSystem launcherControl;
 
     MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).brakeMode().zeroed();
     public static double turretTargetAngle = 0;
-    private ControlSystem turretControl;
+    public static ControlSystem turretControl;
+
+
+    public TurretSubsystem(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.teamColor color){
+        this.telemetry = telemetry;
+        this.color = color;
+
+    }
 
 
     @Override
@@ -58,6 +64,10 @@ public class TurretSubsystem implements Subsystem {
         return new RunToPosition(turretControl, degrees, new KineticState(1.5));
     }
 
+    public Command commandRunToVelocity(double velocity){
+        return new RunToPosition(launcherControl, velocity);
+    }
+
 
     public  double getTargetVelocity(double distanceToGoalInMeters) {
         //https://www.desmos.com/calculator/yw7iis7m3w
@@ -81,13 +91,18 @@ public class TurretSubsystem implements Subsystem {
         turretTargetAngle = Math.toDegrees(radians);
     }
 
+    public void setColor(UniConstants.teamColor color){
+        this.color = color;
+    }
+
     public void sendTelemetry(UniConstants.loggingState state){
         switch(state){
             case DISABLED:
                 break;
             case ENABLED:
                 telemetry.addLine("START OF OUTTAKE LOG");
-
+                telemetry.addData("Turret Target Angle ", turretTargetAngle);
+                telemetry.addData("Target Velocity ", launcherControl.getGoal().getVelocity());
                 telemetry.addLine("END OF OUTTAKE LOG");
             case EXTREME:
 
