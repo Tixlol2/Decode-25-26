@@ -42,7 +42,7 @@ public class TurretSubsystem implements Subsystem {
         launcherControl = ControlSystem.builder()
                 .velPid(.0001, 0, 0)
                 .build();
-        //TODO: how the fuck does this work
+        //TODO: how the freak does this work
         turretControl = ControlSystem.builder()
                 .angular(AngleType.DEGREES,
                         feedback -> feedback.posPid(.005, 0, 0)
