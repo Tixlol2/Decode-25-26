@@ -149,7 +149,7 @@ public class IntakeSortingSubsystem implements Subsystem {
 
         int loops = 0;
 
-        Slot back = backSlot;
+        Slot first = backSlot;
         Slot second = rightSlot;
         Slot third = leftSlot;
 
@@ -160,7 +160,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 if(state == slot.getColorState()){
                     switch(loops){
                         case 1:
-                            back = slot;
+                            first = slot;
                             break;
                         case 2:
                             second = slot;
@@ -176,7 +176,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             }
         }
 
-        return launchInPattern(back, second, third);
+        return launchInPattern(first, second, third);
     }
 
     public boolean allFull() {

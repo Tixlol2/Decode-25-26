@@ -168,6 +168,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
         joinedTelemetry.addData("Bot Centric ", botCentric);
         joinedTelemetry.addData("Pattern ", pattern);
+        joinedTelemetry.addData("Current Commands ", manager.snapshot());
 //        for(Slot slot : intake.slots){
 //            slot.sendTelemetry(UniConstants.loggingState.ENABLED);
 //        }
