@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -14,6 +15,7 @@ import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
 
 @Configurable
@@ -31,47 +33,60 @@ public class IntakeSortingSubsystem implements Subsystem {
 
     //Active motor
     MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
-    public UniConstants.servoState state = UniConstants.servoState.DOWN;
+    public static UniConstants.servoState state = UniConstants.servoState.DOWN;
 
-    Slot backSlot;
-    Slot rightSlot;
-    Slot leftSlot;
+    public static Slot backSlot;
+    public static Slot rightSlot;
+    public static Slot leftSlot;
 
-    ArrayList<Slot> slots;
+    public ArrayList<Slot> slots;
 
-    public IntakeSortingSubsystem(HardwareMap hardwareMap, JoinedTelemetry telemetry){
-        this.telemetry = telemetry;
+    public IntakeSortingSubsystem(){}
 
-        backSlot = new Slot(hardwareMap, UniConstants.FLICKER_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, telemetry);
-        rightSlot = new Slot(hardwareMap, UniConstants.FLICKER_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, telemetry);
-        leftSlot = new Slot(hardwareMap, UniConstants.FLICKER_LEFT_STRING, UniConstants.COLOR_SENSOR_SLOT_LEFT_STRING, telemetry);
+    @Override
+    public void initialize(){
+        telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
+
+        backSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, telemetry);
+        rightSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, telemetry);
+        leftSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_LEFT_STRING, UniConstants.COLOR_SENSOR_SLOT_LEFT_STRING, telemetry);
 
         slots = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
     }
 
+    /*
+    * Back slot down = .2
+    * Back slot up = .5
+    *
+    *
+    *
+    *
+    *
+    *
+    * */
 
 
     @Override
     public void periodic() {
 
-        //if ANY servos are up, set state to OUTTAKE so the active is running
-        //TODO: Make sure the flicker up and down are the right values for all servos
-        if(backSlot.getTargetPosition().equals(UniConstants.servoState.DOWN) && rightSlot.getTargetPosition().equals(UniConstants.servoState.DOWN) && leftSlot.getTargetPosition().equals(UniConstants.servoState.DOWN)){
-            state = UniConstants.servoState.DOWN;
-        } else{
-            state = UniConstants.servoState.UP;
+        if(ActiveOpMode.isStarted()) {
+
+            backSlot.update();
+            rightSlot.update();
+            leftSlot.update();
+
+            //if ANY servos are up, set state to OUTTAKE so the active is running
+            //TODO: Make sure the flicker up and down are the right values for all servos
+            if (backSlot.getTargetPosition().equals(UniConstants.servoState.DOWN) && rightSlot.getTargetPosition().equals(UniConstants.servoState.DOWN) && leftSlot.getTargetPosition().equals(UniConstants.servoState.DOWN)) {
+                state = UniConstants.servoState.DOWN;
+            } else {
+                state = UniConstants.servoState.UP;
+            }
+
+
+            active.setPower(isEnabled ? (isReversed ? -1 : 1) : 0);
+
         }
-
-
-        active.setPower(isEnabled ? (isReversed ? -1 : 1) : 0);
-
-        if(state == UniConstants.servoState.UP){
-            active.setPower(1);
-        }
-
-        backSlot.update();
-        rightSlot.update();
-        leftSlot.update();
 
     }
 
@@ -91,6 +106,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     public void forwardIntake(){
         isReversed = false;
     }
+    public boolean shouldRumble(){return state == UniConstants.servoState.UP;}
 
     //Command Testing
     public Command setServoState(Slot slot, UniConstants.servoState state){
@@ -116,10 +132,16 @@ public class IntakeSortingSubsystem implements Subsystem {
     public Command launchInPattern(Slot first, Slot second, Slot third){
         return new SequentialGroup(
                 setServoState(first, UniConstants.servoState.UP),
-                new Delay(.25),
+                new Delay(1),
+                setServoState(first, UniConstants.servoState.DOWN),
+                new Delay(1),
                 setServoState(second, UniConstants.servoState.UP),
-                new Delay(.25),
-                setServoState(third, UniConstants.servoState.UP)
+                new Delay(1),
+                setServoState(second, UniConstants.servoState.DOWN),
+                new Delay(1),
+                setServoState(third, UniConstants.servoState.UP),
+                new Delay(1),
+                setServoState(third, UniConstants.servoState.DOWN)
         );
     }
 

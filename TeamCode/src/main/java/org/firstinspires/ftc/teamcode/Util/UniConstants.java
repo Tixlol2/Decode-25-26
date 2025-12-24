@@ -82,18 +82,17 @@ CONFIG
     public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
 
     //Flickers
-    public static final String FLICKER_BACK_STRING = "F1S";
-    public static final String FLICKER_RIGHT_STRING = "F2S";
-    public static final String FLICKER_LEFT_STRING = "F3S";
-    public static  double FLICKER_UP = .75;
-    public static  double FLICKER_DOWN = 0.5;
+    public static final String FLICKER_BACK_STRING = "FBS";
+    public static final String FLICKER_RIGHT_STRING = "FRS";
+    public static final String FLICKER_LEFT_STRING = "FLS";
+
 
     //Turret Control
     public static final String TURRET_STRING = "TURR";
 
 
     //Color sensors
-    public static final String COLOR_SENSOR_SLOT_BACK_STRING = "CSF";
+    public static final String COLOR_SENSOR_SLOT_BACK_STRING = "CSB";
     public static final String COLOR_SENSOR_SLOT_RIGHT_STRING = "CSR";
     public static final String COLOR_SENSOR_SLOT_LEFT_STRING = "CSL";
 

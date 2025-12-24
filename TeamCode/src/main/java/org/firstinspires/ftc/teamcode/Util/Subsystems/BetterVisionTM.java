@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import android.util.Size;
 
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.OpModes.NextFTCTeleop;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -16,13 +18,14 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.ArrayList;
 
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 
 public class BetterVisionTM implements Subsystem {
-    private final AprilTagProcessor aprilTagProcessor;
-    private final VisionPortal visionPortal;
-    private final JoinedTelemetry telemetry;
-    private UniConstants.loggingState state;
-    private UniConstants.teamColor color;
+    private AprilTagProcessor aprilTagProcessor;
+    private VisionPortal visionPortal;
+    private JoinedTelemetry telemetry;
+    private UniConstants.loggingState state = NextFTCTeleop.logState;
+    private UniConstants.teamColor color = NextFTCTeleop.color;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
     private ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
@@ -31,11 +34,19 @@ public class BetterVisionTM implements Subsystem {
 
     private Timer timer = new Timer();
 
-    public BetterVisionTM(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.loggingState state, UniConstants.teamColor color) {
-        this.telemetry = telemetry;
-        this.state = state;
-        this.color = color;
+    public BetterVisionTM() {}
 
+
+
+
+    @Override
+    public void initialize(){
+
+        telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
+
+        //21 - 23 for obelisk
+        //20 for blue goal
+        //24 for red goal
 
         // Build AprilTag processor
         aprilTagProcessor = new AprilTagProcessor.Builder()
@@ -46,19 +57,12 @@ public class BetterVisionTM implements Subsystem {
 
         // Build Vision Portal
         visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "Webcam 1"))
                 .addProcessor(aprilTagProcessor)
                 .setCameraResolution(new Size(640, 480))
                 .enableLiveView(true)
                 .build();
     }
-
-    //21 - 23 for obelisk
-    //20 for blue goal
-    //24 for red goal
-
-
-
 
 
 
@@ -168,11 +172,10 @@ public class BetterVisionTM implements Subsystem {
 
     @Override
     public void periodic() {
-        if (timer.getTimeSeconds() == 1) {
             detections = getDetections();
+            detectionIDs = getDetectionIDs();
+            obeliskTargetPattern(getObeliskID());
             quickAnalyzeGoal();
-            timer.reset();
-        }
     }
 
     public double getDistanceToGoal(){
@@ -187,6 +190,7 @@ public class BetterVisionTM implements Subsystem {
         switch(ID){
             case -1:
                 pattern = new ArrayList<>(List.of(null, null, null));
+                break;
             case 21:
                 pattern = new ArrayList<>(List.of(UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE));
                 break;
