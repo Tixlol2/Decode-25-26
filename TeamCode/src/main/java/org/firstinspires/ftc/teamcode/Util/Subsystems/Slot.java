@@ -13,18 +13,34 @@ public class Slot {
     private final ServoEx kickerServo;
     private final ColorSensor colorSensor;
 
+    String name = "";
 
     private UniConstants.slotState colorState = UniConstants.slotState.EMPTY;
-    private UniConstants.servoState servoState = UniConstants.servoState.DOWN;
+    public static UniConstants.servoState servoState = UniConstants.servoState.DOWN;
     private final JoinedTelemetry telemetry;
+
+    double up = 0;
+    double down = 0;
 
     public Slot(HardwareMap hardwareMap, String kickerServoName, String colorSensorName, JoinedTelemetry telemetry){
 
         kickerServo = new ServoEx(kickerServoName);
+        name = kickerServoName;
         colorSensor = hardwareMap.get(ColorSensor.class, colorSensorName);
 
         this.telemetry = telemetry;
 
+
+        if(kickerServoName.equals("FBS")){
+            up = .5;
+            down = .2;
+        } else if (kickerServoName.equals("FLS")) {
+            up = .85;
+            down = .5;
+        } else {
+            up = .5;
+            down = .9;
+        }
 
 
 
@@ -36,7 +52,7 @@ public class Slot {
         readSlot();
 
         //Update Servo
-        kickerServo.setPosition((servoState == UniConstants.servoState.UP) ? (UniConstants.FLICKER_UP) : UniConstants.FLICKER_DOWN);
+        kickerServo.setPosition(IntakeSortingSubsystem.state == UniConstants.servoState.UP ? ((servoState == UniConstants.servoState.UP) ? up : down) : down);
     }
 
     private void readSlot() {
@@ -78,7 +94,9 @@ public class Slot {
                 break;
             case ENABLED:
                 telemetry.addLine("START OF SLOT LOG");
-                telemetry.addData("Kicker Target ", servoState);
+                telemetry.addData("Name ", name);
+                telemetry.addData("Kicker Up ", up);
+                telemetry.addData("Kicker Down ", down);
                 telemetry.addData("Color State ", colorState);
                 telemetry.addData("Is Full ", isFull());
                 telemetry.addLine("END OF SLOT LOG");

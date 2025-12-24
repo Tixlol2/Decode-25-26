@@ -5,10 +5,12 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -28,7 +30,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
 
 
-    UniConstants.teamColor color = UniConstants.teamColor.BLUE;
+    public static UniConstants.teamColor color = UniConstants.teamColor.BLUE;
 
     static boolean isSlowed = false;
 
@@ -43,24 +45,29 @@ public class NextFTCTeleop extends NextFTCOpMode {
     public static boolean botCentric = false;
 
     //All different subsystems
-    private static BetterVisionTM vision;
-    private static IntakeSortingSubsystem intake;
-    private static TurretSubsystem turret;
-    private static MecDriveSubsystem mecDrive;
+    private static BetterVisionTM vision = new BetterVisionTM();
+    private static IntakeSortingSubsystem intake = new IntakeSortingSubsystem();
+    private static TurretSubsystem turret = new TurretSubsystem();
+    private static MecDriveSubsystem mecDrive = new MecDriveSubsystem();
 
-    ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
+    ArrayList<UniConstants.slotState> pattern = new ArrayList<>(List.of(null, null, null));
+
+    CommandManager manager;
 
     Timer driverTimer = new Timer();
     Timer shooterTimer = new Timer();
 
+    {
+        addComponents(
+                CommandManager.INSTANCE,
+                new SubsystemComponent(turret, intake, mecDrive, vision)
+        ); //Subsystems
+    }
+
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
-
-        intake = new IntakeSortingSubsystem(hardwareMap, joinedTelemetry);
-        turret = new TurretSubsystem(hardwareMap, joinedTelemetry, color);
-        vision = new BetterVisionTM(hardwareMap, joinedTelemetry, logState, color);
-        mecDrive = new MecDriveSubsystem(hardwareMap, joinedTelemetry, color);
+        manager = CommandManager.INSTANCE;
     }
 
     @Override
@@ -82,12 +89,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         vision.setColor(color);
-        mecDrive.setColor(color);
-        turret.setColor(color);
 
         turret.setTargetVelocity(2200);
-
-
+        mecDrive.startTele();
     }
 
     @Override
@@ -109,7 +113,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         if(gamepad1.a){
-            turret.setTargetVelocity(2200);
+            turret.setTargetVelocity(3000);
         }
 
         if(gamepad1.b){
@@ -123,10 +127,15 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         //Shooting command
-        if (gamepad1.right_bumper && shooterTimer.getTimeSeconds() > 1.5) {
-
-            intake.shoot(pattern).schedule();
+        if(gamepad1.right_bumper && shooterTimer.getTimeSeconds() > 1.5) {
+            manager.scheduleCommand(intake.shoot(pattern));
             shooterTimer.reset();
+        }
+
+        if(intake.allFull()){
+            gamepad1.rumble(250);
+        } else {
+            gamepad1.stopRumble();
         }
 
         //If pattern hasn't been assigned yet
@@ -155,17 +164,19 @@ public class NextFTCTeleop extends NextFTCOpMode {
         );
 
 
+        manager.run();
+
         joinedTelemetry.addData("Bot Centric ", botCentric);
+        joinedTelemetry.addData("Pattern ", pattern);
+//        for(Slot slot : intake.slots){
+//            slot.sendTelemetry(UniConstants.loggingState.ENABLED);
+//        }
+        turret.sendTelemetry(UniConstants.loggingState.ENABLED);
         joinedTelemetry.update();
 
     }
 
 
-    {
-        addComponents(
-                CommandManager.INSTANCE,
-                new SubsystemComponent(intake, turret, mecDrive)
-        ); //Subsystems
-    }
+
 
     }

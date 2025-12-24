@@ -2,44 +2,44 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.OpModes.NextFTCTeleop;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 
 @Configurable
 //TODO: Tune all constants to ensure correctness awesome
 public class MecDriveSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
-    UniConstants.teamColor color;
+    UniConstants.teamColor color = NextFTCTeleop.color;
     public static boolean debug = false;
     private Follower follower;
 
-    //For ensuring that PP is reset
-    public static GoBildaPinpointDriver pinpoint;
+
 
     //For calculated turret angle
     private static double changeInTurretAngle = 0;
 
 
-    public MecDriveSubsystem(HardwareMap hardwareMap, JoinedTelemetry telemetry, UniConstants.teamColor color){
-        this.color = color;
-        this.telemetry = telemetry;
-        follower = Constants.createFollower(hardwareMap);
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, UniConstants.PINPOINT_STRING);
+    public MecDriveSubsystem(){}
+
+    @Override
+    public void initialize(){
+        telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
+        follower = Constants.createFollower(ActiveOpMode.hardwareMap());
         follower.setPose(new Pose());
         follower.update();
-
     }
-
-
 
 
     @Override
@@ -59,7 +59,7 @@ public class MecDriveSubsystem implements Subsystem {
     public double updateDistanceAndAngle() {
         //Returns distance between goal in meters, it also updates the turretTargetAngle
         double x = 0,y = 1;
-        switch (color){
+        switch (NextFTCTeleop.color){
             case BLUE:
                 x = Poses.blueGoal.getX() - follower.getPose().getX();
                 y = Poses.blueGoal.getY() - follower.getPose().getY();
@@ -76,16 +76,9 @@ public class MecDriveSubsystem implements Subsystem {
     }
 
     public double getCalculatedTurretAngle(){
-        return color == UniConstants.teamColor.RED ? -changeInTurretAngle : changeInTurretAngle;
+        return NextFTCTeleop.color == UniConstants.teamColor.RED ? -changeInTurretAngle : changeInTurretAngle;
     }
 
-    public void resetPinpoint(){
-        pinpoint.resetPosAndIMU();
-    }
-
-    public void setColor(UniConstants.teamColor color){
-        this.color = color;
-    }
 
     public void setPose(Pose pose) {
         follower.setPose(pose);
