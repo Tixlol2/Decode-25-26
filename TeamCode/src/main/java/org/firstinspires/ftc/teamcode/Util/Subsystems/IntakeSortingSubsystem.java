@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -153,11 +154,13 @@ public class IntakeSortingSubsystem implements Subsystem {
         Slot second = rightSlot;
         Slot third = leftSlot;
 
+        ArrayList<Slot> used = new ArrayList<>();
+
         //TODO: research how to make this better :sob:
         for(UniConstants.slotState state : pattern){
             loops++;
             for(Slot slot : slots){
-                if(state == slot.getColorState()){
+                if(state == slot.getColorState() && !used.contains(slot)){
                     switch(loops){
                         case 1:
                             first = slot;
@@ -171,8 +174,10 @@ public class IntakeSortingSubsystem implements Subsystem {
                         default:
                             break;
                     }
+                    used.add(slot);
                     break;
                 }
+
             }
         }
 
