@@ -28,7 +28,7 @@ public class TurretSubsystem implements Subsystem {
 
     int targetVelocity = 0;
     public static ControlSystem launcherControl;
-    public static double p = 0.00015, i = 0, d = 0;
+    public static double p = .00022, i = 0, d = 0;
 
     //MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).brakeMode().zeroed();
     public static double turretTargetAngle = 0;

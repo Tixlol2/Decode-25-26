@@ -132,11 +132,11 @@ public class NextFTCTeleop extends NextFTCOpMode {
             shooterTimer.reset();
         }
 
-        if(intake.allFull()){
-            gamepad1.rumble(250);
-        } else {
-            gamepad1.stopRumble();
-        }
+//        if(intake.allFull()){
+//            gamepad1.rumble(250);
+//        } else {
+//            gamepad1.stopRumble();
+//        }
 
         //If pattern hasn't been assigned yet
         if(pattern.contains(null)){
@@ -169,9 +169,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
         joinedTelemetry.addData("Bot Centric ", botCentric);
         joinedTelemetry.addData("Pattern ", pattern);
         joinedTelemetry.addData("Current Commands ", manager.snapshot());
-//        for(Slot slot : intake.slots){
-//            slot.sendTelemetry(UniConstants.loggingState.ENABLED);
-//        }
+        for(Slot slot : intake.slots){
+            slot.sendTelemetry(UniConstants.loggingState.EXTREME);
+        }
         turret.sendTelemetry(UniConstants.loggingState.ENABLED);
         joinedTelemetry.update();
 

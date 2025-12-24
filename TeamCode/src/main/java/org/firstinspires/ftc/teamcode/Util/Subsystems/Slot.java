@@ -16,7 +16,7 @@ public class Slot {
     String name = "";
 
     private UniConstants.slotState colorState = UniConstants.slotState.EMPTY;
-    public static UniConstants.servoState servoState = UniConstants.servoState.DOWN;
+    private UniConstants.servoState servoState = UniConstants.servoState.DOWN;
     private final JoinedTelemetry telemetry;
 
     double up = 0;
@@ -32,11 +32,11 @@ public class Slot {
 
 
         if(kickerServoName.equals("FBS")){
-            up = .5;
-            down = .2;
+            up = .6;
+            down = .15;
         } else if (kickerServoName.equals("FLS")) {
             up = .85;
-            down = .5;
+            down = .45;
         } else {
             up = .5;
             down = .9;
@@ -61,7 +61,7 @@ public class Slot {
         double green = colorSensor.green();
         double blue = colorSensor.blue();
         double alpha = colorSensor.alpha();
-        if (((green > red) && (blue > red)) && (alpha < 5000)) {
+        if (((green > red) && (blue > red)) && (alpha < 5000) && green > 55) {
             colorState = UniConstants.slotState.GREEN;
         } else if (((red > green) && (blue > green)) && (alpha < 5000)) {
             colorState = UniConstants.slotState.PURPLE;
@@ -98,6 +98,20 @@ public class Slot {
                 telemetry.addData("Kicker Up ", up);
                 telemetry.addData("Kicker Down ", down);
                 telemetry.addData("Color State ", colorState);
+                telemetry.addData("Is Full ", isFull());
+                telemetry.addLine("END OF SLOT LOG");
+                telemetry.addLine();
+                break;
+            case EXTREME:
+                telemetry.addLine("START OF SLOT LOG");
+                telemetry.addData("Name ", name);
+                telemetry.addData("Kicker Up ", up);
+                telemetry.addData("Kicker Down ", down);
+                telemetry.addData("Color State ", colorState);
+                telemetry.addData("Red ", colorSensor.red());
+                telemetry.addData("Green ", colorSensor.green());
+                telemetry.addData("Blue ", colorSensor.blue());
+                telemetry.addLine();
                 telemetry.addData("Is Full ", isFull());
                 telemetry.addLine("END OF SLOT LOG");
                 telemetry.addLine();

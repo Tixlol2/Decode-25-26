@@ -105,7 +105,7 @@ CONFIG
 
 
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
-
+    public static double TIME_BETWEEN_SHOT_SECONDS = 1.05;
 
 
 

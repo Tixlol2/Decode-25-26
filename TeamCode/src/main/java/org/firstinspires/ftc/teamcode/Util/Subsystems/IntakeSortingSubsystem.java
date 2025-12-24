@@ -3,11 +3,9 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -107,7 +105,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     public void forwardIntake(){
         isReversed = false;
     }
-    public boolean shouldRumble(){return state == UniConstants.servoState.UP;}
+    public boolean shouldRumble(){return allFull();}
 
     //Command Testing
     public Command setServoState(Slot slot, UniConstants.servoState state){
@@ -122,7 +120,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 })
                 .setStop(interrupted -> {
                     // Runs on stop
-                    slot.setTargetPosition(UniConstants.servoState.DOWN);
+
                 })
                 .setIsDone(() -> true) // Returns if the command has finished
                 .requires(this)
@@ -133,15 +131,15 @@ public class IntakeSortingSubsystem implements Subsystem {
     public Command launchInPattern(Slot first, Slot second, Slot third){
         return new SequentialGroup(
                 setServoState(first, UniConstants.servoState.UP),
-                new Delay(1),
+                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
                 setServoState(first, UniConstants.servoState.DOWN),
-                new Delay(1),
+                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
                 setServoState(second, UniConstants.servoState.UP),
-                new Delay(1),
+                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
                 setServoState(second, UniConstants.servoState.DOWN),
-                new Delay(1),
+                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
                 setServoState(third, UniConstants.servoState.UP),
-                new Delay(1),
+                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
                 setServoState(third, UniConstants.servoState.DOWN)
         );
     }
@@ -150,37 +148,44 @@ public class IntakeSortingSubsystem implements Subsystem {
 
         int loops = 0;
 
-        Slot first = backSlot;
-        Slot second = rightSlot;
-        Slot third = leftSlot;
+        Slot first = null;
+        Slot second = null;
+        Slot third = null;
 
         ArrayList<Slot> used = new ArrayList<>();
 
         //TODO: research how to make this better :sob:
-        for(UniConstants.slotState state : pattern){
-            loops++;
-            for(Slot slot : slots){
-                if(state == slot.getColorState() && !used.contains(slot)){
-                    switch(loops){
+        for(UniConstants.slotState color : pattern){
+
+            for(int i = 0; i < slots.size(); i++){
+
+                if(slots.get(i).getColorState() == color && !used.contains(slots.get(i))){
+                    switch (i){
+                        case 0:
+                            first = slots.get(i);
+                            break;
                         case 1:
-                            first = slot;
+                            second = slots.get(i);
                             break;
                         case 2:
-                            second = slot;
-                            break;
-                        case 3:
-                            third = slot;
+                            third = slots.get(i);
                             break;
                         default:
                             break;
                     }
-                    used.add(slot);
+                    used.add(slots.get(i));
                     break;
                 }
+            }
 
+            //Default case in case 2P 1G not true
+            if(first == null || second == null || third == null){
+                first = backSlot;
+                second = rightSlot;
+                third = leftSlot;
             }
         }
-
+        slots = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
         return launchInPattern(first, second, third);
     }
 
