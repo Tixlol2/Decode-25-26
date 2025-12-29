@@ -53,17 +53,6 @@ public class IntakeSortingSubsystem implements Subsystem {
         slots = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
     }
 
-    /*
-    * Back slot down = .2
-    * Back slot up = .5
-    *
-    *
-    *
-    *
-    *
-    *
-    * */
-
 
     @Override
     public void periodic() {
@@ -75,7 +64,6 @@ public class IntakeSortingSubsystem implements Subsystem {
             leftSlot.update();
 
             //if ANY servos are up, set state to OUTTAKE so the active is running
-            //TODO: Make sure the flicker up and down are the right values for all servos
             if (backSlot.getTargetPosition().equals(UniConstants.servoState.DOWN) && rightSlot.getTargetPosition().equals(UniConstants.servoState.DOWN) && leftSlot.getTargetPosition().equals(UniConstants.servoState.DOWN)) {
                 state = UniConstants.servoState.DOWN;
             } else {
@@ -129,7 +117,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     }
 
 
-    //TODO: rewrite for ArrayList of slots
+
     public Command launchInPattern(Slot first, Slot second, Slot third){
         return new SequentialGroup(
                 setServoState(first, UniConstants.servoState.UP),
@@ -146,53 +134,87 @@ public class IntakeSortingSubsystem implements Subsystem {
         );
     }
 
+
+    //BANGGGGGGGGGGG
     public Command shoot(ArrayList<UniConstants.slotState> pattern){
-
-
         Slot first = null;
         Slot second = null;
         Slot third = null;
 
+        boolean[] slotUsed = new boolean[3]; // which slots we've already queued up
 
-        ArrayList<Slot> used = new ArrayList<>();
+        // try to match what the pattern wants
+        if(pattern != null){
+            int patternSize = pattern.size();
+            for(int p = 0; p < patternSize; p++){
+                UniConstants.slotState desiredColor = pattern.get(p);
 
-        //TODO: research how to make this better :sob:
-        for(UniConstants.slotState color : pattern){
+                // look for a slot with this color that we haven't used yet
+                for(int s = 0; s < 3; s++){
+                    if(!slotUsed[s] && slots.get(s).getColorState().equals(desiredColor)){
+                        slotUsed[s] = true;
 
-            for(int i = 0; i < slots.size(); i++){
+                        // assign based on which position in pattern we're at
+                        if(p == 0) first = slots.get(s);
+                        else if(p == 1) second = slots.get(s);
+                        else if(p == 2) third = slots.get(s);
 
-                if(slots.get(i).getColorState().equals(color) && !used.contains(slots.get(i))){
-                    switch (i){
-                        case 0:
-                            first = slots.get(i);
-                            break;
-                        case 1:
-                            second = slots.get(i);
-                            break;
-                        case 2:
-                            third = slots.get(i);
-                            break;
-                        default:
-                            break;
+                        break;
                     }
-                    used.add(slots.get(i));
-                    break;
                 }
             }
-            //Default case in case 2P 1G not true
-            if(first == null || second == null || third == null){
-                first = backSlot;
-                second = rightSlot;
-                third = leftSlot;
-            }
-
         }
 
+        // if we couldn't fill all 3 positions from the pattern, grab any full slots we have left
+        // doesn't matter what order at this point, just shoot what we got
+        if(first == null || second == null || third == null){
+            int nextSlotIndex = 0;
 
+            if(first == null){
+                while(nextSlotIndex < 3 && (slotUsed[nextSlotIndex] || !slots.get(nextSlotIndex).isFull())) nextSlotIndex++;
+                if(nextSlotIndex < 3){
+                    first = slots.get(nextSlotIndex);
+                    slotUsed[nextSlotIndex] = true;
+                }
+            }
 
+            if(second == null){
+                nextSlotIndex = 0;
+                while(nextSlotIndex < 3 && (slotUsed[nextSlotIndex] || !slots.get(nextSlotIndex).isFull())) nextSlotIndex++;
+                if(nextSlotIndex < 3){
+                    second = slots.get(nextSlotIndex);
+                    slotUsed[nextSlotIndex] = true;
+                }
+            }
+
+            if(third == null){
+                nextSlotIndex = 0;
+                while(nextSlotIndex < 3 && (slotUsed[nextSlotIndex] || !slots.get(nextSlotIndex).isFull())) nextSlotIndex++;
+                if(nextSlotIndex < 3){
+                    third = slots.get(nextSlotIndex);
+                    slotUsed[nextSlotIndex] = true;
+                }
+            }
+        }
+
+        // still have nulls? just use defaults but make sure we don't double-shoot anything
+        if(first == null){
+            if(backSlot != second && backSlot != third) first = backSlot;
+            else if(rightSlot != second && rightSlot != third) first = rightSlot;
+            else first = leftSlot;
+        }
+        if(second == null){
+            if(rightSlot != first && rightSlot != third) second = rightSlot;
+            else if(backSlot != first && backSlot != third) second = backSlot;
+            else second = leftSlot;
+        }
+        if(third == null){
+            if(leftSlot != first && leftSlot != second) third = leftSlot;
+            else if(rightSlot != first && rightSlot != second) third = rightSlot;
+            else third = backSlot;
+        }
 
         return launchInPattern(first, second, third);
-
     }
 
     public boolean allFull() {

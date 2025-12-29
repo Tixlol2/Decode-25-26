@@ -17,7 +17,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
 @Configurable
-//TODO: Tune all constants to ensure correctness awesome
+//TODO: Tune all constants to ensure correctness awesome - prob not needed
 public class MecDriveSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
