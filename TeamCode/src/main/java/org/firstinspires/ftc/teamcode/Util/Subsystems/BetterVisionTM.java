@@ -4,7 +4,6 @@ import android.util.Size;
 
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -174,7 +173,7 @@ public class BetterVisionTM implements Subsystem {
     public void periodic() {
             detections = getDetections();
             detectionIDs = getDetectionIDs();
-            obeliskTargetPattern(getObeliskID());
+
             quickAnalyzeGoal();
     }
 

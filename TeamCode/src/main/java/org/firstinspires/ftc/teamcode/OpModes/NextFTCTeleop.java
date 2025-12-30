@@ -10,7 +10,6 @@ import com.sun.tools.javac.util.List;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
-import org.firstinspires.ftc.teamcode.Util.Subsystems.Slot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -50,6 +49,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
     private static TurretSubsystem turret = new TurretSubsystem();
     private static MecDriveSubsystem mecDrive = new MecDriveSubsystem();
 
+    public static boolean patternFull = false;
     ArrayList<UniConstants.slotState> pattern = new ArrayList<>(List.of(null, null, null));
 
     CommandManager manager;
@@ -136,15 +136,17 @@ public class NextFTCTeleop extends NextFTCOpMode {
             shooterTimer.reset();
         }
 
-//        if(intake.allFull()){
-//            gamepad1.rumble(250);
-//        } else {
-//            gamepad1.stopRumble();
-//        }
+        if(intake.shouldRumble()){
+            gamepad1.rumble(250);
+        } else {
+            gamepad1.stopRumble();
+        }
 
         //If pattern hasn't been assigned yet
         if(pattern.contains(null)){
             pattern = vision.getPattern();
+        } else {
+            patternFull = true;
         }
 
         //TODO: Determine what is better
@@ -173,7 +175,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         joinedTelemetry.addData("Bot Centric ", botCentric);
         joinedTelemetry.addData("Pattern ", pattern);
         joinedTelemetry.addData("Current Commands ", manager.snapshot());
-        for(Slot slot : intake.slots){
+        for(IntakeSortingSubsystem.Slot slot : intake.slots){
             slot.sendTelemetry(UniConstants.loggingState.EXTREME);
         }
         turret.sendTelemetry(UniConstants.loggingState.ENABLED);
