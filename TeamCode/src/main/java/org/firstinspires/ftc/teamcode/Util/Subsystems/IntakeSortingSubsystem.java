@@ -200,19 +200,31 @@ public class IntakeSortingSubsystem implements Subsystem {
             }
         }
 
-        // still have nulls? just use defaults but make sure we don't double-shoot anything
+        // still have nulls? use defaults but prioritize full slots and avoid duplicates
         if(first == null){
-            if(backSlot != second && backSlot != third) first = backSlot;
+            if(backSlot != second && backSlot != third && backSlot.isFull()) first = backSlot;
+            else if(rightSlot != second && rightSlot != third && rightSlot.isFull()) first = rightSlot;
+            else if(leftSlot != second && leftSlot != third && leftSlot.isFull()) first = leftSlot;
+                // if no full slots available, just use any non-duplicate
+            else if(backSlot != second && backSlot != third) first = backSlot;
             else if(rightSlot != second && rightSlot != third) first = rightSlot;
             else first = leftSlot;
         }
         if(second == null){
-            if(rightSlot != first && rightSlot != third) second = rightSlot;
+            if(rightSlot != first && rightSlot != third && rightSlot.isFull()) second = rightSlot;
+            else if(backSlot != first && backSlot != third && backSlot.isFull()) second = backSlot;
+            else if(leftSlot != first && leftSlot != third && leftSlot.isFull()) second = leftSlot;
+                // if no full slots available, just use any non-duplicate
+            else if(rightSlot != first && rightSlot != third) second = rightSlot;
             else if(backSlot != first && backSlot != third) second = backSlot;
             else second = leftSlot;
         }
         if(third == null){
-            if(leftSlot != first && leftSlot != second) third = leftSlot;
+            if(leftSlot != first && leftSlot != second && leftSlot.isFull()) third = leftSlot;
+            else if(rightSlot != first && rightSlot != second && rightSlot.isFull()) third = rightSlot;
+            else if(backSlot != first && backSlot != second && backSlot.isFull()) third = backSlot;
+                // if no full slots available, just use any non-duplicate
+            else if(leftSlot != first && leftSlot != second) third = leftSlot;
             else if(rightSlot != first && rightSlot != second) third = rightSlot;
             else third = backSlot;
         }
