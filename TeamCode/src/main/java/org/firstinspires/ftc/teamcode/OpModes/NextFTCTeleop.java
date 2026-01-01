@@ -72,7 +72,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
         manager = CommandManager.INSTANCE;
-        mecDrive.getFollower().setPose(startPose);
+
     }
 
     @Override
@@ -101,7 +101,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-
+        mecDrive.getFollower().setPose(startPose);
         isSlowed = gamepad1.left_bumper;
 
         //Spin active forward
