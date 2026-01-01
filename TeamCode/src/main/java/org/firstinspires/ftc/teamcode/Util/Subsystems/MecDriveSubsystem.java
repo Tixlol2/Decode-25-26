@@ -68,13 +68,13 @@ public class MecDriveSubsystem implements Subsystem {
                 break;
         }
 
-        changeInTurretAngle = 180 + (-(Math.toDegrees(Math.atan2(y,x))) - Math.toDegrees(follower.getPose().getHeading()));
+        changeInTurretAngle = Math.toDegrees(Math.abs(Math.atan(x/y))) * (color == UniConstants.teamColor.BLUE ? -1 : 1);
         return Math.hypot(x,y) / 39.37;
 
     }
 
     public double getCalculatedTurretAngle(){
-        return NextFTCTeleop.color == UniConstants.teamColor.RED ? -changeInTurretAngle : changeInTurretAngle;
+        return changeInTurretAngle;
     }
 
 

@@ -45,7 +45,7 @@ public class TurretSubsystem implements Subsystem {
     @Override
     public void initialize() {
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
-        resetTurret();
+        init();
 
     }
 
@@ -98,6 +98,10 @@ public class TurretSubsystem implements Subsystem {
         targetVelocity = velo;
     }
 
+    public void setTargetAngle(double angleDeg){
+        turretTargetAngle = angleDeg;
+    }
+
     //Uses degrees
     public double angleToTicks(double angle){
         return angle * UniConstants.TURRET_TICKS_PER_DEGREE;
@@ -112,7 +116,7 @@ public class TurretSubsystem implements Subsystem {
         return Math.abs(launcher.getVelocity() * 2.1);
     }
 
-    public void resetTurret(){
+    public void init(){
         turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turretTargetAngle = 0;

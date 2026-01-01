@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.sun.tools.javac.util.List;
 
@@ -65,10 +66,13 @@ public class NextFTCTeleop extends NextFTCOpMode {
         ); //Subsystems
     }
 
+    public static Pose startPose = new Pose(72, 72, Math.toRadians(90));
+
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
         manager = CommandManager.INSTANCE;
+        mecDrive.getFollower().setPose(startPose);
     }
 
     @Override
@@ -158,8 +162,15 @@ public class NextFTCTeleop extends NextFTCOpMode {
             deltaAngle = mecDrive.getCalculatedTurretAngle();
         }
 
+
+
+
+
+
+
+
         //TODO: Still have to integrate look up table or linreg for power as a function of distance
-        //TODO: Integrate actual turret control, right now I believe it will not work (also its not even being set)
+
 
         mecDrive.updateTeleop(
                 -gamepad1.left_stick_y * (isSlowed ? .25 : 1), //Forward/Backward
@@ -167,7 +178,12 @@ public class NextFTCTeleop extends NextFTCOpMode {
                 -gamepad1.right_stick_x * (isSlowed ? .25 : 1), //Left/Right Strafe
                 botCentric
         );
+
+        //Turret will auto-aim at goal :)
         turret.setHeading(mecDrive.getHeadingDegrees());
+        turret.setTargetAngle(mecDrive.getCalculatedTurretAngle());
+
+
 
         manager.run();
 
