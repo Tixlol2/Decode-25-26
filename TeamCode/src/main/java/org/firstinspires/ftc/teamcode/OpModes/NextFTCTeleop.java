@@ -99,6 +99,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
         mecDrive.startTele();
     }
 
+    //TODO: Move to assigned gamepads via NextFTC - faster
+    //TODO: Consider creating 'Robot' subsystem group for... something?
+
     @Override
     public void onUpdate() {
         mecDrive.getFollower().setPose(startPose);
@@ -190,6 +193,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         joinedTelemetry.addData("Bot Centric ", botCentric);
         joinedTelemetry.addData("Pattern ", pattern);
         joinedTelemetry.addData("Follower Heading ", mecDrive.getHeadingDegrees());
+        joinedTelemetry.addData("Calc-ed Angle ", mecDrive.getCalculatedTurretAngle());
         joinedTelemetry.addData("Current Commands ", manager.snapshot());
         for(IntakeSortingSubsystem.Slot slot : intake.slots){
             slot.sendTelemetry(UniConstants.loggingState.ENABLED);
