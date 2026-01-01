@@ -55,22 +55,38 @@ public class MecDriveSubsystem implements Subsystem {
     }
 
     public double updateDistanceAndAngle() {
-        //Returns distance between goal in meters, it also updates the turretTargetAngle
-        double x = 0,y = 1;
-        switch (NextFTCTeleop.color){
+        double x = 0, y = 0;
+
+        switch (NextFTCTeleop.color) {
             case BLUE:
                 x = Poses.blueGoal.getX() - follower.getPose().getX();
                 y = Poses.blueGoal.getY() - follower.getPose().getY();
                 break;
             case RED:
-                x =  Poses.redGoal.getX() - follower.getPose().getX();
-                y =  Poses.redGoal.getY() - follower.getPose().getY();
+                x = Poses.redGoal.getX() - follower.getPose().getX();
+                y = Poses.redGoal.getY() - follower.getPose().getY();
                 break;
         }
 
-        changeInTurretAngle = Math.toDegrees(Math.abs(Math.atan(x/y))) * (color == UniConstants.teamColor.BLUE ? 1 : -1);
-        return Math.hypot(x,y) / 39.37;
+        // In Pedro Pathing: +Y is forward (90), +X is right (0)
+        // atan2(y, x) measures angle from +X axis
+        // We want angle where +Y is 0 (forward for the robot)
+        // So: fieldAngle = atan2(y, x) gives us angle from +X
+        // To get angle from +Y: subtract 90 (or add 270, same thing)
+        double fieldAngleToTarget = Math.toDegrees(Math.atan2(y, x)) - 90;
 
+        // Get robot heading in degrees (0 = facing +X, 90 = facing +Y)
+        double robotHeading = getHeadingDegrees() - 90;
+
+        // Calculate turret angle relative to robot
+        changeInTurretAngle = fieldAngleToTarget - robotHeading;
+
+        // Clamp to -180 to 180
+        while (changeInTurretAngle > 180) changeInTurretAngle -= 360;
+        while (changeInTurretAngle < -180) changeInTurretAngle += 360;
+
+        // Return distance in meters
+        return Math.hypot(x, y) / 39.37;
     }
 
     public double getCalculatedTurretAngle(){

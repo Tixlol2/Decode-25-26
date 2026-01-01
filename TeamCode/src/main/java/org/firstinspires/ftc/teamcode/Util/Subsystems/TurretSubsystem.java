@@ -52,28 +52,19 @@ public class TurretSubsystem implements Subsystem {
     @Override
     public void periodic() {
         if(!ActiveOpMode.opModeInInit()) {
-            // periodic logic (runs every loop)
-
-            //NextFTC Control System PID
-//        launcherControl = ControlSystem.builder()
-//                .velPid(p)
-//                .build();
-//        launcherControl.setLastMeasurement(new KineticState(0, launcher.getVelocity() * 2.1));
-//        launcher.setPower(launcherControl.calculate(new KineticState(0, targetVelocity)));
-
+            // Launcher control (this looks fine)
             launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
             launcherCurrentVelo = getCurrentVelocity();
             launcherController.setTarget(targetVelocity);
             launcherController.update(launcherCurrentVelo);
             launcher.setPower(Math.max(0.0, Math.min(1.0, launcherController.runPDFL(50))));
 
-
-            //turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
+            //Full turret control
             turretCurrentPos = turret.getCurrentPosition();
-            turretTargetAngle = Math.max(-65.0, Math.min(65, turretTargetAngle));
-            //turretControl.setTarget(Math.max(angleToTicks(-65.0), Math.min(angleToTicks(65), angleToTicks(turretTargetAngle) + angleToTicks(heading))));
+            turretTargetAngle = Math.max(-65.0, Math.min(65.0, turretTargetAngle));
+            turretControl.setTarget(angleToTicks(turretTargetAngle));
             turretControl.update(turretCurrentPos);
-            turret.setPower(turretControl.runPDFL(angleToTicks(.5)));
+            turret.setPower(turretControl.runPDFL(angleToTicks(0.5)));
         }
     }
 

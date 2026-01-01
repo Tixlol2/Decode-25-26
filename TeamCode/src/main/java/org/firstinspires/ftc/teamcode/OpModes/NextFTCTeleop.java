@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.field.PanelsField;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
@@ -94,7 +95,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-
+        mecDrive.getFollower().setPose(startPose);
         vision.setColor(color);
         mecDrive.setColor(color);
         turret.setTargetVelocity(0);
@@ -106,7 +107,6 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        mecDrive.getFollower().setPose(startPose);
         isSlowed = gamepad1.left_bumper;
 
         //Spin active forward
@@ -188,8 +188,11 @@ public class NextFTCTeleop extends NextFTCOpMode {
         );
 
         //Turret will auto-aim at goal :)
-        turret.setHeading(mecDrive.getHeadingDegrees());
-        //turret.setTargetAngle(mecDrive.getCalculatedTurretAngle());
+        distanceToGoalInMeters = mecDrive.updateDistanceAndAngle();
+        deltaAngle = mecDrive.getCalculatedTurretAngle();
+        turret.setTargetAngle(-deltaAngle); //Works when negative
+
+
 
 
 
