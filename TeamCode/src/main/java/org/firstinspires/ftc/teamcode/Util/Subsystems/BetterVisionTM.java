@@ -66,29 +66,17 @@ public class BetterVisionTM implements Subsystem {
 
 
     /** Returns the full list of current AprilTag detections. */
-    public ArrayList<AprilTagDetection> getDetections() {
-        return aprilTagProcessor.getDetections();
+    public void getDetections() {
+        detections = aprilTagProcessor.getDetections();
+        detectionIDs = getDetectionIDs();
     }
 
-    /** Returns the first detected tag ID, or -1 if none seen. */
-    public int getFirstTagId() {
-        ArrayList<AprilTagDetection> detections = getDetections();
-        if (!detections.isEmpty()) {
-            return detections.get(0).id;
-        }
-        return -1;
-    }
 
-    public AprilTagDetection getFirstTagData() {
-        ArrayList<AprilTagDetection> detections = getDetections();
-        if (!detections.isEmpty()) {
-            return detections.get(0);
-        }
-        return null;
-    }
 
-    public void findPosition() {
-        AprilTagDetection tagData = getFirstTagData();
+
+
+    public void analyzeTags() {
+        for(AprilTagDetection tagData : detections){
         if (tagData != null) {
             // Logic to determine position based on tag ID
 
@@ -124,10 +112,12 @@ public class BetterVisionTM implements Subsystem {
             }
 
         }
+        }
     }
 
     public void quickAnalyzeGoal(){
         getDetections();
+        if(!detections.contains(null)){
         for(AprilTagDetection detection : detections){
             double dist = detection.ftcPose.range;
             double pitch = detection.ftcPose.pitch;
@@ -138,7 +128,7 @@ public class BetterVisionTM implements Subsystem {
             }
 
         }
-    }
+    }}
 
     public ArrayList<Integer> getDetectionIDs(){
         ArrayList<Integer> ids = new ArrayList<>();
@@ -171,9 +161,7 @@ public class BetterVisionTM implements Subsystem {
 
     @Override
     public void periodic() {
-            detections = getDetections();
-            detectionIDs = getDetectionIDs();
-
+            getDetections();
             quickAnalyzeGoal();
     }
 

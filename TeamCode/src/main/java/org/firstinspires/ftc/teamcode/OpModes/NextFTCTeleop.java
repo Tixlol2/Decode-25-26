@@ -56,6 +56,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     Timer driverTimer = new Timer();
     Timer shooterTimer = new Timer();
+    Timer rumblingTimer = new Timer();
 
     {
         addComponents(
@@ -90,7 +91,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
         vision.setColor(color);
 
-        turret.setTargetVelocity(2200);
+        turret.setTargetVelocity(0);
         mecDrive.startTele();
     }
 
@@ -136,10 +137,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
             shooterTimer.reset();
         }
 
-        if(intake.shouldRumble()){
-            gamepad1.rumble(250);
-        } else {
-            gamepad1.stopRumble();
+        if(intake.shouldRumble() && rumblingTimer.getTimeSeconds() > 3){
+            gamepad1.rumble(1000);
+            rumblingTimer.reset();
         }
 
         //If pattern hasn't been assigned yet
@@ -153,8 +153,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         if(usingVision){
             distanceToGoalInMeters = vision.getDistanceToGoal();
             deltaAngle = vision.getDeltaAngle();
-        }
-        else{
+        } else {
             distanceToGoalInMeters = mecDrive.updateDistanceAndAngle();
             deltaAngle = mecDrive.getCalculatedTurretAngle();
         }
@@ -168,16 +167,18 @@ public class NextFTCTeleop extends NextFTCOpMode {
                 -gamepad1.right_stick_x * (isSlowed ? .25 : 1), //Left/Right Strafe
                 botCentric
         );
-
+        turret.setHeading(mecDrive.getHeadingDegrees());
 
         manager.run();
 
         joinedTelemetry.addData("Bot Centric ", botCentric);
         joinedTelemetry.addData("Pattern ", pattern);
+        joinedTelemetry.addData("Follower Heading ", mecDrive.getHeadingDegrees());
         joinedTelemetry.addData("Current Commands ", manager.snapshot());
         for(IntakeSortingSubsystem.Slot slot : intake.slots){
-            slot.sendTelemetry(UniConstants.loggingState.EXTREME);
+            slot.sendTelemetry(UniConstants.loggingState.ENABLED);
         }
+        joinedTelemetry.addData("Turret Test: ", turret.getTurretTargetAngle() + Math.toDegrees(mecDrive.getFollower().getPose().getHeading()));
         turret.sendTelemetry(UniConstants.loggingState.ENABLED);
         joinedTelemetry.update();
 

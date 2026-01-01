@@ -49,9 +49,9 @@ public class IntakeSortingSubsystem implements Subsystem {
     public void initialize(){
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
 
-        backSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, telemetry);
-        rightSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, telemetry);
-        leftSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_LEFT_STRING, UniConstants.COLOR_SENSOR_SLOT_LEFT_STRING, telemetry);
+        backSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, UniConstants.LIGHT_BACK_STRING, telemetry);
+        rightSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, UniConstants.LIGHT_RIGHT_STRING, telemetry);
+        leftSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_LEFT_STRING, UniConstants.COLOR_SENSOR_SLOT_LEFT_STRING, UniConstants.LIGHT_LEFT_STRING, telemetry);
 
         slots = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
     }
@@ -168,6 +168,40 @@ public class IntakeSortingSubsystem implements Subsystem {
             }
         }
 
+        // if pattern matching left gaps, move any assigned full slots to the front
+        // priority: shoot balls first, empty slots last
+        if(first == null && second != null){
+            first = second;
+            second = null;
+            // update slotUsed tracking
+            for(int i = 0; i < 3; i++){
+                if(slots.get(i) == first){
+                    slotUsed[i] = true;
+                    break;
+                }
+            }
+        }
+        if(first == null && third != null){
+            first = third;
+            third = null;
+            for(int i = 0; i < 3; i++){
+                if(slots.get(i) == first){
+                    slotUsed[i] = true;
+                    break;
+                }
+            }
+        }
+        if(second == null && third != null){
+            second = third;
+            third = null;
+            for(int i = 0; i < 3; i++){
+                if(slots.get(i) == second){
+                    slotUsed[i] = true;
+                    break;
+                }
+            }
+        }
+
         // if we couldn't fill all 3 positions from the pattern, grab any full slots we have left
         // doesn't matter what order at this point, just shoot what we got
         if(first == null || second == null || third == null){
@@ -205,7 +239,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             if(backSlot != second && backSlot != third && backSlot.isFull()) first = backSlot;
             else if(rightSlot != second && rightSlot != third && rightSlot.isFull()) first = rightSlot;
             else if(leftSlot != second && leftSlot != third && leftSlot.isFull()) first = leftSlot;
-                // if no full slots available, just use any non-duplicate
+                // if no full slots available, just use any non-duplicate (even if empty)
             else if(backSlot != second && backSlot != third) first = backSlot;
             else if(rightSlot != second && rightSlot != third) first = rightSlot;
             else first = leftSlot;
@@ -214,19 +248,19 @@ public class IntakeSortingSubsystem implements Subsystem {
             if(rightSlot != first && rightSlot != third && rightSlot.isFull()) second = rightSlot;
             else if(backSlot != first && backSlot != third && backSlot.isFull()) second = backSlot;
             else if(leftSlot != first && leftSlot != third && leftSlot.isFull()) second = leftSlot;
-                // if no full slots available, just use any non-duplicate
+                // if no full slots available, just use any non-duplicate (even if empty)
             else if(rightSlot != first && rightSlot != third) second = rightSlot;
-            else if(backSlot != first && backSlot != third) second = backSlot;
-            else second = leftSlot;
+            else if(leftSlot != first && leftSlot != third) second = leftSlot;
+            else second = backSlot;
         }
         if(third == null){
             if(leftSlot != first && leftSlot != second && leftSlot.isFull()) third = leftSlot;
             else if(rightSlot != first && rightSlot != second && rightSlot.isFull()) third = rightSlot;
             else if(backSlot != first && backSlot != second && backSlot.isFull()) third = backSlot;
-                // if no full slots available, just use any non-duplicate
+                // if no full slots available, just use any non-duplicate (even if empty)
             else if(leftSlot != first && leftSlot != second) third = leftSlot;
-            else if(rightSlot != first && rightSlot != second) third = rightSlot;
-            else third = backSlot;
+            else if(backSlot != first && backSlot != second) third = backSlot;
+            else third = rightSlot;
         }
 
         return launchInPattern(first, second, third);
@@ -261,6 +295,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     public static class Slot {
 
         private final ServoEx kickerServo;
+        private final ServoEx light;
         private final ColorSensor colorSensor;
 
         String name = "";
@@ -272,9 +307,10 @@ public class IntakeSortingSubsystem implements Subsystem {
         double up = 0;
         double down = 0;
 
-        public Slot(HardwareMap hardwareMap, String kickerServoName, String colorSensorName, JoinedTelemetry telemetry){
+        public Slot(HardwareMap hardwareMap, String kickerServoName, String colorSensorName, String lightName, JoinedTelemetry telemetry){
 
             kickerServo = new ServoEx(kickerServoName);
+            light = new ServoEx(lightName);
             name = kickerServoName;
             colorSensor = hardwareMap.get(ColorSensor.class, colorSensorName);
 
@@ -303,6 +339,7 @@ public class IntakeSortingSubsystem implements Subsystem {
 
             //Update Servo
             kickerServo.setPosition(state == UniConstants.servoState.UP ? ((servoState == UniConstants.servoState.UP) ? up : down) : down);
+            light.setPosition(isFull() ? (colorState.equals(UniConstants.slotState.GREEN) ? .5 : .722) : 0);
         }
 
         private void readSlot() {

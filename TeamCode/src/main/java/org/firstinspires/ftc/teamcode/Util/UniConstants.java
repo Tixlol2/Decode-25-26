@@ -97,6 +97,11 @@ CONFIG
     public static final String COLOR_SENSOR_SLOT_RIGHT_STRING = "CSR";
     public static final String COLOR_SENSOR_SLOT_LEFT_STRING = "CSL";
 
+    //Light Names
+    public static final String LIGHT_BACK_STRING = "BACK";
+    public static final String LIGHT_RIGHT_STRING = "RIGHT";
+    public static final String LIGHT_LEFT_STRING = "LEFT";
+
     //Launcher Speed Calculation variables
     public static final double ANGLE_OF_LAUNCHER_IN_DEGREES = 35;
     public static  final double HEIGHT_OF_ROBOT_IN_METERS = 0.35; //TODO: Check to make sure this is right

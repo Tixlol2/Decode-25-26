@@ -82,8 +82,8 @@ public class MecDriveSubsystem implements Subsystem {
         follower.setPose(pose);
     }
 
-    public double getHeading(){
-        return follower.getPose().getHeading();
+    public double getHeadingDegrees(){
+        return Math.toDegrees(follower.getPose().getHeading());
     }
 
     public Follower getFollower(){
