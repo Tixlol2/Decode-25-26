@@ -51,30 +51,30 @@ public class TurretSubsystem implements Subsystem {
 
     @Override
     public void periodic() {
-        // periodic logic (runs every loop)
+        if(!ActiveOpMode.opModeInInit()) {
+            // periodic logic (runs every loop)
 
-        //NextFTC Control System PID
+            //NextFTC Control System PID
 //        launcherControl = ControlSystem.builder()
 //                .velPid(p)
 //                .build();
 //        launcherControl.setLastMeasurement(new KineticState(0, launcher.getVelocity() * 2.1));
 //        launcher.setPower(launcherControl.calculate(new KineticState(0, targetVelocity)));
 
-        launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
-        launcherCurrentVelo = getCurrentVelocity();
-        launcherController.setTarget(targetVelocity);
-        launcherController.update(launcherCurrentVelo);
-        launcher.setPower(Math.max(0.0, Math.min(1.0, launcherController.runPDFL(50))));
+            launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
+            launcherCurrentVelo = getCurrentVelocity();
+            launcherController.setTarget(targetVelocity);
+            launcherController.update(launcherCurrentVelo);
+            launcher.setPower(Math.max(0.0, Math.min(1.0, launcherController.runPDFL(50))));
 
 
-
-        //turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
-        turretCurrentPos = turret.getCurrentPosition();
-        turretTargetAngle = Math.max(-65.0, Math.min(65, turretTargetAngle));
-        turretControl.setTarget(Math.max(angleToTicks(-65.0), Math.min(angleToTicks(65), angleToTicks(turretTargetAngle) + angleToTicks(heading))));
-        turretControl.update(turretCurrentPos);
-        turret.setPower(turretControl.runPDFL(angleToTicks(.5)));
-
+            //turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
+            turretCurrentPos = turret.getCurrentPosition();
+            turretTargetAngle = Math.max(-65.0, Math.min(65, turretTargetAngle));
+            //turretControl.setTarget(Math.max(angleToTicks(-65.0), Math.min(angleToTicks(65), angleToTicks(turretTargetAngle) + angleToTicks(heading))));
+            turretControl.update(turretCurrentPos);
+            turret.setPower(turretControl.runPDFL(angleToTicks(.5)));
+        }
     }
 
 

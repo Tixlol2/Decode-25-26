@@ -68,7 +68,7 @@ public class MecDriveSubsystem implements Subsystem {
                 break;
         }
 
-        changeInTurretAngle = Math.toDegrees(Math.abs(Math.atan(x/y))) * (color == UniConstants.teamColor.BLUE ? -1 : 1);
+        changeInTurretAngle = Math.toDegrees(Math.abs(Math.atan(x/y))) * (color == UniConstants.teamColor.BLUE ? 1 : -1);
         return Math.hypot(x,y) / 39.37;
 
     }
@@ -85,6 +85,9 @@ public class MecDriveSubsystem implements Subsystem {
     public double getHeadingDegrees(){
         return Math.toDegrees(follower.getPose().getHeading());
     }
+
+    public void setColor(UniConstants.teamColor col){color = col;}
+
 
     public Follower getFollower(){
         return follower;

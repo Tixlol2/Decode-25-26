@@ -55,6 +55,8 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     CommandManager manager;
 
+    boolean enableRumble = false;
+
     Timer driverTimer = new Timer();
     Timer shooterTimer = new Timer();
     Timer rumblingTimer = new Timer();
@@ -94,7 +96,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
     public void onStartButtonPressed() {
 
         vision.setColor(color);
-
+        mecDrive.setColor(color);
         turret.setTargetVelocity(0);
         mecDrive.startTele();
     }
@@ -132,6 +134,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
             turret.setTargetVelocity(2000);
         }
 
+        if(gamepad1.dpad_up){enableRumble = true;}
+        if(gamepad1.dpad_down){enableRumble = false;}
+
         //Able to switch between driver and robot centric
         if(gamepad1.y && driverTimer.getTimeSeconds() > .5){
             botCentric = !botCentric;
@@ -144,7 +149,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
             shooterTimer.reset();
         }
 
-        if(intake.shouldRumble() && rumblingTimer.getTimeSeconds() > 3){
+        if(intake.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble){
             gamepad1.rumble(1000);
             rumblingTimer.reset();
         }
@@ -184,7 +189,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
         //Turret will auto-aim at goal :)
         turret.setHeading(mecDrive.getHeadingDegrees());
-        turret.setTargetAngle(mecDrive.getCalculatedTurretAngle());
+        //turret.setTargetAngle(mecDrive.getCalculatedTurretAngle());
 
 
 
@@ -198,7 +203,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         for(IntakeSortingSubsystem.Slot slot : intake.slots){
             slot.sendTelemetry(UniConstants.loggingState.ENABLED);
         }
-        joinedTelemetry.addData("Turret Test: ", turret.getTurretTargetAngle() + Math.toDegrees(mecDrive.getFollower().getPose().getHeading()));
+        joinedTelemetry.addData("Turret Test: ", (turret.getTurretTargetAngle() + Math.toDegrees(mecDrive.getFollower().getPose().getHeading())));
         turret.sendTelemetry(UniConstants.loggingState.ENABLED);
         joinedTelemetry.update();
 

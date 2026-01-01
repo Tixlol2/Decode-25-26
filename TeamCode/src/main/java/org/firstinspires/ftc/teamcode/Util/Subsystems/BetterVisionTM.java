@@ -162,7 +162,7 @@ public class BetterVisionTM implements Subsystem {
     @Override
     public void periodic() {
             getDetections();
-            quickAnalyzeGoal();
+
     }
 
     public double getDistanceToGoal(){
