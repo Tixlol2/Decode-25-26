@@ -25,7 +25,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
     public static boolean debug = false;
-    public static boolean isEnabled = false;
+    public boolean isEnabled = false;
     public static boolean isReversed = false;
 
 
@@ -124,15 +124,15 @@ public class IntakeSortingSubsystem implements Subsystem {
     public Command launchInPattern(Slot first, Slot second, Slot third){
         return new SequentialGroup(
                 setServoState(first, UniConstants.servoState.UP),
-                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
+                new Delay(UniConstants.FLICKER_TIME_UP),
                 setServoState(first, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
+                new Delay(UniConstants.FLICKER_TIME_DOWN),
                 setServoState(second, UniConstants.servoState.UP),
-                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
+                new Delay(UniConstants.FLICKER_TIME_UP),
                 setServoState(second, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
+                new Delay(UniConstants.FLICKER_TIME_DOWN),
                 setServoState(third, UniConstants.servoState.UP),
-                new Delay(UniConstants.TIME_BETWEEN_SHOT_SECONDS / 2),
+                new Delay(UniConstants.FLICKER_TIME_UP),
                 setServoState(third, UniConstants.servoState.DOWN)
         );
     }
@@ -316,16 +316,16 @@ public class IntakeSortingSubsystem implements Subsystem {
 
             this.telemetry = telemetry;
 
-
-            if(kickerServoName.equals(UniConstants.FLICKER_BACK_STRING)){
-                up = .6; //Back up
-                down = .15; //Back down
-            } else if (kickerServoName.equals(UniConstants.FLICKER_LEFT_STRING)) {
-                up = .85; //Left up
-                down = .4; //Left down
+            //Identify slot and assign servo constants
+            if(name.equals(UniConstants.FLICKER_BACK_STRING)){
+                up = UniConstants.FLICKER_BACK_UP; //Back up
+                down = UniConstants.FLICKER_BACK_DOWN; //Back down
+            } else if (name.equals(UniConstants.FLICKER_LEFT_STRING)) {
+                up = UniConstants.FLICKER_LEFT_UP; //Left up
+                down = UniConstants.FLICKER_LEFT_DOWN; //Left down
             } else {
-                up = .5; //Right up
-                down = .9; //Right down
+                up = UniConstants.FLICKER_RIGHT_UP; //Right up
+                down = UniConstants.FLICKER_RIGHT_DOWN; //Right down
             }
 
 
@@ -333,6 +333,8 @@ public class IntakeSortingSubsystem implements Subsystem {
         }
 
         public void update(){
+
+
 
             //Update Colors
             readSlot();

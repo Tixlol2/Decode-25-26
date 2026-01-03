@@ -20,11 +20,11 @@ public class TurretSubsystem implements Subsystem {
     // put hardware, commands, etc here
     JoinedTelemetry telemetry;
 
-    MotorEx launcher = new MotorEx(UniConstants.LAUNCHER_STRING).floatMode().reversed();
+    MotorEx launcher = new MotorEx(UniConstants.LAUNCHER_STRING).floatMode();
 
     public static int targetVelocity = 0;
     public static ControlSystem launcherControl;
-    public static double pLaunch = .0035, iLaunch = 0, dLaunch = 0, fLaunch = 0, lLaunch = 0.13;
+    public static double pLaunch = .00, iLaunch = 0, dLaunch = 0, fLaunch = 0, lLaunch = 0.01;
     private PDFLController launcherController = new PDFLController(pLaunch, dLaunch, fLaunch, lLaunch);
     private double launcherCurrentVelo = 0;
 
@@ -37,6 +37,11 @@ public class TurretSubsystem implements Subsystem {
     private final double pTurret = 0.003, dTurret = 0, lTurret = 0.125, fTurret = 0;
     private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
 
+    private double motorPower = 0.0;
+
+    public static boolean debug = true;
+    public static double debugPower = 0;
+
 
     public TurretSubsystem(){}
 
@@ -46,18 +51,13 @@ public class TurretSubsystem implements Subsystem {
     public void initialize() {
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         init();
-
     }
 
     @Override
     public void periodic() {
         if(!ActiveOpMode.opModeInInit()) {
             // Launcher control (this looks fine)
-            launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
-            launcherCurrentVelo = getCurrentVelocity();
-            launcherController.setTarget(targetVelocity);
-            launcherController.update(launcherCurrentVelo);
-            launcher.setPower(Math.max(0.0, Math.min(1.0, launcherController.runPDFL(50))));
+            launcher.setPower(debugPower);
 
             //Full turret control
             turretCurrentPos = turret.getCurrentPosition();
@@ -70,9 +70,7 @@ public class TurretSubsystem implements Subsystem {
 
 
 
-    public Command commandRunToVelocity(double velocity){
-        return new RunToPosition(launcherControl, velocity);
-    }
+
 
 
     public  double getTargetVelocity(double distanceToGoalInMeters) {
@@ -85,8 +83,15 @@ public class TurretSubsystem implements Subsystem {
         );
     }
 
-    public void setTargetVelocity(int velo){
+    public void setTargetVelocityTicks(int velo){
         targetVelocity = velo;
+    }
+    public void setTargetVelocityRPM(int velo){
+        targetVelocity = (int) (velo / 2.1);
+    }
+
+    public void setMotorPower(double power){
+        debugPower = -Math.max(0, Math.min(1, power));
     }
 
     public void setTargetAngle(double angleDeg){
@@ -104,7 +109,7 @@ public class TurretSubsystem implements Subsystem {
     }
 
     public double getCurrentVelocity(){
-        return Math.abs(launcher.getVelocity() * 2.1);
+        return launcher.getVelocity();
     }
 
     public void init(){
@@ -131,11 +136,13 @@ public class TurretSubsystem implements Subsystem {
                 telemetry.addLine("START OF OUTTAKE LOG");
                 telemetry.addData("Turret Target Angle ", turretTargetAngle);
                 telemetry.addData("Target Velocity ", targetVelocity);
-                telemetry.addData("Current Velocity ", getCurrentVelocity());
+                telemetry.addData("Current Velocity ", launcher.getVelocity());
+                telemetry.addData("Current RPM ", launcher.getVelocity() * 2.1);
                 telemetry.addLine();
                 telemetry.addData("Turret Position Deg ", ticksToAngle(turretCurrentPos));
                 telemetry.addData("Turret Position Ticks ", (turretCurrentPos));
                 telemetry.addData("Turret Target Deg ", turretTargetAngle);
+                telemetry.addData("Motor Power: ", motorPower);
 
 
 

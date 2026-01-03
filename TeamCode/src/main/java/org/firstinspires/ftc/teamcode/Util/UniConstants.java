@@ -27,14 +27,15 @@ CONFIG
     //CHI2C3 = pp
 
 //Expansion Hub
-    //EHM0 = FR
-    //EHM1 = BR
-    //EHM2 = TURR
-    //EHM3 = LAUNCH
+    //EHM0 = LAUNCHER
+    //EHM1 =
+    //EHM2 = FRM
+    //EHM3 = BRM
 
     //EHI2C0 = CSR
 
-    //EHS5 =
+    //EHS0 = FBS
+    //EHS5 = FLS
 
 */
 
@@ -110,7 +111,18 @@ CONFIG
 
 
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
-    public static double TIME_BETWEEN_SHOT_SECONDS = 2;
+    public static double FLICKER_TIME_UP = 1.2;
+    public static double FLICKER_TIME_DOWN = .5;
+
+    public static final double FLICKER_BACK_UP = .55;
+    public static final double FLICKER_BACK_DOWN = .1;
+
+    public static final double FLICKER_RIGHT_DOWN = .9;
+    public static final double FLICKER_RIGHT_UP = .5;
+
+    public static final double FLICKER_LEFT_DOWN = .4;
+    public static final double FLICKER_LEFT_UP = .85;
+
 
 
 

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.field.PanelsField;
+import com.bylazar.gamepad.Gamepad;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 
 
@@ -42,7 +43,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     JoinedTelemetry joinedTelemetry;
 
-    public static boolean usingVision = false;
+
     public static boolean botCentric = false;
 
     //All different subsystems
@@ -59,7 +60,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
     boolean enableRumble = false;
 
     Timer driverTimer = new Timer();
-    Timer shooterTimer = new Timer();
+    Timer shootTimer = new Timer();
     Timer rumblingTimer = new Timer();
 
     {
@@ -70,6 +71,10 @@ public class NextFTCTeleop extends NextFTCOpMode {
     }
 
     public static Pose startPose = new Pose(72, 72, Math.toRadians(90));
+    private boolean turretForward = true;
+    public static int targetVelo = 500;
+
+    private boolean intakeEnabled = false;
 
     @Override
     public void onInit() {
@@ -96,10 +101,14 @@ public class NextFTCTeleop extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         mecDrive.getFollower().setPose(startPose);
+        //TODO: see if we can just use the static instance of the color
         vision.setColor(color);
         mecDrive.setColor(color);
-        turret.setTargetVelocity(0);
+        turret.setTargetVelocityTicks(0);
         mecDrive.startTele();
+
+
+
     }
 
     //TODO: Move to assigned gamepads via NextFTC - faster
@@ -123,19 +132,21 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         if(gamepad1.a){
-            turret.setTargetVelocity(3000);
+            turret.setMotorPower(.6);
         }
 
         if(gamepad1.b){
-            turret.setTargetVelocity(0);
+            turret.setMotorPower(0);
         }
 
         if(gamepad1.x){
-            turret.setTargetVelocity(2000);
+            turret.setMotorPower(1);
         }
 
-        if(gamepad1.dpad_up){enableRumble = true;}
-        if(gamepad1.dpad_down){enableRumble = false;}
+        if(gamepad1.dpad_left){enableRumble = true;}
+        if(gamepad1.dpad_right){enableRumble = false;}
+        if(gamepad1.dpad_up){turretForward = true;}
+        if(gamepad1.dpad_down){turretForward = false;}
 
         //Able to switch between driver and robot centric
         if(gamepad1.y && driverTimer.getTimeSeconds() > .5){
@@ -144,9 +155,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         //Shooting command
-        if(gamepad1.right_bumper && shooterTimer.getTimeSeconds() > 1.5) {
+        if(gamepad1.right_bumper && shootTimer.getTimeSeconds() > 5) {
             manager.scheduleCommand(intake.shoot(pattern));
-            shooterTimer.reset();
+            shootTimer.reset();
         }
 
         if(intake.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble){
@@ -161,22 +172,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
             patternFull = true;
         }
 
-        //TODO: Determine what is better
-        if(usingVision){
-            distanceToGoalInMeters = vision.getDistanceToGoal();
-            deltaAngle = vision.getDeltaAngle();
-        } else {
-            distanceToGoalInMeters = mecDrive.updateDistanceAndAngle();
-            deltaAngle = mecDrive.getCalculatedTurretAngle();
-        }
-
-
-
-
-
-
-
-
+        //TODO: Look into manual MegaTag2 for relocalization for odo.
         //TODO: Still have to integrate look up table or linreg for power as a function of distance
 
 
@@ -190,7 +186,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         //Turret will auto-aim at goal :)
         distanceToGoalInMeters = mecDrive.updateDistanceAndAngle();
         deltaAngle = mecDrive.getCalculatedTurretAngle();
-        turret.setTargetAngle(-deltaAngle); //Works when negative
+        turret.setTargetAngle(turretForward ? 0 : -deltaAngle); //Works when negative
 
 
 
@@ -206,7 +202,6 @@ public class NextFTCTeleop extends NextFTCOpMode {
         for(IntakeSortingSubsystem.Slot slot : intake.slots){
             slot.sendTelemetry(UniConstants.loggingState.ENABLED);
         }
-        joinedTelemetry.addData("Turret Test: ", (turret.getTurretTargetAngle() + Math.toDegrees(mecDrive.getFollower().getPose().getHeading())));
         turret.sendTelemetry(UniConstants.loggingState.ENABLED);
         joinedTelemetry.update();
 
