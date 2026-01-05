@@ -117,8 +117,10 @@ public class TurretSubsystem implements Subsystem {
     public void init(){
         turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turretCurrentPos = 0;
         turretTargetAngle = 0;
         targetVelocity = 0;
+        motorPower = 0;
     }
 
 
@@ -126,9 +128,7 @@ public class TurretSubsystem implements Subsystem {
         return turretTargetAngle;
     }
 
-    public void setHeading(double heading){
-        this.heading = heading;
-    }
+
 
     public void sendTelemetry(UniConstants.loggingState state){
         switch(state){

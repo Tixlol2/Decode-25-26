@@ -5,6 +5,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.teamcode.OpModes.NextFTCTeleop;
 import org.firstinspires.ftc.teamcode.Util.Poses;
@@ -30,6 +31,7 @@ public class MecDriveSubsystem implements Subsystem {
     private static double changeInTurretAngle = 0;
 
 
+
     public MecDriveSubsystem(){}
 
     @Override
@@ -44,6 +46,7 @@ public class MecDriveSubsystem implements Subsystem {
     @Override
     public void periodic(){
         color = NextFTCTeleop.color;
+        updateDistanceAndAngle();
         follower.update();
     }
 
@@ -56,7 +59,7 @@ public class MecDriveSubsystem implements Subsystem {
         follower.update();
     }
 
-    public double updateDistanceAndAngle() {
+    public void updateDistanceAndAngle() {
         double x = 0, y = 0;
 
         switch (NextFTCTeleop.color) {
@@ -87,8 +90,11 @@ public class MecDriveSubsystem implements Subsystem {
         while (changeInTurretAngle > 180) changeInTurretAngle -= 360;
         while (changeInTurretAngle < -180) changeInTurretAngle += 360;
 
-        // Return distance in meters
+        //distance in meters
         distanceToGoal = Math.hypot(x, y) / 39.37;
+    }
+
+    public double getDistanceToGoal(){
         return distanceToGoal;
     }
 

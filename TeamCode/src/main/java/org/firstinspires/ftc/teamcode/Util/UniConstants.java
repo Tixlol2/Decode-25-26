@@ -114,14 +114,14 @@ CONFIG
     public static double FLICKER_TIME_UP = 1.2;
     public static double FLICKER_TIME_DOWN = .5;
 
-    public static final double FLICKER_BACK_UP = .55;
-    public static final double FLICKER_BACK_DOWN = .1;
+    public static  double FLICKER_BACK_UP = .55;
+    public static  double FLICKER_BACK_DOWN = .15;
 
-    public static final double FLICKER_RIGHT_DOWN = .9;
-    public static final double FLICKER_RIGHT_UP = .5;
+    public static  double FLICKER_RIGHT_DOWN = 1;
+    public static  double FLICKER_RIGHT_UP = .5;
 
-    public static final double FLICKER_LEFT_DOWN = .4;
-    public static final double FLICKER_LEFT_UP = .85;
+    public static  double FLICKER_LEFT_DOWN = .5;
+    public static  double FLICKER_LEFT_UP = .93;
 
 
 

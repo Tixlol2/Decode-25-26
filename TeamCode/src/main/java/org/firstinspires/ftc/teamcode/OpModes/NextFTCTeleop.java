@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import java.util.ArrayList;
 
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -36,44 +37,49 @@ public class NextFTCTeleop extends NextFTCOpMode {
     private boolean isSlowed = false;
 
     private double distanceToGoalInMeters = 0.0;
-    private double deltaAngle = 0.0;
+
 
     public static UniConstants.loggingState logState = UniConstants.loggingState.ENABLED;
 
     JoinedTelemetry joinedTelemetry;
-    public static boolean botCentric = false;
-
-
+    private boolean botCentric = true;
 
     public static boolean patternFull = false;
-    ArrayList<UniConstants.slotState> pattern = new ArrayList<>(List.of(null, null, null));
+    ArrayList<UniConstants.slotState> pattern;
+    private boolean enableRumble = false;
 
-
-
-    boolean enableRumble = false;
-
-//    Timer driverTimer = new Timer();
-//    Timer shootTimer = new Timer();
+    Timer driverTimer = new Timer();
+    Timer shootTimer = new Timer();
     Timer rumblingTimer = new Timer();
 
     {
         addComponents(
-                CommandManager.INSTANCE,
                 new SubsystemComponent(TurretSubsystem.INSTANCE, IntakeSortingSubsystem.INSTANCE, MecDriveSubsystem.INSTANCE, BetterVisionTM.INSTANCE),
-                BulkReadComponent.INSTANCE
+                BulkReadComponent.INSTANCE,
+                BindingsComponent.INSTANCE
         ); //Subsystems
     }
 
     public static Pose startPose = new Pose(72, 72, Math.toRadians(90));
+
     private boolean turretForward = true;
 
     ElapsedTime loopTimer = new ElapsedTime();
 
-
+    //CommandManager manager;
 
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
+        pattern = new ArrayList<>(List.of(null, null, null));
+        patternFull = false;
+
+        if(MecDriveSubsystem.INSTANCE.getFollower().getPose().roughlyEquals(new Pose(0, 0), 5)){
+            MecDriveSubsystem.INSTANCE.setPose(startPose);
+        }
+
+
+        //manager = CommandManager.INSTANCE;
     }
 
     @Override
@@ -96,10 +102,9 @@ public class NextFTCTeleop extends NextFTCOpMode {
         MecDriveSubsystem.INSTANCE.getFollower().setPose(startPose);
         TurretSubsystem.INSTANCE.setTargetVelocityTicks(0);
         MecDriveSubsystem.INSTANCE.startTele();
-        createBindings();
+        //createBindings();
     }
 
-    //TODO: Move to assigned gamepads via NextFTC - faster
     //TODO: Consider creating 'Robot' subsystem group for... something?
 
     @Override
@@ -110,42 +115,43 @@ public class NextFTCTeleop extends NextFTCOpMode {
         isSlowed = gamepad1.left_bumper;
 
         //Spin active forward
-//        if (gamepad1.right_trigger > 0) {
-//            intake.forwardIntake();
-//            intake.enableActive();
-//        } //Reverse Active and Spin
-//        else if (gamepad1.left_trigger > 0) {
-//            intake.reverseIntake();
-//            intake.enableActive();
-//        }
-//        else {
-//            intake.disableActive();
-//        }
+        if (gamepad1.right_trigger > 0) {
+            IntakeSortingSubsystem.INSTANCE.forwardIntake();
+        } //Reverse Active and Spin
+        else if (gamepad1.left_trigger > 0) {
+            IntakeSortingSubsystem.INSTANCE.reverseIntake();
+        }
+        else {
+            IntakeSortingSubsystem.INSTANCE.disableActive();
+        }
 
-//        if(gamepad1.a){
-//            turret.setMotorPower(.6);
-//        }
-//
-//        if(gamepad1.b){
-//            turret.setMotorPower(0);
-//        }
-//
-//        if(gamepad1.x){
-//            turret.setMotorPower(1);
-//        }
+        if(gamepad1.a){
+            TurretSubsystem.INSTANCE.setMotorPower(.6);
+        }
 
-//        if(gamepad1.dpad_left){enableRumble = true;}
-//        if(gamepad1.dpad_right){enableRumble = false;}
-//        if(gamepad1.dpad_up){turretForward = true;}
-//        if(gamepad1.dpad_down){turretForward = false;}
+        if(gamepad1.b){
+            TurretSubsystem.INSTANCE.setMotorPower(0);
+        }
 
-        //Able to switch between driver and robot centric
-//        if(gamepad1.y && driverTimer.getTimeSeconds() > .5){
-//            botCentric = !botCentric;
-//            driverTimer.reset();
-//        }
+        if(gamepad1.x){
+            TurretSubsystem.INSTANCE.setMotorPower(1);
+        }
 
+        if(gamepad1.dpad_left){enableRumble = true;}
+        if(gamepad1.dpad_right){enableRumble = false;}
+        if(gamepad1.dpad_up){turretForward = true;}
+        if(gamepad1.dpad_down){turretForward = false;}
 
+//        Able to switch between driver and robot centric
+        if(gamepad1.y && driverTimer.getTimeSeconds() > .5){
+            botCentric = !botCentric;
+            driverTimer.reset();
+        }
+
+        if(gamepad1.right_bumper && shootTimer.getTimeSeconds() > 5) {
+            IntakeSortingSubsystem.INSTANCE.shoot(pattern).schedule();
+            shootTimer.reset();
+        }
 
 
         if(IntakeSortingSubsystem.INSTANCE.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble){
@@ -160,7 +166,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
             patternFull = true;
         }
 
-        //TODO: Look into manual MegaTag2 for relocalization for odo. think it requires limelight :/
+
         //TODO: Still have to integrate look up table or linreg for power as a function of distance
 
 
@@ -172,20 +178,16 @@ public class NextFTCTeleop extends NextFTCOpMode {
         );
 
         //Turret will auto-aim at goal :)
-        distanceToGoalInMeters = MecDriveSubsystem.INSTANCE.updateDistanceAndAngle(); //Needed for power interpolation when implemented
-        deltaAngle = MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle();
-        TurretSubsystem.INSTANCE.setTargetAngle(turretForward ? 0 : -deltaAngle); //Works when negative
-
-
-
-
+        distanceToGoalInMeters = MecDriveSubsystem.INSTANCE.getDistanceToGoal(); //Needed for power interpolation when implemented
+        TurretSubsystem.INSTANCE.setTargetAngle(turretForward ? 0 : -MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle()); //Works when negative
 
 
 
         joinedTelemetry.addData("Loop Time (ms) ", loopTimer.milliseconds());
-        joinedTelemetry.addData("Bot Centric ", botCentric);
-        joinedTelemetry.addData("Pattern ", pattern);
-        joinedTelemetry.addData("Current Commands ", CommandManager.INSTANCE.snapshot());
+        joinedTelemetry.addData("Bot Centric: ", botCentric);
+        joinedTelemetry.addData("Pattern: ", pattern);
+        joinedTelemetry.addData("Turret Forward: ", turretForward);
+        joinedTelemetry.addData("Current Commands: ", CommandManager.INSTANCE.snapshot());
         for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
             slot.sendTelemetry(UniConstants.loggingState.ENABLED);
         }
@@ -198,16 +200,16 @@ public class NextFTCTeleop extends NextFTCOpMode {
     void createBindings(){
 
         //Disable active when triggers not held down
-        Gamepads.gamepad1().rightTrigger().atMost(0).and(Gamepads.gamepad1().leftTrigger().atMost(0)).whenFalse(IntakeSortingSubsystem.INSTANCE::disableActive);
+        Gamepads.gamepad1().rightTrigger().atMost(.1).and(Gamepads.gamepad1().leftTrigger().atMost(.1)).whenFalse(IntakeSortingSubsystem.INSTANCE::disableActive);
 
         //Run active in direction based on trigger
-        Gamepads.gamepad1().rightTrigger().greaterThan(0).whenBecomesTrue(
+        Gamepads.gamepad1().rightTrigger().greaterThan(0).whenTrue(
                 () -> {
                     IntakeSortingSubsystem.INSTANCE.enableActive();
                     IntakeSortingSubsystem.INSTANCE.forwardIntake();
                 });
 
-        Gamepads.gamepad1().leftTrigger().greaterThan(0).whenBecomesTrue(
+        Gamepads.gamepad1().leftTrigger().greaterThan(0).whenTrue(
                 () -> {
                     IntakeSortingSubsystem.INSTANCE.enableActive();
                     IntakeSortingSubsystem.INSTANCE.reverseIntake();
