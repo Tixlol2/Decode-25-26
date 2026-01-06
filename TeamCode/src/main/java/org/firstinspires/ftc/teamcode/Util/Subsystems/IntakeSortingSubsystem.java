@@ -8,7 +8,6 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -38,6 +37,8 @@ public class IntakeSortingSubsystem implements Subsystem {
     MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
     public static UniConstants.servoState state = UniConstants.servoState.DOWN;
 
+    public ArrayList<UniConstants.slotState> shotHistory = new ArrayList<>();
+
     public static Slot backSlot;
     public static Slot rightSlot;
     public static Slot leftSlot;
@@ -55,6 +56,8 @@ public class IntakeSortingSubsystem implements Subsystem {
         leftSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_LEFT_STRING, UniConstants.COLOR_SENSOR_SLOT_LEFT_STRING, UniConstants.LIGHT_LEFT_STRING, telemetry);
 
         slots = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
+
+
     }
 
 
@@ -112,124 +115,200 @@ public class IntakeSortingSubsystem implements Subsystem {
         return new InstantCommand(() -> {slot.setTargetPosition(state);}).named(slot.name + " Set Servo State");
     }
 
-    public Command launchInPattern(Slot first, Slot second, Slot third){
-        return new SequentialGroup(
-                setServoState(first, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(first, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
-                setServoState(second, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(second, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
-                setServoState(third, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(third, UniConstants.servoState.DOWN)
-        );
-    }
-
-
-    //BANGGGGGGGGGGG
+    /**
+     * Two-phase adaptive shooting: Launch current balls, then rescan and launch any that shifted in
+     * Uses proper command scheduling - NO blocking calls
+     * Tracks shot history in shotHistory ArrayList
+     *
+     * Replace your existing shoot() method with this complete implementation
+     */
     public Command shoot(@NonNull ArrayList<UniConstants.slotState> pattern){
-        Slot first = null;
-        Slot second = null;
-        Slot third = null;
-        boolean[] slotUsed = new boolean[3];
+        return new SequentialGroup(
+                // Phase 1: Launch all currently detected balls
+                createInitialLaunchCommand(pattern),
 
-        UniConstants.slotState p0 = pattern.get(0);
-        UniConstants.slotState p1 = pattern.get(1);
-        UniConstants.slotState p2 = pattern.get(2);
+                // Small delay to let mechanical system settle
+                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
 
-        // Fast path: check if we can make the exact pattern
-        boolean canMakePattern = false;
-
-        int matches = 0;
-        boolean[] tempUsed = new boolean[3];
-
-        // unrolled loop for pattern check - faster than nested loops
-
-
-        // try to match first pattern position
-        if(slots.get(0).getColorState().equals(p0)){ tempUsed[0] = true; matches++; }
-        else if(slots.get(1).getColorState().equals(p0)){ tempUsed[1] = true; matches++; }
-        else if(slots.get(2).getColorState().equals(p0)){ tempUsed[2] = true; matches++; }
-
-        // try to match second pattern position
-        if(!tempUsed[0] && slots.get(0).getColorState().equals(p1)){ tempUsed[0] = true; matches++; }
-        else if(!tempUsed[1] && slots.get(1).getColorState().equals(p1)){ tempUsed[1] = true; matches++; }
-        else if(!tempUsed[2] && slots.get(2).getColorState().equals(p1)){ tempUsed[2] = true; matches++; }
-
-        // try to match third pattern position
-        if(!tempUsed[0] && slots.get(0).getColorState().equals(p2)){ tempUsed[0] = true; matches++; }
-        else if(!tempUsed[1] && slots.get(1).getColorState().equals(p2)){ tempUsed[1] = true; matches++; }
-        else if(!tempUsed[2] && slots.get(2).getColorState().equals(p2)){ tempUsed[2] = true; matches++; }
-
-        canMakePattern = (matches == 3);
-
-
-        if(canMakePattern){
-            // build exact pattern - unrolled for speed
-
-            // match first position
-            if(slots.get(0).getColorState().equals(p0)){ first = slots.get(0); slotUsed[0] = true; }
-            else if(slots.get(1).getColorState().equals(p0)){ first = slots.get(1); slotUsed[1] = true; }
-            else if(slots.get(2).getColorState().equals(p0)){ first = slots.get(2); slotUsed[2] = true; }
-
-            // match second position
-            if(!slotUsed[0] && slots.get(0).getColorState().equals(p1)){ second = slots.get(0); slotUsed[0] = true; }
-            else if(!slotUsed[1] && slots.get(1).getColorState().equals(p1)){ second = slots.get(1); slotUsed[1] = true; }
-            else if(!slotUsed[2] && slots.get(2).getColorState().equals(p1)){ second = slots.get(2); slotUsed[2] = true; }
-
-            // match third position
-            if(!slotUsed[0] && slots.get(0).getColorState().equals(p2)){ third = slots.get(0); slotUsed[0] = true; }
-            else if(!slotUsed[1] && slots.get(1).getColorState().equals(p2)){ third = slots.get(1); slotUsed[1] = true; }
-            else if(!slotUsed[2] && slots.get(2).getColorState().equals(p2)){ third = slots.get(2); slotUsed[2] = true; }
-        }
-        else {
-            // fallback: prioritize full slots
-            boolean slot0Full = slots.get(0).isFull();
-            boolean slot1Full = slots.get(1).isFull();
-            boolean slot2Full = slots.get(2).isFull();
-
-            // special case: only back is full
-            if(slot0Full && !slot1Full && !slot2Full){
-                first = slots.get(0);
-                slotUsed[0] = true;
-            } else {
-                // prefer right/left for first position
-                if(slot1Full){ first = rightSlot; slotUsed[1] = true; }
-                else if(slot2Full){ first = leftSlot; slotUsed[2] = true; }
-            }
-
-            // fill remaining with any full slots
-            if(second == null && !slotUsed[0] && slot0Full){ second = slots.get(0); slotUsed[0] = true; }
-            else if(second == null && !slotUsed[1] && slot1Full){ second = slots.get(1); slotUsed[1] = true; }
-            else if(second == null && !slotUsed[2] && slot2Full){ second = slots.get(2); slotUsed[2] = true; }
-
-            if(third == null && !slotUsed[0] && slot0Full){ third = slots.get(0); slotUsed[0] = true; }
-            else if(third == null && !slotUsed[1] && slot1Full){ third = slots.get(1); slotUsed[1] = true; }
-            else if(third == null && !slotUsed[2] && slot2Full){ third = slots.get(2); slotUsed[2] = true; }
-
-            // fill nulls with defaults: right -> left -> back
-            if(first == null){
-                if(rightSlot != second && rightSlot != third) first = rightSlot;
-                else if(leftSlot != second && leftSlot != third) first = leftSlot;
-                else first = rightSlot;
-            }
-            if(second == null){
-                if(rightSlot != first && rightSlot != third) second = rightSlot;
-                else if(leftSlot != first && leftSlot != third) second = leftSlot;
-                else second = backSlot;
-            }
-            if(third == null){
-                if(rightSlot != first && rightSlot != second) third = rightSlot;
-                else if(leftSlot != first && leftSlot != second) third = leftSlot;
-                else third = backSlot;
-            }
-        }
-
-        return launchInPattern(first, second, third);
+                // Phase 2: Rescan and launch any new balls that appeared
+                createRescanLaunchCommand()
+        ).named("Adaptive Shoot");
     }
+
+    /**
+     * Phase 1: Determine and launch initial balls
+     */
+    private Command createInitialLaunchCommand(ArrayList<UniConstants.slotState> pattern){
+        return new LambdaCommand()
+                .setStart(() -> {
+                    // Read current state
+                    UniConstants.slotState s0 = slots.get(0).getColorState();
+                    UniConstants.slotState s1 = slots.get(1).getColorState();
+                    UniConstants.slotState s2 = slots.get(2).getColorState();
+
+                    boolean s0Full = s0 != UniConstants.slotState.EMPTY;
+                    boolean s1Full = s1 != UniConstants.slotState.EMPTY;
+                    boolean s2Full = s2 != UniConstants.slotState.EMPTY;
+
+                    ArrayList<Slot> toLaunch = new ArrayList<>(3);
+                    boolean[] used = new boolean[3];
+
+                    // Try to match pattern
+                    if(pattern.size() >= 3){
+                        UniConstants.slotState p0 = pattern.get(0);
+                        UniConstants.slotState p1 = pattern.get(1);
+                        UniConstants.slotState p2 = pattern.get(2);
+
+                        // Check if we can make exact pattern
+                        int matches = 0;
+                        boolean[] temp = new boolean[3];
+
+                        if(s0.equals(p0)){ temp[0] = true; matches++; }
+                        else if(s1.equals(p0)){ temp[1] = true; matches++; }
+                        else if(s2.equals(p0)){ temp[2] = true; matches++; }
+
+                        if(!temp[0] && s0.equals(p1)){ temp[0] = true; matches++; }
+                        else if(!temp[1] && s1.equals(p1)){ temp[1] = true; matches++; }
+                        else if(!temp[2] && s2.equals(p1)){ temp[2] = true; matches++; }
+
+                        if(!temp[0] && s0.equals(p2)){ temp[0] = true; matches++; }
+                        else if(!temp[1] && s1.equals(p2)){ temp[1] = true; matches++; }
+                        else if(!temp[2] && s2.equals(p2)){ temp[2] = true; matches++; }
+
+                        if(matches == 3){
+                            // Build exact pattern
+                            if(s0.equals(p0)){ toLaunch.add(backSlot); used[0] = true; }
+                            else if(s1.equals(p0)){ toLaunch.add(rightSlot); used[1] = true; }
+                            else if(s2.equals(p0)){ toLaunch.add(leftSlot); used[2] = true; }
+
+                            if(!used[0] && s0.equals(p1)){ toLaunch.add(backSlot); used[0] = true; }
+                            else if(!used[1] && s1.equals(p1)){ toLaunch.add(rightSlot); used[1] = true; }
+                            else if(!used[2] && s2.equals(p1)){ toLaunch.add(leftSlot); used[2] = true; }
+
+                            if(!used[0] && s0.equals(p2)){ toLaunch.add(backSlot); used[0] = true; }
+                            else if(!used[1] && s1.equals(p2)){ toLaunch.add(rightSlot); used[1] = true; }
+                            else if(!used[2] && s2.equals(p2)){ toLaunch.add(leftSlot); used[2] = true; }
+                        }
+                    }
+
+                    // If pattern failed or not enough matches, just launch all full slots
+                    if(toLaunch.isEmpty()){
+                        // Prioritize right/left over back for first position
+                        boolean onlyBackFull = s0Full && !s1Full && !s2Full;
+
+                        if(onlyBackFull){
+                            toLaunch.add(backSlot);
+                            used[0] = true;
+                        } else {
+                            if(s1Full){ toLaunch.add(rightSlot); used[1] = true; }
+                            else if(s2Full){ toLaunch.add(leftSlot); used[2] = true; }
+                        }
+
+                        if(!used[0] && s0Full) toLaunch.add(backSlot);
+                        if(!used[1] && s1Full) toLaunch.add(rightSlot);
+                        if(!used[2] && s2Full) toLaunch.add(leftSlot);
+                    }
+
+                    // Schedule the batch launch
+                    if(!toLaunch.isEmpty()){
+                        batchLaunch(toLaunch.toArray(new Slot[0])).schedule();
+                    }
+                })
+                .setIsDone(() -> true)
+                .named("Initial Launch");
+    }
+
+    /**
+     * Phase 2: Rescan for any balls that shifted in during phase 1
+     */
+    private Command createRescanLaunchCommand(){
+        return new LambdaCommand()
+                .setStart(() -> {
+                    // Rescan all slots
+                    ArrayList<Slot> remainingBalls = new ArrayList<>();
+
+                    if(slots.get(0).isFull()) remainingBalls.add(backSlot);
+                    if(slots.get(1).isFull()) remainingBalls.add(rightSlot);
+                    if(slots.get(2).isFull()) remainingBalls.add(leftSlot);
+
+                    // Launch any balls found
+                    if(!remainingBalls.isEmpty()){
+                        batchLaunch(remainingBalls.toArray(new Slot[0])).schedule();
+                    }
+                })
+                .setIsDone(() -> true)
+                .named("Rescan Launch");
+    }
+
+    /**
+     * Launches multiple slots in sequence with real-time verification
+     * Records each successful launch to shotHistory
+     */
+    private Command batchLaunch(Slot[] slotsToLaunch){
+        if(slotsToLaunch.length == 0){
+            return new InstantCommand(() -> {});
+        }
+
+        // Build dynamic command sequence
+        ArrayList<Command> commands = new ArrayList<>();
+
+        for(int i = 0; i < slotsToLaunch.length; i++){
+            final Slot slot = slotsToLaunch[i];
+
+            // Verify and launch, record to history if successful
+            commands.add(new LambdaCommand()
+                    .setStart(() -> {
+                        if(slot.isFull()){
+                            UniConstants.slotState colorShot = slot.getColorState();
+                            slot.setTargetPosition(UniConstants.servoState.UP);
+                            // Add to shot history
+                            shotHistory.add(colorShot);
+                        }
+                    })
+                    .setIsDone(() -> true)
+                    .named(slot.name + " Up"));
+
+            commands.add(new Delay(UniConstants.FAST_FLICKER_TIME_UP));
+
+            commands.add(new InstantCommand(() ->
+                    slot.setTargetPosition(UniConstants.servoState.DOWN))
+                    .named(slot.name + " Down"));
+
+            // Add delay between shots (but not after last shot)
+            if(i < slotsToLaunch.length - 1){
+                commands.add(new Delay(UniConstants.FAST_FLICKER_TIME_DOWN));
+            }
+        }
+
+        return new SequentialGroup(commands.toArray(new Command[0]));
+    }
+
+
+    public void clearShotHistory(){
+        shotHistory.clear();
+    }
+
+
+    public int getPurpleCount(){
+        int count = 0;
+        for(UniConstants.slotState color : shotHistory){
+            if(color == UniConstants.slotState.PURPLE) count++;
+        }
+        return count;
+    }
+
+    public int getGreenCount(){
+        int count = 0;
+        for(UniConstants.slotState color : shotHistory){
+            if(color == UniConstants.slotState.GREEN) count++;
+        }
+        return count;
+    }
+
+
+
+
+
 
     public boolean allFull() {
         return backSlot.isFull() && rightSlot.isFull() && leftSlot.isFull();
@@ -249,6 +328,9 @@ public class IntakeSortingSubsystem implements Subsystem {
                 telemetry.addData("Intake Enabled ", isEnabled);
                 telemetry.addData("Intake Reversed ", isReversed);
                 telemetry.addData("All Full ", allFull());
+                telemetry.addData("Shot History ", shotHistory);
+                telemetry.addData("Purple Count ", getPurpleCount());
+                telemetry.addData("Green Count ", getGreenCount());
                 telemetry.addLine("END OF SORTING LOG");
                 telemetry.addLine();
                 break;
@@ -314,8 +396,6 @@ public class IntakeSortingSubsystem implements Subsystem {
                 up = UniConstants.FLICKER_RIGHT_UP; //Right up
                 down = UniConstants.FLICKER_RIGHT_DOWN; //Right down
             }
-
-
 
 
             //Update Colors
