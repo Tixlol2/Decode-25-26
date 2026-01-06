@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.ParallelGroup;
+import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
@@ -52,6 +53,7 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
         follower = MecDriveSubsystem.INSTANCE.getFollower();
         follower.setStartingPose(Poses.blueTopStart);
         paths = new CloseBluePaths(follower);
+        TurretSubsystem.INSTANCE.setMotorPower(0);
         NextFTCTeleop.patternFull = false;
     }
 
@@ -74,14 +76,16 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
         new SequentialGroup(
                 //Path 1: Shoot close preload
                 new SequentialGroup(
-                        TurretSubsystem.INSTANCE.SetMotorPower(.67),
+                        TurretSubsystem.INSTANCE.SetMotorPower(.7),
                         AimForward(),
                         new ParallelGroup(
-                            new Delay(2.5),
+                            new Delay(3),
                             MecDriveSubsystem.INSTANCE.FollowPath(paths.Path1, true)
                                 ),
-                        IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern)
-                        ),
+                        new ParallelGroup(
+                        IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern),
+                                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path12, true, .125)
+                        )),
                 ChangePath(),
                 //Path 2: Prepare to intake
                 MecDriveSubsystem.INSTANCE.FollowPath(paths.Path2, false),
@@ -89,28 +93,30 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
                 //Path 3: Intake and hit lever
                 new SequentialGroup(
                         IntakeSortingSubsystem.INSTANCE.runActive(),
-                        MecDriveSubsystem.INSTANCE.FollowPathTime(paths.Path3, true, .85, 2),
+                        MecDriveSubsystem.INSTANCE.FollowPathTime(paths.Path3, true, .65, 2),
                         AimObelisk()
                 ),
                 ChangePath(),
 
                 //Path 4: Shoot
                 new SequentialGroup(
+                        AimGoal(),
                         MecDriveSubsystem.INSTANCE.FollowPath(paths.Path4, true),
                         new Delay(.5),
-                        AimGoal(),
-                        new Delay(.25),
-                        IntakeSortingSubsystem.INSTANCE.stopActive(),
-                        IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern)
+
+                                IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern),
+                                //MecDriveSubsystem.INSTANCE.FollowPath(paths.Path13, false, .125)
+
+                        IntakeSortingSubsystem.INSTANCE.stopActive()
                         ),
                 //Path 5: Prepare to intake
                 MecDriveSubsystem.INSTANCE.FollowPath(paths.Path5, false),
-                AimForward(),
+                //AimForward(),
                 ChangePath(),
                 //Path 6: Intake
                 new ParallelGroup(
                         IntakeSortingSubsystem.INSTANCE.runActive(),
-                        MecDriveSubsystem.INSTANCE.FollowPath(paths.Path6, false, .925)
+                        MecDriveSubsystem.INSTANCE.FollowPath(paths.Path6, false)
                 ),
                 ChangePath(),
                 //Path 7: Shoot
@@ -118,7 +124,10 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
                         MecDriveSubsystem.INSTANCE.FollowPath(paths.Path7, true),
                         new Delay(.25),
                         IntakeSortingSubsystem.INSTANCE.stopActive(),
-                        IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern)
+                        new ParallelGroup(
+                                IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern),
+                                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path12, true, .125)
+                        )
                 ),
                 //Path 8: Prepare to intake
                 MecDriveSubsystem.INSTANCE.FollowPath(paths.Path8, false),
@@ -126,7 +135,7 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
                 //Path 9: Intake
                 new ParallelGroup(
                         IntakeSortingSubsystem.INSTANCE.runActive(),
-                        MecDriveSubsystem.INSTANCE.FollowPath(paths.Path9, false, .925)
+                        MecDriveSubsystem.INSTANCE.FollowPath(paths.Path9, false, .8)
                 ),
                 ChangePath(),
                 //Path 10: Shoot
@@ -134,7 +143,10 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
                         MecDriveSubsystem.INSTANCE.FollowPath(paths.Path10, true),
                         new Delay(.25),
                         IntakeSortingSubsystem.INSTANCE.stopActive(),
-                        IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern)
+                        new ParallelGroup(
+                                IntakeSortingSubsystem.INSTANCE.shoot(NextFTCTeleop.pattern),
+                                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path12, true, .125)
+                        )
                 ),
                 //Path 11: Park
                 new ParallelGroup(
@@ -161,6 +173,10 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
         joinedTelemetry.addData("Path State: ", pathState);
         //joinedTelemetry.addData("Current Commands: ", CommandManager.INSTANCE.snapshot());
         MecDriveSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
+        for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
+            joinedTelemetry.addData(slot.getName()+" Color: ", slot.getColorState());
+        }
+        //joinedTelemetry.addData("Shot History: ", IntakeSortingSubsystem.INSTANCE.shotHistory);
 
         joinedTelemetry.update();
         follower.update();
@@ -182,8 +198,8 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
     public Command StopSubsystems(){
         return new ParallelGroup(
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
-                TurretSubsystem.INSTANCE.SetMotorPower(0),
-                new InstantCommand(() -> turretForward = false)
+                //TurretSubsystem.INSTANCE.SetMotorPower(0),
+                AimForward()
         );
     }
 
