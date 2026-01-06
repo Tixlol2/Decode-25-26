@@ -13,6 +13,7 @@ public class Poses {
 
 
     public static Pose blueTopStart = new Pose(22, 124, Math.toRadians(144));
+    public static Pose blueShortScore = new Pose(48, 108);
 
     public static Pose obelisk = new Pose(72,148);
 
