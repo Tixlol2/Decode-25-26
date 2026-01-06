@@ -13,11 +13,7 @@ import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
@@ -97,7 +93,7 @@ public class CloseBlueAutoTrue extends NextFTCOpMode {
                         AimObelisk()
                 ),
                 ChangePath(),
-                //Consider putting turret grabbing AprilTag here, as this would be best for it
+
                 //Path 4: Shoot
                 new SequentialGroup(
                         MecDriveSubsystem.INSTANCE.FollowPath(paths.Path4, true),
