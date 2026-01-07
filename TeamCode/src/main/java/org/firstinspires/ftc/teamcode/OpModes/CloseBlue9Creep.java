@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.OpModes.AutonUtil.CloseBlue9Paths;
@@ -17,6 +18,7 @@ import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
@@ -44,7 +46,7 @@ public class CloseBlue9Creep extends NextFTCOpMode {
 
     @Override
     public void onInit(){
-        joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
+        joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         paths = new CloseBlue9Paths(MecDriveSubsystem.INSTANCE.getFollower());
     }
 

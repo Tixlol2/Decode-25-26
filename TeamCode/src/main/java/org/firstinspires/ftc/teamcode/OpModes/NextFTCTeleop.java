@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
@@ -58,7 +60,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     @Override
     public void onInit() {
-        joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
+        joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
 
 
         Robot.inTeleop = true;
