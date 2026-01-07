@@ -4,6 +4,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.OpModes.AutonUtil.CloseBluePaths;
 import org.firstinspires.ftc.teamcode.Util.Poses;
@@ -22,6 +23,7 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
+@Disabled
 @Autonomous(name = "12 Ball Blue Close", group = "Main")
 public class CloseBlueAutoTrue extends NextFTCOpMode {
     {

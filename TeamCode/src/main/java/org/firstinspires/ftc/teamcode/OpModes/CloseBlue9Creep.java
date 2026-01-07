@@ -4,6 +4,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.OpModes.AutonUtil.CloseBlue9Paths;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
@@ -19,8 +20,8 @@ import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@Autonomous(name = "9 Ball Blue Close", group = "Main")
-public class CloseBlue9 extends NextFTCOpMode {
+@Autonomous(name = "9 Ball Blue Close Creep", group = "Main")
+public class CloseBlue9Creep extends NextFTCOpMode {
     {
         addComponents(
                 new SubsystemComponent(Robot.INSTANCE),
@@ -65,28 +66,31 @@ public class CloseBlue9 extends NextFTCOpMode {
     public void onStartButtonPressed(){
 
         new SequentialGroup(
-                TurretSubsystem.INSTANCE.SetMotorPower(.65),
-                Robot.INSTANCE.TurretObelisk(),
-                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path1, true),
+                new ParallelGroup(
+                    TurretSubsystem.INSTANCE.SetMotorPower(.65),
+                    Robot.INSTANCE.TurretObelisk(),
+                    MecDriveSubsystem.INSTANCE.FollowPath(paths.ScanAndShoot, true)
+                ),
                 Robot.INSTANCE.FaceGoal(),
                 Robot.INSTANCE.ShootCreep(creepDistance, .5),
 
-                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path2, false),
+                MecDriveSubsystem.INSTANCE.FollowPath(paths.MoveToActive1, false),
 
-                Robot.INSTANCE.FollowPathActive(paths.Path3, false, .85),
+                Robot.INSTANCE.FollowPathActive(paths.Active1, false, .85),
 
-                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path4, true),
+                MecDriveSubsystem.INSTANCE.FollowPath(paths.Shoot2, true),
                 Robot.INSTANCE.ShootCreep(creepDistance, .5),
 
-                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path5, false),
+                IntakeSortingSubsystem.INSTANCE.stopActive(),
+                MecDriveSubsystem.INSTANCE.FollowPath(paths.MovetoActive2, false),
 
-                Robot.INSTANCE.FollowPathActive(paths.Path6, false, .85),
+                Robot.INSTANCE.FollowPathActive(paths.Active2, false, .85),
 
-                MecDriveSubsystem.INSTANCE.FollowPath(paths.Path7, true),
+                MecDriveSubsystem.INSTANCE.FollowPath(paths.Shoot3, true),
                 Robot.INSTANCE.ShootCreep(creepDistance, .5),
 
                 new ParallelGroup(
-                    MecDriveSubsystem.INSTANCE.FollowPath(paths.Path8, true),
+                        MecDriveSubsystem.INSTANCE.FollowPath(paths.Park, true),
                         Robot.INSTANCE.StopSubsystems()
                 )
         ).schedule();

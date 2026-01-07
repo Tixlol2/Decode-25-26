@@ -8,6 +8,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.commands.utility.NullCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
@@ -110,12 +112,12 @@ public class IntakeSortingSubsystem implements Subsystem {
         return new InstantCommand(() -> {slot.setTargetPosition(state);}).named(slot.name + " Set Servo State");
     }
 
-    public Command Shoot(Slot slot){
+    public Command Shoot(Slot slot, boolean isLast){
         return new SequentialGroup(
                 setServoState(slot, UniConstants.servoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
                 setServoState(slot, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)
+                new IfElseCommand(() -> isLast, new NullCommand(), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN))
         );
     }
 

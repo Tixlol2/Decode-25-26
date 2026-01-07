@@ -98,22 +98,22 @@ public class Robot extends SubsystemGroup {
         ArrayList<IntakeSortingSubsystem.Slot> order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
         return new SequentialGroup(
                 FaceGoal(),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0)),
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
                 MecDriveSubsystem.INSTANCE.PushForward(maxPower, distanceCreepInches, false),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1)),
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
                 MecDriveSubsystem.INSTANCE.PushForward(maxPower, distanceCreepInches, false),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2))
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), false)
         );
     }
 
     public Command ShootWait(double waitTime){
         ArrayList<IntakeSortingSubsystem.Slot> order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
         return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0)),
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
                 new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1)),
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
                 new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2))
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true)
                 );
     }
 
