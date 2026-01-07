@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpModes.Util;
+package org.firstinspires.ftc.teamcode.OpModes.AutonUtil;
 
 import android.util.Size;
 
@@ -89,16 +89,15 @@ public class VisionTesting extends OpMode {
 
     public ArrayList<UniConstants.slotState> obeliskTargetPattern(int ID) {
         switch (ID) {
-            case -1:
-                return new ArrayList<>(List.of(null, null, null));
             case 21:
                 return new ArrayList<>(List.of(UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE));
             case 22:
                 return new ArrayList<>(List.of(UniConstants.slotState.PURPLE, UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE));
             case 23:
                 return new ArrayList<>(List.of(UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE, UniConstants.slotState.GREEN));
+            default:
+                return new ArrayList<>(List.of(null, null, null));
         }
-        return null;
     }
 
     public String getPatternAsString(ArrayList<UniConstants.slotState> pattern){

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.constants;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -14,20 +15,21 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
+@Configurable
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10)
-            .forwardZeroPowerAcceleration(-39.759534962072166)
-            .lateralZeroPowerAcceleration(-61.780465880294116)
+            .forwardZeroPowerAcceleration(-44.27070972535246)
+            .lateralZeroPowerAcceleration(-66.75944463360159)
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
             .centripetalScaling(0.0003)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0, 0))
-            .headingPIDFCoefficients(new PIDFCoefficients(.7, 0, 0, 0.02))
+            .headingPIDFCoefficients(new PIDFCoefficients(.67, 0, 0, 0.0))
             .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(0.005, 0, 0.000, 0, 0)
+                    new FilteredPIDFCoefficients(0.005, 0, 0.000, 0.6, 0)
             );
 
     public static MecanumConstants driveConstants = new MecanumConstants()
@@ -39,8 +41,8 @@ public class Constants {
             .leftRearMotorDirection(UniConstants.DRIVE_BACK_LEFT_DIRECTION)
             .rightFrontMotorDirection(UniConstants.DRIVE_FRONT_RIGHT_DIRECTION)
             .rightRearMotorDirection(UniConstants.DRIVE_BACK_RIGHT_DIRECTION)
-            .xVelocity(62.728982760211615)
-            .yVelocity(50.884218230960876);
+            .xVelocity(61.17509496493602)
+            .yVelocity(50.46043047567052);
 
 
 
@@ -56,8 +58,8 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,
             500,
-            1.5,
-            1
+            1,
+            1.25
     );
 
     public static Follower createFollower(HardwareMap hardwareMap) {

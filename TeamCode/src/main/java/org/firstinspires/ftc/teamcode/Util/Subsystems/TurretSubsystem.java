@@ -1,0 +1,159 @@
+package org.firstinspires.ftc.teamcode.Util.Subsystems;
+
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.Util.PDFLController;
+import org.firstinspires.ftc.teamcode.Util.UniConstants;
+
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
+import dev.nextftc.hardware.impl.MotorEx;
+
+@Configurable
+public class TurretSubsystem implements Subsystem {
+    // put hardware, commands, etc here
+    JoinedTelemetry telemetry;
+
+    public static final TurretSubsystem INSTANCE = new TurretSubsystem();
+
+    MotorEx launcher = new MotorEx(UniConstants.LAUNCHER_STRING).floatMode();
+
+
+
+    public static int targetVelocity = 0;
+    public static ControlSystem launcherControl;
+//    public static double pLaunch = .00, iLaunch = 0, dLaunch = 0, fLaunch = 0, lLaunch = 0.01;
+//    private PDFLController launcherController = new PDFLController(pLaunch, dLaunch, fLaunch, lLaunch);
+    private double launcherCurrentVelo = 0;
+
+
+
+    MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).floatMode().zeroed().brakeMode();
+    public static double turretTargetAngle = 0;
+    private double heading = 0;
+    private double turretCurrentPos = 0;
+    public static double pTurret = 0.0025, dTurret = 0, lTurret = 0.125, fTurret = 0;
+    private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
+
+    private double motorPower = 0.0;
+
+    public static boolean debug = true;
+    public static double debugPower = 0;
+
+
+    public TurretSubsystem(){}
+
+
+
+    @Override
+    public void initialize() {
+        telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
+        init();
+    }
+
+    @Override
+    public void periodic() {
+        if(!ActiveOpMode.opModeInInit()) {
+            // Launcher control (this looks fine)
+            launcher.setPower(debugPower);
+
+            //Full turret control
+            turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
+            turretCurrentPos = turret.getCurrentPosition();
+            turretTargetAngle = Math.max(-65.0, Math.min(90, turretTargetAngle));
+            turretControl.setTarget(angleToTicks(turretTargetAngle));
+            turretControl.update(turretCurrentPos);
+            turret.setPower(turretControl.runPDFL(angleToTicks(0.5)));
+        }
+    }
+
+
+
+
+
+
+    public  double getTargetVelocity(double distanceToGoalInMeters) {
+        //https://www.desmos.com/calculator/yw7iis7m3w
+        //https://medium.com/@vikramaditya.nishant/programming-a-decode-shooter-4ab114dac01f
+        return Math.sqrt(
+                ((9.81) * (Math.pow(distanceToGoalInMeters, 2)))
+                        /
+                        (Math.pow(2 * (Math.cos(Math.toRadians(UniConstants.ANGLE_OF_LAUNCHER_IN_DEGREES))), 2) * ((distanceToGoalInMeters * Math.tan(Math.toRadians(UniConstants.ANGLE_OF_LAUNCHER_IN_DEGREES))) - UniConstants.HEIGHT_TO_GOAL_WITH_CLEARANCE_METERS))
+        );
+    }
+
+    public void setTargetVelocityTicks(int velo){
+        targetVelocity = velo;
+    }
+    public void setTargetVelocityRPM(int velo){
+        targetVelocity = (int) (velo / 2.1);
+    }
+
+    public void setMotorPower(double power){
+        debugPower = -Math.max(0, Math.min(1, power));
+    }
+
+    public void setTargetAngle(double angleDeg){
+        turretTargetAngle = angleDeg;
+    }
+
+    //Uses degrees
+    public double angleToTicks(double angle){
+        return angle * UniConstants.TURRET_TICKS_PER_DEGREE;
+    }
+
+    //Uses degrees
+    public double ticksToAngle(double ticks){
+        return (ticks / UniConstants.TURRET_TICKS_PER_DEGREE) % 360;
+    }
+
+    public double getCurrentVelocity(){
+        return launcher.getVelocity();
+    }
+
+    public void init(){
+        turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretCurrentPos = 0;
+        turretTargetAngle = 0;
+        targetVelocity = 0;
+        motorPower = 0;
+    }
+
+
+    public double getTurretTargetAngle(){
+        return turretTargetAngle;
+    }
+
+    public Command SetMotorPower(double power){
+        return new InstantCommand(() -> setMotorPower(power));
+    }
+
+    public void sendTelemetry(UniConstants.loggingState state){
+        switch(state){
+            case DISABLED:
+                break;
+            case ENABLED:
+                telemetry.addLine("START OF OUTTAKE LOG");
+                telemetry.addData("Current RPM ", launcher.getVelocity() * 2.1);
+                telemetry.addLine();
+                telemetry.addData("Turret Position Deg ", ticksToAngle(turretCurrentPos));
+                telemetry.addData("Turret Target Deg ", turretTargetAngle);
+                telemetry.addData("Motor Power: ", motorPower);
+                telemetry.addLine("END OF OUTTAKE LOG");
+                break;
+            case EXTREME:
+
+                telemetry.addLine("START OF OUTTAKE LOG");
+
+                telemetry.addLine("END OF OUTTAKE LOG");
+        }
+    }
+
+
+}

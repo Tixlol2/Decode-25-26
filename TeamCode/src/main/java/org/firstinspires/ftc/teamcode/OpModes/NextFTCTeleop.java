@@ -4,16 +4,27 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.BetterVisionTM;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
-import org.firstinspires.ftc.teamcode.Util.Subsystems.OuttakeSubsystem;
-import org.firstinspires.ftc.teamcode.Util.Subsystems.RotaryIntakeSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.components.BindingsComponent;
+import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
+import dev.nextftc.ftc.components.BulkReadComponent;
 
 
 //Written by Noah Nottingham - 6566 Circuit Breakers
@@ -22,40 +33,53 @@ import dev.nextftc.ftc.NextFTCOpMode;
 @Configurable
 public class NextFTCTeleop extends NextFTCOpMode {
 
-    {
-        addComponents(); //Subsystems
-    }
+    public static UniConstants.teamColor color = UniConstants.teamColor.BLUE;
 
-    UniConstants.teamColor color = UniConstants.teamColor.BLUE;
+    private boolean isSlowed = false;
 
-    static boolean isSlowed = false;
+    private double distanceToGoalInMeters = 0.0;
 
-    static double distanceToGoalInMeters = 0.0;
 
     public static UniConstants.loggingState logState = UniConstants.loggingState.ENABLED;
 
     JoinedTelemetry joinedTelemetry;
+    private boolean botCentric = true;
 
-    Timer rotaryTimer = new Timer();
+    public static boolean patternFull = false;
+    public static ArrayList<UniConstants.slotState> pattern = new ArrayList<>(Arrays.asList(null,null,null));
+    private boolean enableRumble = false;
 
+    Timer driverTimer = new Timer();
+    Timer shootTimer = new Timer();
+    Timer rumblingTimer = new Timer();
 
-    //All different subsystems
-    private static BetterVisionTM vision;
-    private static RotaryIntakeSubsystem rotaryIntake;
-    private static OuttakeSubsystem outtake;
-    private static MecDriveSubsystem mecDrive;
+    {
+        addComponents(
+                new SubsystemComponent(TurretSubsystem.INSTANCE, IntakeSortingSubsystem.INSTANCE, MecDriveSubsystem.INSTANCE, BetterVisionTM.INSTANCE),
+                BulkReadComponent.INSTANCE,
+                BindingsComponent.INSTANCE
+        ); //Subsystems
+    }
 
-    Timer turnTimer = new Timer();
+    public static Pose startPose = Poses.blueTopStart;
+
+    private boolean turretForward = true;
+
+    ElapsedTime loopTimer = new ElapsedTime();
+
+    //CommandManager manager;
 
     @Override
     public void onInit() {
         joinedTelemetry = new JoinedTelemetry(telemetry, PanelsTelemetry.INSTANCE.getFtcTelemetry());
-//        vision = new BetterVisionTM(hardwareMap, joinedTelemetry, logState);
-        rotaryIntake = new RotaryIntakeSubsystem(hardwareMap, joinedTelemetry, color);
-        outtake = new OuttakeSubsystem(hardwareMap, joinedTelemetry, color);
-        mecDrive = new MecDriveSubsystem(hardwareMap, joinedTelemetry, color);
-        //mecDrive.resetPinpoint();
-        outtake.resetMotors();
+
+        if(MecDriveSubsystem.INSTANCE.getFollower().getPose().roughlyEquals(new Pose(0, 0), 5)){
+            MecDriveSubsystem.INSTANCE.setPose(startPose);
+        }
+
+        patternFull = !pattern.contains(null);
+
+        //manager = CommandManager.INSTANCE;
     }
 
     @Override
@@ -67,7 +91,7 @@ public class NextFTCTeleop extends NextFTCOpMode {
         }
 
         joinedTelemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
-        joinedTelemetry.addLine("B for Blue, A for Red ");
+        joinedTelemetry.addLine("Circle for Blue, X for Red ");
         joinedTelemetry.addData("Current Team Color ", color);
         joinedTelemetry.update();
     }
@@ -75,95 +99,140 @@ public class NextFTCTeleop extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-
-        rotaryIntake.setColor(color);
-        outtake.setColor(color);
-        outtake.setTurretTargetAngle(0);
-        mecDrive.setColor(color);
-        mecDrive.startTele();
-        rotaryIntake.toggleServo(RotaryIntakeSubsystem.servoState.INTAKE);
-//        mecDrive.setPose(new Pose(72, 72, Math.toRadians(90)));
-
-
+        MecDriveSubsystem.INSTANCE.getFollower().setPose(startPose);
+        TurretSubsystem.INSTANCE.setTargetVelocityTicks(0);
+        MecDriveSubsystem.INSTANCE.startTele();
+        //createBindings();
     }
+
+    //TODO: Consider creating 'Robot' subsystem group for... something?
 
     @Override
     public void onUpdate() {
 
+        loopTimer.reset();
+
         isSlowed = gamepad1.left_bumper;
 
-        //Spin active forward, if the front slot is full, move to the next one.
+        //Spin active forward
         if (gamepad1.right_trigger > 0) {
-            rotaryIntake.forwardIntake();
-            rotaryIntake.enableActive();
+            IntakeSortingSubsystem.INSTANCE.forwardIntake();
         } //Reverse Active and Spin
         else if (gamepad1.left_trigger > 0) {
-            rotaryIntake.reverseIntake();
-            rotaryIntake.enableActive();
+            IntakeSortingSubsystem.INSTANCE.reverseIntake();
         }
         else {
-            rotaryIntake.disableActive();
+            IntakeSortingSubsystem.INSTANCE.disableActive();
         }
 
         if(gamepad1.a){
-            outtake.setLauncherTargetVelo(2200);
+            TurretSubsystem.INSTANCE.setMotorPower(.67);
         }
 
         if(gamepad1.b){
-            outtake.setLauncherTargetVelo(0);
-            outtake.setPower(0);
+            TurretSubsystem.INSTANCE.setMotorPower(0);
         }
 
-        if (gamepad1.right_bumper && rotaryTimer.getTimeSeconds() > .5) {
-            rotaryIntake.toggleServo();
-            rotaryTimer.reset();
+        if(gamepad1.x){
+            TurretSubsystem.INSTANCE.setMotorPower(1);
+        }
 
+        if(gamepad1.dpad_left){enableRumble = true;}
+        if(gamepad1.dpad_right){enableRumble = false;}
+        if(gamepad1.dpad_up){turretForward = true;}
+        if(gamepad1.dpad_down){turretForward = false;}
+
+        //Able to switch between driver and robot centric
+        if(gamepad1.y && driverTimer.getTimeSeconds() > .5){
+            botCentric = !botCentric;
+            driverTimer.reset();
+        }
+
+        if(gamepad1.right_bumper && shootTimer.getTimeSeconds() > 5) {
+            IntakeSortingSubsystem.INSTANCE.shoot(pattern).schedule();
+            shootTimer.reset();
         }
 
 
+        if(IntakeSortingSubsystem.INSTANCE.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble){
+            gamepad1.rumble(1000);
+            rumblingTimer.reset();
+        }
 
-
-
-        if(rotaryIntake.state == RotaryIntakeSubsystem.servoState.OUTTAKE){
-            gamepad1.rumble(250);
+        //If pattern hasn't been assigned yet
+        if(pattern.contains(null)){
+            pattern = BetterVisionTM.INSTANCE.getPattern();
         } else {
-            gamepad1.stopRumble();
+            patternFull = true;
         }
 
 
+        //TODO: Still have to integrate look up table or linreg for power as a function of distance
 
 
-
-
-        //Velocity should be constantly interpolated via apriltag localization data right? Heavy comp power
-        //Velocity should only be queried when ready to shoot.
-        //TODO: Generate linear regression to determine velocity for given positions
-        //Exit velocity will be a function of the power put into the motor (PDFL)
-
-        distanceToGoalInMeters = mecDrive.updateDistanceAndAngle();
-//            outtake.setLauncherTargetVelo(outtake.getTargetVelocity(distanceToGoalInMeters));
-//            outtake.setTurretTargetAngle(mecDrive.getCalculatedTurretAngle() - 90);
-
-
-        mecDrive.updateTeleop(
+        MecDriveSubsystem.INSTANCE.updateTeleop(
                 -gamepad1.left_stick_y * (isSlowed ? .25 : 1), //Forward/Backward
                 -gamepad1.left_stick_x * (isSlowed ? .25 : 1), //Left/Right Rotation
                 -gamepad1.right_stick_x * (isSlowed ? .25 : 1), //Left/Right Strafe
-                true
+                botCentric
         );
 
-        rotaryIntake.periodic(); //Updater for rotary + intake
-        outtake.periodic(); //updater for launcher and turret
-//        vision.periodic(); //updater for vision
-        mecDrive.periodic(); //updater for Mecanum drive and follower
+        //Turret will auto-aim at goal :)
+        distanceToGoalInMeters = MecDriveSubsystem.INSTANCE.getDistanceToGoal(); //Needed for power interpolation when implemented
+        TurretSubsystem.INSTANCE.setTargetAngle(turretForward ? 0 : -MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle()); //Works when negative
 
-//        rotaryIntake.sendTelemetry(logState);
-        outtake.sendTelemetry(logState);
-        mecDrive.sendTelemetry(logState);
-        telemetry.addData("Distance to Goal ", distanceToGoalInMeters);
-        telemetry.update();
 
+
+        joinedTelemetry.addData("Loop Time (ms) ", loopTimer.milliseconds());
+        joinedTelemetry.addData("Bot Centric: ", botCentric);
+        joinedTelemetry.addData("Pattern: ", pattern);
+        joinedTelemetry.addData("Turret Forward: ", turretForward);
+        joinedTelemetry.addData("Current Commands: ", CommandManager.INSTANCE.snapshot());
+        for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
+            slot.sendTelemetry(UniConstants.loggingState.ENABLED);
         }
+        TurretSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
+        MecDriveSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
+        joinedTelemetry.update();
+
+    }
+
+    void createBindings(){
+
+        //Disable active when triggers not held down
+        Gamepads.gamepad1().rightTrigger().atMost(.1).and(Gamepads.gamepad1().leftTrigger().atMost(.1)).whenFalse(IntakeSortingSubsystem.INSTANCE::disableActive);
+
+        //Run active in direction based on trigger
+        Gamepads.gamepad1().rightTrigger().greaterThan(0).whenTrue(
+                () -> {
+                    IntakeSortingSubsystem.INSTANCE.enableActive();
+                    IntakeSortingSubsystem.INSTANCE.forwardIntake();
+                });
+
+        Gamepads.gamepad1().leftTrigger().greaterThan(0).whenTrue(
+                () -> {
+                    IntakeSortingSubsystem.INSTANCE.enableActive();
+                    IntakeSortingSubsystem.INSTANCE.reverseIntake();
+                });
+
+        //Toggle things based on dpad
+        Gamepads.gamepad1().dpadUp().toggleOnBecomesTrue().whenBecomesTrue(() -> {turretForward = !turretForward;});
+        Gamepads.gamepad1().dpadLeft().toggleOnBecomesTrue().whenBecomesTrue(() -> {enableRumble = !enableRumble;});
+
+        //Face buttons
+        Gamepads.gamepad1().a().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(.6);});
+        Gamepads.gamepad1().b().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(0);});
+        Gamepads.gamepad1().x().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(1);});
+        Gamepads.gamepad1().y().toggleOnBecomesTrue().whenBecomesTrue(() -> {botCentric = !botCentric;});
+
+        //Shooting command
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(() -> {
+           IntakeSortingSubsystem.INSTANCE.shoot(pattern).schedule();
+        });
+
+
+
+    }
 
 
     }

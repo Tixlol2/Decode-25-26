@@ -12,7 +12,10 @@ import com.pedropathing.geometry.Pose;
 public class Poses {
 
 
-    public static Pose topStart = new Pose(20, 124, Math.toRadians(144));
+    public static Pose blueTopStart = new Pose(22, 124, Math.toRadians(144));
+    public static Pose blueShortScore = new Pose(48, 108);
+
+    public static Pose obelisk = new Pose(72,148);
 
     public static Pose blueGoal = new Pose(16, 132);
     public static Pose redGoal = new Pose(128, 132);
