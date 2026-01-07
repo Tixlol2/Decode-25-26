@@ -4,6 +4,7 @@ import android.util.Size;
 
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.sun.tools.javac.util.List;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 
+@Disabled
 @TeleOp(name = "Vision Testing", group = "Util")
 public class VisionTesting extends OpMode {
 

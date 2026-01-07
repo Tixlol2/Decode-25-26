@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -36,7 +35,7 @@ public class TurretSubsystem implements Subsystem {
 
     MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).floatMode().zeroed().brakeMode();
     public static double turretTargetAngle = 0;
-    private double heading = 0;
+
     private double turretCurrentPos = 0;
     public static double pTurret = 0.0025, dTurret = 0, lTurret = 0.125, fTurret = 0;
     private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
@@ -118,7 +117,6 @@ public class TurretSubsystem implements Subsystem {
     }
 
     public void init(){
-        turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretCurrentPos = 0;
         turretTargetAngle = 0;
         targetVelocity = 0;

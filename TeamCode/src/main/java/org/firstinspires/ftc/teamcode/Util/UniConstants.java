@@ -126,5 +126,10 @@ CONFIG
     public static  double FLICKER_LEFT_DOWN = .19;
     public static  double FLICKER_LEFT_UP = .62;
 
+    public static double ANGLE_BLUE_GOAL_DEGREES = 137;
+    public static double ANGLE_RED_GOAL_DEGREES = 44;
+
+
+
 
 }

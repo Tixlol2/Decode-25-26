@@ -7,7 +7,6 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.OpModes.NextFTCTeleop;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -23,8 +22,8 @@ public class BetterVisionTM implements Subsystem {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
     private JoinedTelemetry telemetry;
-    private UniConstants.loggingState state = NextFTCTeleop.logState;
-    private UniConstants.teamColor color = NextFTCTeleop.color;
+    private UniConstants.loggingState state = Robot.loggingState;
+    private UniConstants.teamColor color = Robot.color;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
     private ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
@@ -164,7 +163,7 @@ public class BetterVisionTM implements Subsystem {
     @Override
     public void periodic() {
 
-        if(!NextFTCTeleop.patternFull){
+        if(!Robot.patternFull){
             getDetections();
         }
 

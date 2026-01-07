@@ -8,7 +8,6 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
-import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
@@ -112,25 +110,36 @@ public class IntakeSortingSubsystem implements Subsystem {
         return new InstantCommand(() -> {slot.setTargetPosition(state);}).named(slot.name + " Set Servo State");
     }
 
-    public Command launchInPattern(Slot first, Slot second, Slot third){
+    public Command Shoot(Slot slot){
         return new SequentialGroup(
-                setServoState(first, UniConstants.servoState.UP),
+                setServoState(slot, UniConstants.servoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(first, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
-                setServoState(second, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(second, UniConstants.servoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
-                setServoState(third, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(third, UniConstants.servoState.DOWN)
+                setServoState(slot, UniConstants.servoState.DOWN),
+                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)
         );
     }
 
 
+
+//    public Command launchInPattern(Slot first, Slot second, Slot third){
+//        return new SequentialGroup(
+//                setServoState(first, UniConstants.servoState.UP),
+//                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
+//                setServoState(first, UniConstants.servoState.DOWN),
+//                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
+//                setServoState(second, UniConstants.servoState.UP),
+//                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
+//                setServoState(second, UniConstants.servoState.DOWN),
+//                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
+//                setServoState(third, UniConstants.servoState.UP),
+//                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
+//                setServoState(third, UniConstants.servoState.DOWN)
+//        );
+//    }
+
+
     //BANGGGGGGGGGGG
-    public Command shoot(@NonNull ArrayList<UniConstants.slotState> pattern){
+    public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern){
         Slot first = null;
         Slot second = null;
         Slot third = null;
@@ -228,17 +237,20 @@ public class IntakeSortingSubsystem implements Subsystem {
             }
         }
 
-        return launchInPattern(first, second, third);
+        return new ArrayList<>(Arrays.asList(first, second, third));
     }
 
     public boolean allFull() {
         return backSlot.isFull() && rightSlot.isFull() && leftSlot.isFull();
     }
 
-    public boolean isFast(Slot slot){
-        return slot.name.equals("FLS") || slot.name.equals("FBS");
-    }
 
+
+    public void sendSlotTelemetry(UniConstants.loggingState state){
+        backSlot.sendTelemetry(state);
+        rightSlot.sendTelemetry(state);
+        leftSlot.sendTelemetry(state);
+    }
 
     public void sendTelemetry(UniConstants.loggingState state){
         switch(state){
@@ -249,6 +261,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 telemetry.addData("Intake Enabled ", isEnabled);
                 telemetry.addData("Intake Reversed ", isReversed);
                 telemetry.addData("All Full ", allFull());
+                sendSlotTelemetry(state);
                 telemetry.addLine("END OF SORTING LOG");
                 telemetry.addLine();
                 break;

@@ -4,29 +4,35 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 
-import org.firstinspires.ftc.teamcode.OpModes.NextFTCTeleop;
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
+import dev.nextftc.hardware.impl.MotorEx;
 
 @Configurable
 //TODO: Tune all constants to ensure correctness awesome - prob not needed
 public class MecDriveSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
-    UniConstants.teamColor color = NextFTCTeleop.color;
+    UniConstants.teamColor color = Robot.color;
     public static boolean debug = false;
     private Follower follower;
     private double distanceToGoal = 0;
+    private boolean driving = false;
 
     public static final MecDriveSubsystem INSTANCE = new MecDriveSubsystem();
 
@@ -34,6 +40,10 @@ public class MecDriveSubsystem implements Subsystem {
     private static double goalAngle = 0;
     private static double obeliskAngle = 0;
 
+    private static final MotorEx fl = new MotorEx(UniConstants.DRIVE_FRONT_LEFT_STRING).floatMode().reversed();
+    private static final MotorEx fr = new MotorEx(UniConstants.DRIVE_FRONT_RIGHT_STRING).floatMode().reversed();
+    private static final MotorEx bl = new MotorEx(UniConstants.DRIVE_BACK_LEFT_STRING).floatMode();
+    private static final MotorEx br = new MotorEx(UniConstants.DRIVE_BACK_RIGHT_STRING).floatMode().reversed();
 
 
     public MecDriveSubsystem(){}
@@ -42,14 +52,13 @@ public class MecDriveSubsystem implements Subsystem {
     public void initialize(){
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         follower = Constants.createFollower(ActiveOpMode.hardwareMap());
-        follower.setPose(new Pose());
         follower.update();
     }
 
 
     @Override
     public void periodic(){
-        color = NextFTCTeleop.color;
+        driving = !MecDriveSubsystem.INSTANCE.getFollower().getTeleopDriveVector().equals(new Vector(0, 0));
         updateDistanceAndAngle();
         follower.update();
     }
@@ -66,7 +75,7 @@ public class MecDriveSubsystem implements Subsystem {
     public void updateDistanceAndAngle() {
         double x = 0, y = 0, obX = 0, obY = 0;
 
-        switch (NextFTCTeleop.color) {
+        switch (Robot.color) {
             case BLUE:
                 x = Poses.blueGoal.getX() - follower.getPose().getX();
                 y = Poses.blueGoal.getY() - follower.getPose().getY();
@@ -106,18 +115,11 @@ public class MecDriveSubsystem implements Subsystem {
         distanceToGoal = Math.hypot(x, y) / 39.37;
     }
 
-    public Command FollowPath(PathChain path){
-        return new LambdaCommand("Follow Path")
-                .setStart(() -> MecDriveSubsystem.INSTANCE.getFollower().followPath(path))
-                .setIsDone(() -> !follower.isBusy())
-                .setInterruptible(false)
-                .requires(this);
-    }
 
     public Command FollowPath(PathChain path, boolean holdEnd){
         return new LambdaCommand("Follow Path Hold End: " + holdEnd)
                 .setStart(() -> MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd))
-                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3))
+                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3) || driving)
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
     }
@@ -125,10 +127,12 @@ public class MecDriveSubsystem implements Subsystem {
     public Command FollowPath(PathChain path, boolean holdEnd, double maxPower){
         return new LambdaCommand("Follow Path Hold End: " + holdEnd)
                 .setStart(() -> MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd))
-                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3))
+                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3) || driving)
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
     }
+
+
 
     public Command FollowPathTime(PathChain path, boolean holdEnd, double seconds){
         Timer timer = new Timer();
@@ -148,7 +152,44 @@ public class MecDriveSubsystem implements Subsystem {
                 .requires(MecDriveSubsystem.INSTANCE);
     }
 
+    public Command PushForward(double power, double distance, boolean useIntake){
+        follower.startTeleopDrive();
+        Pose startDistance = follower.getPose();
+        return new SequentialGroup(
+                new IfElseCommand(() -> useIntake, IntakeSortingSubsystem.INSTANCE.runActive(), IntakeSortingSubsystem.INSTANCE.stopActive()),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            setAllMotorPower(power);
+                        })
 
+                        .setIsDone(() -> Math.abs(follower.getPose().distanceFrom(startDistance)) >= distance || driving)
+                        .setStop(inter -> {
+                            setAllMotorPower(0);
+                        })
+                        .requires(INSTANCE, IntakeSortingSubsystem.INSTANCE)
+                        .setInterruptible(true)
+        );
+    }
+
+    public Command TurnTo(double degree){
+        return new LambdaCommand()
+                .setStart(() -> follower.turnTo(Math.toRadians(degree)))
+                .setIsDone(() -> Math.abs(Math.toDegrees(follower.getPose().getHeading()) - degree) < 1 || driving)
+                .setStop( interrupted -> {
+                    if(Robot.inTeleop){
+                        follower.startTeleopDrive();
+                    }
+                });
+
+    }
+
+    public void setAllMotorPower(double power){
+        power = Math.max(-1, Math.min(1, power));
+        fl.setPower(power);
+        fr.setPower(power);
+        bl.setPower(power);
+        br.setPower(power);
+    }
 
     public double getDistanceToGoal(){
         return distanceToGoal;
@@ -171,8 +212,17 @@ public class MecDriveSubsystem implements Subsystem {
         return Math.toDegrees(follower.getPose().getHeading());
     }
 
-    public void setColor(UniConstants.teamColor col){color = col;}
 
+    public PathChain createParkPath(){
+
+        return follower.pathBuilder()
+                .addPath((MecDriveSubsystem.INSTANCE.getFollower().getPose().getX() >= 72) ?
+                        new BezierCurve(MecDriveSubsystem.INSTANCE.getFollower().getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark, color == UniConstants.teamColor.BLUE ? Poses.blueParkCP : Poses.redParkCP) :
+                        new BezierLine(MecDriveSubsystem.INSTANCE.getFollower().getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark))
+                .setConstantHeadingInterpolation(Math.toRadians(90)).build();
+
+
+    }
 
     public Follower getFollower(){
         return follower;
