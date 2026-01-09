@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import android.util.Size;
 
 import com.bylazar.telemetry.JoinedTelemetry;
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -22,8 +21,8 @@ public class BetterVisionTM implements Subsystem {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
     private JoinedTelemetry telemetry;
-    private UniConstants.loggingState state = Robot.loggingState;
-    private UniConstants.teamColor color = Robot.color;
+    private UniConstants.loggingState state = UniConstants.loggingState.ENABLED;
+    private UniConstants.teamColor color = UniConstants.teamColor.BLUE;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
     private ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
@@ -42,7 +41,7 @@ public class BetterVisionTM implements Subsystem {
     @Override
     public void initialize(){
 
-        telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
+        //telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
 
         //21 - 23 for obelisk
         //20 for blue goal
@@ -196,4 +195,8 @@ public class BetterVisionTM implements Subsystem {
     }
 
     public void setColor(UniConstants.teamColor col){color = col;}
+
+    public void setTelemetry(JoinedTelemetry telemetry){
+        this.telemetry = telemetry;
+    }
 }

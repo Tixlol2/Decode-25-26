@@ -275,6 +275,10 @@ public class IntakeSortingSubsystem implements Subsystem {
         }
     }
 
+    public void setTelemetry(JoinedTelemetry telemetry){
+        this.telemetry = telemetry;
+    }
+
 
     public static class Slot {
 
@@ -286,7 +290,7 @@ public class IntakeSortingSubsystem implements Subsystem {
 
         private UniConstants.slotState colorState = UniConstants.slotState.EMPTY;
         private UniConstants.servoState servoState = UniConstants.servoState.DOWN;
-        private final JoinedTelemetry telemetry;
+        private JoinedTelemetry telemetry;
 
         double up = 0;
         double down = 0;
@@ -352,7 +356,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 colorState = UniConstants.slotState.GREEN;
             } else if (((red > green) && (blue > green)) && (alpha < 5000)) {
                 colorState = UniConstants.slotState.PURPLE;
-            } else {
+            } else if (Robot.shotTimer.getTimeSeconds() < 2){
                 colorState = UniConstants.slotState.EMPTY;
             }
 
@@ -409,6 +413,9 @@ public class IntakeSortingSubsystem implements Subsystem {
 
         }
 
+        public void setTelemetry(JoinedTelemetry telemetry){
+            this.telemetry = telemetry;
+        }
 
 
     }

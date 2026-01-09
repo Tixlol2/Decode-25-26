@@ -29,7 +29,7 @@ public class Constants {
             .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0, 0))
             .headingPIDFCoefficients(new PIDFCoefficients(.67, 0, 0, 0.0))
             .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(0.005, 0, 0.000, 0.6, 0)
+                    new FilteredPIDFCoefficients(0.0035, 0, 0.000, 0.6, 0)
             );
 
     public static MecanumConstants driveConstants = new MecanumConstants()
@@ -42,7 +42,8 @@ public class Constants {
             .rightFrontMotorDirection(UniConstants.DRIVE_FRONT_RIGHT_DIRECTION)
             .rightRearMotorDirection(UniConstants.DRIVE_BACK_RIGHT_DIRECTION)
             .xVelocity(61.17509496493602)
-            .yVelocity(50.46043047567052);
+            .yVelocity(50.46043047567052)
+            .maxPower(1);
 
 
 

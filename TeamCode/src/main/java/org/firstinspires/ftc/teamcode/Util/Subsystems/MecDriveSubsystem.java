@@ -7,7 +7,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.math.Vector;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
@@ -20,6 +19,7 @@ import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
 
@@ -28,7 +28,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class MecDriveSubsystem implements Subsystem {
     //Class variables
     JoinedTelemetry telemetry;
-    UniConstants.teamColor color = Robot.color;
+    UniConstants.teamColor color = UniConstants.teamColor.BLUE;
     public static boolean debug = false;
     private Follower follower;
     private double distanceToGoal = 0;
@@ -50,17 +50,19 @@ public class MecDriveSubsystem implements Subsystem {
 
     @Override
     public void initialize(){
+        color = Robot.color;
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
-        follower = Constants.createFollower(ActiveOpMode.hardwareMap());
-        follower.update();
+        follower = PedroComponent.follower();
+
+
     }
 
 
     @Override
     public void periodic(){
-        driving = !MecDriveSubsystem.INSTANCE.getFollower().getTeleopDriveVector().equals(new Vector(0, 0));
+        //driving = !MecDriveSubsystem.INSTANCE.getFollower().getTeleopDriveVector().equals(new Vector(0, 0));
         updateDistanceAndAngle();
-        follower.update();
+        //follower.update();
     }
 
     public void startTele(){
@@ -68,8 +70,12 @@ public class MecDriveSubsystem implements Subsystem {
         follower.update();
     }
     public void updateTeleop(double forward, double strafe, double rotation, boolean botCentric){
-        follower.setTeleOpDrive(forward, strafe, rotation, botCentric);
-        follower.update();
+        if(follower != null) {
+            follower.setTeleOpDrive(forward, strafe, rotation, botCentric);
+            follower.update();
+        } else {
+            follower = Constants.createFollower(ActiveOpMode.hardwareMap());
+        }
     }
 
     public void updateDistanceAndAngle() {
@@ -118,15 +124,15 @@ public class MecDriveSubsystem implements Subsystem {
 
     public Command FollowPath(PathChain path, boolean holdEnd){
         return new LambdaCommand("Follow Path Hold End: " + holdEnd)
-                .setStart(() -> MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd))
-                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3) || driving)
+                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd); Robot.automatedDrive = true;})
+                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 1))
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
     }
 
     public Command FollowPath(PathChain path, boolean holdEnd, double maxPower){
         return new LambdaCommand("Follow Path Hold End: " + holdEnd)
-                .setStart(() -> MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd))
+                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd); Robot.automatedDrive = true;})
                 .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3) || driving)
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
@@ -137,7 +143,7 @@ public class MecDriveSubsystem implements Subsystem {
     public Command FollowPathTime(PathChain path, boolean holdEnd, double seconds){
         Timer timer = new Timer();
         return new LambdaCommand("Follow Path Time Hold End: " + holdEnd)
-                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd); timer.reset();})
+                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd); timer.reset(); Robot.automatedDrive = true;})
                 .setIsDone(() -> timer.getTimeSeconds() > seconds)
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
@@ -146,7 +152,7 @@ public class MecDriveSubsystem implements Subsystem {
     public Command FollowPathTime(PathChain path, boolean holdEnd, double maxPower, double seconds){
         Timer timer = new Timer();
         return new LambdaCommand("Follow Path Time Hold End: " + holdEnd)
-                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd); timer.reset();})
+                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd); timer.reset(); Robot.automatedDrive = true;})
                 .setIsDone(() -> timer.getTimeSeconds() > seconds)
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
@@ -155,6 +161,7 @@ public class MecDriveSubsystem implements Subsystem {
     public Command PushForward(double power, double distance, boolean useIntake){
         follower.startTeleopDrive();
         Pose startDistance = follower.getPose();
+        Robot.automatedDrive = true;
         return new SequentialGroup(
                 new IfElseCommand(() -> useIntake, IntakeSortingSubsystem.INSTANCE.runActive(), IntakeSortingSubsystem.INSTANCE.stopActive()),
                 new LambdaCommand()
@@ -173,8 +180,8 @@ public class MecDriveSubsystem implements Subsystem {
 
     public Command TurnTo(double degree){
         return new LambdaCommand()
-                .setStart(() -> follower.turnTo(Math.toRadians(degree)))
-                .setIsDone(() -> Math.abs(Math.toDegrees(follower.getPose().getHeading()) - degree) < 1 || driving)
+                .setStart(() -> {follower.turnTo(Math.toRadians(degree)); Robot.automatedDrive = true;})
+                .setIsDone(() -> Math.abs(Math.toDegrees(follower.getPose().getHeading()) - degree) < 1d)
                 .setStop( interrupted -> {
                     if(Robot.inTeleop){
                         follower.startTeleopDrive();
@@ -212,16 +219,30 @@ public class MecDriveSubsystem implements Subsystem {
         return Math.toDegrees(follower.getPose().getHeading());
     }
 
+    public void setColor(UniConstants.teamColor color){
+        this.color = color;
+    }
+
 
     public PathChain createParkPath(){
-
         return follower.pathBuilder()
-                .addPath((MecDriveSubsystem.INSTANCE.getFollower().getPose().getX() >= 72) ?
-                        new BezierCurve(MecDriveSubsystem.INSTANCE.getFollower().getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark, color == UniConstants.teamColor.BLUE ? Poses.blueParkCP : Poses.redParkCP) :
-                        new BezierLine(MecDriveSubsystem.INSTANCE.getFollower().getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark))
+                .addPath((follower.getPose().getX() >= 72) ?
+                        new BezierCurve(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark, color == UniConstants.teamColor.BLUE ? Poses.blueParkCP : Poses.redParkCP) :
+                        new BezierLine(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark))
                 .setConstantHeadingInterpolation(Math.toRadians(90)).build();
+    }
 
 
+    public PathChain createShootingPath(){
+        return follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.blueShortScore : Poses.redShortScore))
+                .setConstantHeadingInterpolation(color == UniConstants.teamColor.BLUE ? Poses.blueShortScore.getHeading() : Poses.redShortScore.getHeading()).build();
+    }
+
+    public void setStartPose(Pose pose){
+        if(follower.atPose(new Pose(0, 0), 1, 1)){
+            follower.setStartingPose(pose);
+        }
     }
 
     public Follower getFollower(){
@@ -248,5 +269,11 @@ public class MecDriveSubsystem implements Subsystem {
                 break;
         }
     }
+
+    public void setTelemetry(JoinedTelemetry telemetry){
+        this.telemetry = telemetry;
+    }
+
+
 
 }

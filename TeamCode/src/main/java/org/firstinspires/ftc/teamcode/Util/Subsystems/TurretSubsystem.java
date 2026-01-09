@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -116,7 +117,17 @@ public class TurretSubsystem implements Subsystem {
         return launcher.getVelocity();
     }
 
+    public double getCurrentAngle(){
+        return ticksToAngle(turretCurrentPos);
+    }
+
+    public boolean turretFinished(){
+        return Robot.INSTANCE.withinRange(getCurrentAngle(), getTurretTargetAngle(), 2);
+    }
+
     public void init(){
+        turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         turretCurrentPos = 0;
         turretTargetAngle = 0;
         targetVelocity = 0;
@@ -151,6 +162,10 @@ public class TurretSubsystem implements Subsystem {
 
                 telemetry.addLine("END OF OUTTAKE LOG");
         }
+    }
+
+    public void setTelemetry(JoinedTelemetry telemetry){
+        this.telemetry = telemetry;
     }
 
 

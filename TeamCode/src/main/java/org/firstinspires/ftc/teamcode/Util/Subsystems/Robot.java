@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
+import static dev.nextftc.extensions.pedro.PedroComponent.follower;
+
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
+import org.firstinspires.ftc.teamcode.Util.Poses;
+import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -15,7 +20,10 @@ import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.commands.utility.LambdaCommand;
+import dev.nextftc.core.commands.utility.NullCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
+import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.ftc.ActiveOpMode;
 
 public class Robot extends SubsystemGroup {
@@ -35,7 +43,10 @@ public class Robot extends SubsystemGroup {
     private double distanceToGoal = 0;
     private JoinedTelemetry joinedTelemetry;
 
-    public static boolean inTeleop = false;
+    public static boolean inTeleop = true;
+    public static boolean automatedDrive = false;
+
+    public static Timer shotTimer = new Timer();
 
     ElapsedTime loopTimer = new ElapsedTime();
 
@@ -53,8 +64,7 @@ public class Robot extends SubsystemGroup {
     public void initialize(){
 
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
-
-
+        setGlobals();
         turretForward = true;
         aimAtGoal = false;
 
@@ -67,8 +77,7 @@ public class Robot extends SubsystemGroup {
 
         distanceToGoal = MecDriveSubsystem.INSTANCE.getDistanceToGoal();
         //Handles turret aiming
-        TurretSubsystem.INSTANCE.setTargetAngle(turretForward ? 0 : (aimAtGoal ? -MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle() : -MecDriveSubsystem.INSTANCE.getObeliskAngle()));
-
+        TurretSubsystem.INSTANCE.setTargetAngle(turretForward ? 0 : (aimAtGoal ? (color == UniConstants.teamColor.BLUE ? -MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle() : MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle()) : -MecDriveSubsystem.INSTANCE.getObeliskAngle()));
 
 
         //Handles pattern updating
@@ -113,47 +122,43 @@ public class Robot extends SubsystemGroup {
                 new Delay(waitTime),
                 IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
                 new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true)
-                );
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true),
+                new InstantCommand(() -> Robot.shotTimer.reset())
+        );
+    }
+
+    public Command Shoot(){
+        ArrayList<IntakeSortingSubsystem.Slot> order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
+        return new SequentialGroup(
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
+                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true),
+                new InstantCommand(() -> Robot.shotTimer.reset())
+        );
     }
 
     public Command TurretForward(){
-        return new InstantCommand(() -> {turretForward = true; aimAtGoal = true;});
+        return new LambdaCommand()
+                .setStart(() -> {turretForward = true; aimAtGoal = false;})
+                .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
     public Command TurretGoal(){
-        return new InstantCommand(() -> {turretForward = false; aimAtGoal = true;});
+        return new LambdaCommand()
+                .setStart(() -> {turretForward = false; aimAtGoal = true;})
+                .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
     public Command TurretObelisk(){
-        return new InstantCommand(() -> {turretForward = false; aimAtGoal = false;});
+        return new LambdaCommand()
+                .setStart(() -> {turretForward = false; aimAtGoal = false;})
+                .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
     public Command FaceGoal(){
         return new ParallelGroup(
                 TurretGoal(),
                 MecDriveSubsystem.INSTANCE.TurnTo(color == UniConstants.teamColor.BLUE ? UniConstants.ANGLE_BLUE_GOAL_DEGREES : UniConstants.ANGLE_RED_GOAL_DEGREES)
-        );
-    }
-
-    public Command ShootEndPath(PathChain path){
-        return new SequentialGroup(
-                MecDriveSubsystem.INSTANCE.FollowPath(path, true),
-                ShootCreep(5, .5)
-        );
-    }
-
-    public Command FollowPathActive(PathChain path, boolean holdEnd){
-        return new ParallelGroup(
-                IntakeSortingSubsystem.INSTANCE.runActive(),
-                MecDriveSubsystem.INSTANCE.FollowPath(path, holdEnd)
-        );
-    }
-
-    public Command FollowPathActive(PathChain path, boolean holdEnd, double maxPower){
-        return new ParallelGroup(
-                IntakeSortingSubsystem.INSTANCE.runActive(),
-                MecDriveSubsystem.INSTANCE.FollowPath(path, holdEnd, maxPower)
         );
     }
 
@@ -171,6 +176,72 @@ public class Robot extends SubsystemGroup {
                 TurretSubsystem.INSTANCE.SetMotorPower(0)
         );
     }
+
+    public Command ActivePath(PathChain path){
+        return new ParallelGroup(
+                IntakeSortingSubsystem.INSTANCE.runActive(),
+                new FollowPath(path)
+        );
+    }
+
+    public Command ActivePath(PathChain path, boolean holdEnd, double maxPower){
+        return new ParallelGroup(
+                IntakeSortingSubsystem.INSTANCE.runActive(),
+                new FollowPath(path, holdEnd, maxPower)
+        );
+    }
+
+    public void setGlobalTelemetry(){
+        MecDriveSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
+        TurretSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
+        IntakeSortingSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
+        BetterVisionTM.INSTANCE.setTelemetry(joinedTelemetry);
+    }
+
+    public void setGlobalColor(){
+        MecDriveSubsystem.INSTANCE.setColor(color);
+        BetterVisionTM.INSTANCE.setColor(color);
+
+    }
+
+    public void setGlobals(){
+        setGlobalTelemetry();
+        setGlobalColor();
+    }
+
+    public Command StartTeleop(){
+        return new SequentialGroup(
+                new InstantCommand(() -> inTeleop = true),
+                TurretSubsystem.INSTANCE.SetMotorPower(0),
+                new InstantCommand(MecDriveSubsystem.INSTANCE::startTele),
+                IntakeSortingSubsystem.INSTANCE.stopActive(),
+                new InstantCommand(() -> MecDriveSubsystem.INSTANCE.setStartPose(Poses.blueGoalTopStartFacing)),
+                TurretGoal()
+        );
+    }
+
+    public boolean withinRange(double value, double target, double range){
+        return Math.abs(value - target) < range;
+    }
+
+
+    public Command PathShoot(){
+        return new SequentialGroup(
+                Robot.INSTANCE.TurretForward(),
+                new ParallelGroup(
+                        new IfElseCommand(() -> TurretSubsystem.debugPower == .65, new NullCommand(), new ParallelGroup(new Delay(3), TurretSubsystem.INSTANCE.SetMotorPower(.65))),
+                        new FollowPath(MecDriveSubsystem.INSTANCE.createShootingPath(), true)
+                ),
+                Robot.INSTANCE.ShootWait(.25),
+                new InstantCommand(() -> {
+                    follower().breakFollowing();
+                    if (Robot.inTeleop) {
+                        follower().startTeleopDrive();
+                    }
+                })
+        );
+    }
+
 
 
 
