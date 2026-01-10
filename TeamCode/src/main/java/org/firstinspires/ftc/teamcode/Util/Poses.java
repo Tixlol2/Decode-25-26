@@ -32,12 +32,12 @@ public class Poses {
 
     public static Pose readyRedActiveTop = new Pose(92.000, 83.500);
     public static Pose readyBlueActiveTop = mirrorCoordinates(readyRedActiveTop, UniConstants.teamColor.BLUE);
-    public static Pose redActiveTopStop = new Pose(116, 83.500);
+    public static Pose redActiveTopStop = new Pose(124, 83.500);
     public static Pose blueActiveTopStop = mirrorCoordinates(redActiveTopStop, UniConstants.teamColor.BLUE);
 
-    public static Pose readyRedActiveMid = new Pose(92.000, 60);
+    public static Pose readyRedActiveMid = new Pose(92.000, 60.000);
     public static Pose readyBlueActiveMid= mirrorCoordinates(readyRedActiveMid, UniConstants.teamColor.BLUE);
-    public static Pose redActiveMidStop = new Pose(116, 83.500);
+    public static Pose redActiveMidStop = new Pose(124, 60.000);
     public static Pose blueActiveMidStop = mirrorCoordinates(redActiveMidStop, UniConstants.teamColor.BLUE);
 
     public static Pose blueParkAuto = new Pose(48, 128);

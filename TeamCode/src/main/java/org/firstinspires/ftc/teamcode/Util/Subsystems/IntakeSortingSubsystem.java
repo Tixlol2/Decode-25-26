@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
+import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -140,104 +141,93 @@ public class IntakeSortingSubsystem implements Subsystem {
 //    }
 
 
+    public int getGreenCount(){
+        int greens = 0;
+        for(Slot slot : slots){
+            if(slot.colorState.equals(UniConstants.slotState.GREEN)){
+                greens++;
+            }
+        }
+        return greens;
+    }
+
+    public int getPurpleCount(){
+        int purples = 0;
+        for(Slot slot : slots){
+            if(slot.colorState.equals(UniConstants.slotState.PURPLE)){
+                purples++;
+            }
+        }
+        return purples;
+    }
+
     //BANGGGGGGGGGGG
     public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern){
-        Slot first = null;
-        Slot second = null;
-        Slot third = null;
-        boolean[] slotUsed = new boolean[3];
+        Slot first = leftSlot;
+        Slot second = backSlot;
+        Slot third = rightSlot;
+        ArrayList<Slot> used = new ArrayList<>();
 
-        UniConstants.slotState p0 = pattern.get(0);
-        UniConstants.slotState p1 = pattern.get(1);
-        UniConstants.slotState p2 = pattern.get(2);
+        if(getGreenCount() == 1 && getPurpleCount() == 2 && !pattern.contains(null)){
+            for(int i = 0; i < 3; i++){
 
-        // Fast path: check if we can make the exact pattern
-        boolean canMakePattern = false;
+                UniConstants.slotState wanted = pattern.get(i);
 
-        int matches = 0;
-        boolean[] tempUsed = new boolean[3];
+                for(int j = 0; j < 3; j++){
 
-        // unrolled loop for pattern check - faster than nested loops
-
-
-        // try to match first pattern position
-        if(slots.get(0).getColorState().equals(p0)){ tempUsed[0] = true; matches++; }
-        else if(slots.get(1).getColorState().equals(p0)){ tempUsed[1] = true; matches++; }
-        else if(slots.get(2).getColorState().equals(p0)){ tempUsed[2] = true; matches++; }
-
-        // try to match second pattern position
-        if(!tempUsed[0] && slots.get(0).getColorState().equals(p1)){ tempUsed[0] = true; matches++; }
-        else if(!tempUsed[1] && slots.get(1).getColorState().equals(p1)){ tempUsed[1] = true; matches++; }
-        else if(!tempUsed[2] && slots.get(2).getColorState().equals(p1)){ tempUsed[2] = true; matches++; }
-
-        // try to match third pattern position
-        if(!tempUsed[0] && slots.get(0).getColorState().equals(p2)){ tempUsed[0] = true; matches++; }
-        else if(!tempUsed[1] && slots.get(1).getColorState().equals(p2)){ tempUsed[1] = true; matches++; }
-        else if(!tempUsed[2] && slots.get(2).getColorState().equals(p2)){ tempUsed[2] = true; matches++; }
-
-        canMakePattern = (matches == 3);
-
-
-        if(canMakePattern){
-            // build exact pattern - unrolled for speed
-
-            // match first position
-            if(slots.get(0).getColorState().equals(p0)){ first = slots.get(0); slotUsed[0] = true; }
-            else if(slots.get(1).getColorState().equals(p0)){ first = slots.get(1); slotUsed[1] = true; }
-            else if(slots.get(2).getColorState().equals(p0)){ first = slots.get(2); slotUsed[2] = true; }
-
-            // match second position
-            if(!slotUsed[0] && slots.get(0).getColorState().equals(p1)){ second = slots.get(0); slotUsed[0] = true; }
-            else if(!slotUsed[1] && slots.get(1).getColorState().equals(p1)){ second = slots.get(1); slotUsed[1] = true; }
-            else if(!slotUsed[2] && slots.get(2).getColorState().equals(p1)){ second = slots.get(2); slotUsed[2] = true; }
-
-            // match third position
-            if(!slotUsed[0] && slots.get(0).getColorState().equals(p2)){ third = slots.get(0); slotUsed[0] = true; }
-            else if(!slotUsed[1] && slots.get(1).getColorState().equals(p2)){ third = slots.get(1); slotUsed[1] = true; }
-            else if(!slotUsed[2] && slots.get(2).getColorState().equals(p2)){ third = slots.get(2); slotUsed[2] = true; }
-        }
-        else {
-            // fallback: prioritize full slots
-            boolean slot0Full = slots.get(0).isFull();
-            boolean slot1Full = slots.get(1).isFull();
-            boolean slot2Full = slots.get(2).isFull();
-
-            // special case: only back is full
-            if(slot0Full && !slot1Full && !slot2Full){
-                first = slots.get(0);
-                slotUsed[0] = true;
-            } else {
-                // prefer right/left for first position
-                if(slot1Full){ first = rightSlot; slotUsed[1] = true; }
-                else if(slot2Full){ first = leftSlot; slotUsed[2] = true; }
-            }
-
-            // fill remaining with any full slots
-            if(second == null && !slotUsed[0] && slot0Full){ second = slots.get(0); slotUsed[0] = true; }
-            else if(second == null && !slotUsed[1] && slot1Full){ second = slots.get(1); slotUsed[1] = true; }
-            else if(second == null && !slotUsed[2] && slot2Full){ second = slots.get(2); slotUsed[2] = true; }
-
-            if(third == null && !slotUsed[0] && slot0Full){ third = slots.get(0); slotUsed[0] = true; }
-            else if(third == null && !slotUsed[1] && slot1Full){ third = slots.get(1); slotUsed[1] = true; }
-            else if(third == null && !slotUsed[2] && slot2Full){ third = slots.get(2); slotUsed[2] = true; }
-
-            // fill nulls with defaults: right -> left -> back
-            if(first == null){
-                if(rightSlot != second && rightSlot != third) first = rightSlot;
-                else if(leftSlot != second && leftSlot != third) first = leftSlot;
-                else first = rightSlot;
-            }
-            if(second == null){
-                if(rightSlot != first && rightSlot != third) second = rightSlot;
-                else if(leftSlot != first && leftSlot != third) second = leftSlot;
-                else second = backSlot;
-            }
-            if(third == null){
-                if(rightSlot != first && rightSlot != second) third = rightSlot;
-                else if(leftSlot != first && leftSlot != second) third = leftSlot;
-                else third = backSlot;
+                    if(pattern.get(j).equals(wanted) && !used.contains(slots.get(j))){
+                        used.add(slots.get(j));
+                        switch (i){
+                            case 0:
+                                first = slots.get(i);
+                                break;
+                            case 1:
+                                second = slots.get(i);
+                                break;
+                            case 2:
+                                third = slots.get(i);
+                                break;
+                        }
+                    }
+                }
             }
         }
+//        else {
+//             if(!allFull()) {
+//                if(leftSlot.isFull()){
+//                    first = leftSlot;
+//                    if(rightSlot.isFull()){
+//                        second = rightSlot;
+//                        third = backSlot;
+//                    } else {
+//                        second = backSlot;
+//                        third = rightSlot;
+//                    }
+//                }
+//                else if(rightSlot.isFull()){
+//                    first = rightSlot;
+//                    if(backSlot.isFull()){
+//                        second = backSlot;
+//                        third = leftSlot;
+//                    } else {
+//                        second = leftSlot;
+//                        third = backSlot;
+//                    }
+//                }
+//                else if(backSlot.isFull()){
+//                    first = backSlot;
+//                    if(rightSlot.isFull()){
+//                        second = rightSlot;
+//                        third = leftSlot;
+//                    } else {
+//                        second = leftSlot;
+//                        third = rightSlot;
+//                    }
+//                }
+//            }
+//        }
+
+
 
         return new ArrayList<>(Arrays.asList(first, second, third));
     }
@@ -260,6 +250,8 @@ public class IntakeSortingSubsystem implements Subsystem {
                 break;
             case ENABLED:
                 telemetry.addLine("START OF SORTING LOG");
+                telemetry.addData("Purple Count: ", getPurpleCount());
+                telemetry.addData("Green Count: ", getGreenCount());
                 telemetry.addData("Intake Enabled ", isEnabled);
                 telemetry.addData("Intake Reversed ", isReversed);
                 telemetry.addData("All Full ", allFull());
@@ -301,6 +293,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             light = new ServoEx(lightName);
             name = kickerServoName;
             colorSensor = hardwareMap.get(ColorSensor.class, colorSensorName);
+            Timer readTimer = new Timer();
 
             this.telemetry = telemetry;
 
@@ -356,7 +349,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 colorState = UniConstants.slotState.GREEN;
             } else if (((red > green) && (blue > green)) && (alpha < 5000)) {
                 colorState = UniConstants.slotState.PURPLE;
-            } else if (Robot.shotTimer.getTimeSeconds() < 2){
+            } else{
                 colorState = UniConstants.slotState.EMPTY;
             }
 

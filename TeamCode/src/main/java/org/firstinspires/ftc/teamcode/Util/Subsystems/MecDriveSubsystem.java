@@ -202,7 +202,7 @@ public class MecDriveSubsystem implements Subsystem {
         return distanceToGoal;
     }
 
-    public double getCalculatedTurretAngle(){
+    public double getGoalAngle(){
         return goalAngle;
     }
 
@@ -222,8 +222,6 @@ public class MecDriveSubsystem implements Subsystem {
     public void setColor(UniConstants.teamColor color){
         this.color = color;
     }
-
-
     public PathChain createParkPath(){
         return follower.pathBuilder()
                 .addPath((follower.getPose().getX() >= 72) ?

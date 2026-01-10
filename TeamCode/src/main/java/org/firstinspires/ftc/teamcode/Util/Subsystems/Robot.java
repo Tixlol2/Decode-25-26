@@ -2,12 +2,12 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -21,11 +21,14 @@ import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
-import dev.nextftc.core.commands.utility.NullCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
+import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
+import dev.nextftc.extensions.pedro.PedroComponent;
+import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.ActiveOpMode;
 
+@Configurable
 public class Robot extends SubsystemGroup {
 
     public static final Robot INSTANCE = new Robot();
@@ -37,9 +40,6 @@ public class Robot extends SubsystemGroup {
 
     public static UniConstants.loggingState loggingState = UniConstants.loggingState.ENABLED;
 
-    public static boolean turretForward = true;
-    public static boolean aimAtGoal = false;
-
     private double distanceToGoal = 0;
     private JoinedTelemetry joinedTelemetry;
 
@@ -50,6 +50,8 @@ public class Robot extends SubsystemGroup {
 
     ElapsedTime loopTimer = new ElapsedTime();
 
+
+    public static double standardWaitTime = .75;
 
     private Robot() {
         super(
@@ -65,8 +67,6 @@ public class Robot extends SubsystemGroup {
 
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         setGlobals();
-        turretForward = true;
-        aimAtGoal = false;
 
     }
 
@@ -77,7 +77,17 @@ public class Robot extends SubsystemGroup {
 
         distanceToGoal = MecDriveSubsystem.INSTANCE.getDistanceToGoal();
         //Handles turret aiming
-        TurretSubsystem.INSTANCE.setTargetAngle(turretForward ? 0 : (aimAtGoal ? (color == UniConstants.teamColor.BLUE ? -MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle() : MecDriveSubsystem.INSTANCE.getCalculatedTurretAngle()) : -MecDriveSubsystem.INSTANCE.getObeliskAngle()));
+        switch(TurretSubsystem.state){
+            case FORWARD:
+                TurretSubsystem.INSTANCE.setTargetAngle(0);
+                break;
+            case GOAL:
+                TurretSubsystem.INSTANCE.setTargetAngle(MecDriveSubsystem.INSTANCE.getGoalAngle());
+                break;
+            case OBELISK:
+                TurretSubsystem.INSTANCE.setTargetAngle(MecDriveSubsystem.INSTANCE.getObeliskAngle());
+                break;
+        }
 
 
         //Handles pattern updating
@@ -139,33 +149,33 @@ public class Robot extends SubsystemGroup {
 
     public Command TurretForward(){
         return new LambdaCommand()
-                .setStart(() -> {turretForward = true; aimAtGoal = false;})
+                .setStart(() -> {TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.FORWARD);})
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
     public Command TurretGoal(){
         return new LambdaCommand()
-                .setStart(() -> {turretForward = false; aimAtGoal = true;})
+                .setStart(() -> {TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.GOAL);})
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
     public Command TurretObelisk(){
         return new LambdaCommand()
-                .setStart(() -> {turretForward = false; aimAtGoal = false;})
+                .setStart(() -> {TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.OBELISK);})
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
     public Command FaceGoal(){
         return new ParallelGroup(
                 TurretGoal(),
-                MecDriveSubsystem.INSTANCE.TurnTo(color == UniConstants.teamColor.BLUE ? UniConstants.ANGLE_BLUE_GOAL_DEGREES : UniConstants.ANGLE_RED_GOAL_DEGREES)
+                new TurnTo(color == UniConstants.teamColor.BLUE ? Angle.fromDeg(UniConstants.ANGLE_BLUE_GOAL_DEGREES) : Angle.fromDeg(UniConstants.ANGLE_RED_GOAL_DEGREES))
         );
     }
 
     public Command Park(){
         return new ParallelGroup(
                 StopSubsystems(),
-                MecDriveSubsystem.INSTANCE.FollowPath(MecDriveSubsystem.INSTANCE.createParkPath(), true)
+                new FollowPath(MecDriveSubsystem.INSTANCE.createParkPath(), true)
         );
     }
 
@@ -229,10 +239,10 @@ public class Robot extends SubsystemGroup {
         return new SequentialGroup(
                 Robot.INSTANCE.TurretForward(),
                 new ParallelGroup(
-                        new IfElseCommand(() -> TurretSubsystem.debugPower == .65, new NullCommand(), new ParallelGroup(new Delay(3), TurretSubsystem.INSTANCE.SetMotorPower(.65))),
+                        //new IfElseCommand(() -> TurretSubsystem.debugPower == .75, new NullCommand(), new ParallelGroup(new Delay(5), TurretSubsystem.INSTANCE.SetMotorPower(.75))),
                         new FollowPath(MecDriveSubsystem.INSTANCE.createShootingPath(), true)
                 ),
-                Robot.INSTANCE.ShootWait(.25),
+                Robot.INSTANCE.ShootWait(.75),
                 new InstantCommand(() -> {
                     follower().breakFollowing();
                     if (Robot.inTeleop) {

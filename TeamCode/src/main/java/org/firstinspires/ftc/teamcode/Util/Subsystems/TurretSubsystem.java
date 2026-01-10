@@ -46,6 +46,8 @@ public class TurretSubsystem implements Subsystem {
     public static boolean debug = true;
     public static double debugPower = 0;
 
+    public static turretState state = turretState.FORWARD;
+
 
     public TurretSubsystem(){}
 
@@ -97,6 +99,10 @@ public class TurretSubsystem implements Subsystem {
 
     public void setMotorPower(double power){
         debugPower = -Math.max(0, Math.min(1, power));
+    }
+
+    public void setTurretState(turretState state) {
+        TurretSubsystem.state = state;
     }
 
     public void setTargetAngle(double angleDeg){
@@ -166,6 +172,12 @@ public class TurretSubsystem implements Subsystem {
 
     public void setTelemetry(JoinedTelemetry telemetry){
         this.telemetry = telemetry;
+    }
+
+    public enum turretState{
+        FORWARD,
+        OBELISK,
+        GOAL
     }
 
 

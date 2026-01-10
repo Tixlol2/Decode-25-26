@@ -94,23 +94,23 @@ public class Auto extends NextFTCOpMode {
         Robot.inTeleop = false;
 
         new SequentialGroup(
-                TurretSubsystem.INSTANCE.SetMotorPower(.65),
+                TurretSubsystem.INSTANCE.SetMotorPower(.7),
                 new ParallelGroup(
                         Robot.INSTANCE.TurretObelisk(),
-                        new FollowPath(paths.Path1),
-                        new Delay(3) //For outtake
+                        new FollowPath(paths.StartShoot),
+                        new Delay(3.5) //For outtake
                 ),
                 Robot.INSTANCE.TurretForward(),
-                Robot.INSTANCE.ShootWait(.25),
-                new FollowPath(paths.Path2),
-                Robot.INSTANCE.ActivePath(paths.Path3, false, 1),
+                Robot.INSTANCE.ShootWait(.5),
+                new FollowPath(paths.ReadyIntakeTop),
+                Robot.INSTANCE.ActivePath(paths.IntakeTop, false, 1),
                 Robot.INSTANCE.PathShoot(),
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
-                new FollowPath(paths.Path4),
-                Robot.INSTANCE.ActivePath(paths.Path5, false, 1),
+                new FollowPath(paths.ReadyIntakeMid),
+                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, 1),
                 Robot.INSTANCE.PathShoot(),
                 new ParallelGroup(
-                        new FollowPath(paths.Path6),
+                        new FollowPath(paths.Park),
                         Robot.INSTANCE.StopSubsystems()
                 )
         ).schedule();

@@ -33,10 +33,10 @@ public class Tele extends NextFTCOpMode {
 
     {
         addComponents(
+                new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Robot.INSTANCE),
                 BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)
+                BindingsComponent.INSTANCE
         ); //Subsystems
     }
 
@@ -50,13 +50,12 @@ public class Tele extends NextFTCOpMode {
     private boolean enableRumble = false;
     Timer rumblingTimer = new Timer();
 
-
+    public static double debugPower = .4;
 
 
     @Override
     public void onInit() {
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
-
     }
 
     @Override
@@ -109,7 +108,7 @@ public class Tele extends NextFTCOpMode {
         }
 
         if (Robot.automatedDrive && (gamepad1.yWasPressed() || !follower().isBusy())) {
-            CommandManager.INSTANCE.cancelCommand(Robot.INSTANCE.PathShoot());
+            CommandManager.INSTANCE.cancelAll();
             follower().startTeleopDrive();
             Robot.automatedDrive = false;
         }
@@ -127,13 +126,11 @@ public class Tele extends NextFTCOpMode {
         //TODO: Still have to integrate look up table or linreg for power as a function of distance
 
         joinedTelemetry.addData("Bot Centric: ", botCentric);
-        joinedTelemetry.addData("Current Commands: ", CommandManager.INSTANCE.snapshot());
+        joinedTelemetry.addData("Automated Shooting: ", autoShoot);
+        //joinedTelemetry.addData("Current Commands: ", CommandManager.INSTANCE.snapshot());
         TurretSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
         MecDriveSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
-
-
-
-        follower().update();
+        IntakeSortingSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
 
 
     }
@@ -157,22 +154,22 @@ public class Tele extends NextFTCOpMode {
 //                });
 
         //Toggle things based on dpad
-        Gamepads.gamepad1().dpadUp().whenBecomesTrue(() -> Robot.turretForward = !Robot.turretForward);
-        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(() -> enableRumble = !enableRumble);
+        Gamepads.gamepad1().dpadUp().whenBecomesTrue(Robot.INSTANCE::TurretForward);
+        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(Robot.INSTANCE::TurretGoal);
         Gamepads.gamepad1().dpadDown().whenBecomesTrue(Robot.INSTANCE.Park());
         Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {autoShoot = !autoShoot;});
 
 
         //Face buttons
-        Gamepads.gamepad1().a().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(.65);});
+        Gamepads.gamepad1().a().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(.8);});
         Gamepads.gamepad1().b().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(0);});
-        Gamepads.gamepad1().x().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(1);});
+        Gamepads.gamepad1().x().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(debugPower);});
 
         //Shooting command
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(
                 new IfElseCommand(() -> autoShoot,
                         Robot.INSTANCE.PathShoot(),
-                        Robot.INSTANCE.ShootWait(.25)
+                        Robot.INSTANCE.ShootWait(.75)
                 )
             );
 

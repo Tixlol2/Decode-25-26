@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.OpModes.AutonUtil;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Util.Poses;
@@ -10,12 +9,12 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 public class Short9BallPaths {
 
-    public PathChain Path1;
-    public PathChain Path2;
-    public PathChain Path3;
-    public PathChain Path4;
-    public PathChain Path5;
-    public PathChain Path6;
+    public PathChain StartShoot;
+    public PathChain ReadyIntakeTop;
+    public PathChain IntakeTop;
+    public PathChain ReadyIntakeMid;
+    public PathChain IntakeMid;
+    public PathChain Park;
 
     public Short9BallPaths(Follower follower, UniConstants.teamColor color){
         if(color == UniConstants.teamColor.BLUE){
@@ -26,57 +25,57 @@ public class Short9BallPaths {
     }
 
     public void redShort(Follower follower) {
-        Path1 = follower
+        StartShoot = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(122.000, 124.000), new Pose(92.000, 100.000))
+                        new BezierLine(Poses.redGoalTopStartFacing, Poses.redShortScore)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(37))
                 .build();
 
-        Path2 = follower
+        ReadyIntakeTop = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(92.000, 100.000), new Pose(92.000, 83.500))
+                        new BezierLine(Poses.redShortScore, Poses.readyRedActiveTop)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(0))
                 .build();
 
-        Path3 = follower
+        IntakeTop = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(92.000, 83.500), new Pose(116, 83.500))
+                        new BezierLine(Poses.readyRedActiveTop, Poses.redActiveTopStop)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 
-        Path4 = follower
+        ReadyIntakeMid = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(92.000, 100.000), new Pose(92.000, 60.000))
+                        new BezierLine(Poses.redShortScore, Poses.readyRedActiveMid)
                 )
                 .setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(0))
                 .build();
 
-        Path5 = follower
+        IntakeMid = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(92.000, 60.000), new Pose(116, 60.000))
+                        new BezierLine(Poses.readyRedActiveMid, Poses.redActiveMidStop)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
 
-        Path6 = follower
+        Park = follower
                 .pathBuilder()
                 .addPath(
-                        new BezierLine(new Pose(92.000, 100.000), new Pose(90.000, 125.000))
+                        new BezierLine(Poses.redShortScore, Poses.redParkAuto)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
     public void blueShort(Follower follower) {
-        Path1 = follower
+        StartShoot = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(Poses.blueGoalTopStartFacing, Poses.blueShortScore)
@@ -84,7 +83,7 @@ public class Short9BallPaths {
                 .setConstantHeadingInterpolation(Poses.blueShortScore.getHeading())
                 .build();
 
-        Path2 = follower
+        ReadyIntakeTop = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(Poses.blueShortScore, Poses.readyBlueActiveTop)
@@ -92,7 +91,7 @@ public class Short9BallPaths {
                 .setLinearHeadingInterpolation(Poses.blueShortScore.getHeading(), Math.toRadians(180))
                 .build();
 
-        Path3 = follower
+        IntakeTop = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(Poses.readyBlueActiveTop, Poses.blueActiveTopStop)
@@ -100,7 +99,7 @@ public class Short9BallPaths {
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
-        Path4 = follower
+        ReadyIntakeMid = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(Poses.blueShortScore, Poses.readyBlueActiveMid)
@@ -108,7 +107,7 @@ public class Short9BallPaths {
                 .setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
                 .build();
 
-        Path5 = follower
+        IntakeMid = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(Poses.readyBlueActiveMid, Poses.blueActiveMidStop)
@@ -116,7 +115,7 @@ public class Short9BallPaths {
                 .setConstantHeadingInterpolation(Math.toRadians(180))
                 .build();
 
-        Path6 = follower
+        Park = follower
                 .pathBuilder()
                 .addPath(
                         new BezierLine(Poses.blueShortScore, Poses.blueParkAuto)
