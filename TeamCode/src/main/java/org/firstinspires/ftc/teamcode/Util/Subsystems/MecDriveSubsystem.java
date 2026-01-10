@@ -34,7 +34,6 @@ public class MecDriveSubsystem implements Subsystem {
     private double distanceToGoal = 0;
     private boolean driving = false;
 
-    public static final MecDriveSubsystem INSTANCE = new MecDriveSubsystem();
 
     //For calculated turret angle
     private static double goalAngle = 0;
@@ -44,6 +43,9 @@ public class MecDriveSubsystem implements Subsystem {
     private static final MotorEx fr = new MotorEx(UniConstants.DRIVE_FRONT_RIGHT_STRING).floatMode().reversed();
     private static final MotorEx bl = new MotorEx(UniConstants.DRIVE_BACK_LEFT_STRING).floatMode();
     private static final MotorEx br = new MotorEx(UniConstants.DRIVE_BACK_RIGHT_STRING).floatMode().reversed();
+
+    public static MecDriveSubsystem INSTANCE = new MecDriveSubsystem();
+
 
 
     public MecDriveSubsystem(){}

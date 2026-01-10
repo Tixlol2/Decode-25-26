@@ -29,9 +29,11 @@ public class BetterVisionTM implements Subsystem {
     private double distanceToGoal = 0;
     private double deltaAngle = 0;
 
-    public static final BetterVisionTM INSTANCE = new BetterVisionTM();
 
     private Timer timer = new Timer();
+
+    public static final BetterVisionTM INSTANCE = new BetterVisionTM();
+
 
     public BetterVisionTM() {}
 

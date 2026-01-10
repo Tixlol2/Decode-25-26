@@ -20,7 +20,7 @@ public class TurretSubsystem implements Subsystem {
     // put hardware, commands, etc here
     JoinedTelemetry telemetry;
 
-    public static final TurretSubsystem INSTANCE = new TurretSubsystem();
+
 
     MotorEx launcher = new MotorEx(UniConstants.LAUNCHER_STRING).floatMode();
 
@@ -48,6 +48,7 @@ public class TurretSubsystem implements Subsystem {
 
     public static turretState state = turretState.FORWARD;
 
+    public static final TurretSubsystem INSTANCE = new TurretSubsystem();
 
     public TurretSubsystem(){}
 

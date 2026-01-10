@@ -36,7 +36,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     public boolean isEnabled = false;
     public static boolean isReversed = false;
 
-    public static final IntakeSortingSubsystem INSTANCE = new IntakeSortingSubsystem();
+
 
     //Active motor
     MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
@@ -47,6 +47,8 @@ public class IntakeSortingSubsystem implements Subsystem {
     public static Slot leftSlot;
 
     public ArrayList<Slot> slots;
+
+    public static IntakeSortingSubsystem INSTANCE = new IntakeSortingSubsystem();
 
     public IntakeSortingSubsystem(){}
 
