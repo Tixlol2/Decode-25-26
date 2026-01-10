@@ -14,6 +14,9 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
@@ -162,75 +165,26 @@ public class IntakeSortingSubsystem implements Subsystem {
     }
 
     //BANGGGGGGGGGGG
-    public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern){
-        Slot first = leftSlot;
-        Slot second = backSlot;
-        Slot third = rightSlot;
-        ArrayList<Slot> used = new ArrayList<>();
+    public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern) {
+        ArrayList<Slot> result = new ArrayList<>();
+        Set<Slot> used = new HashSet<>();
 
-        if(getGreenCount() == 1 && getPurpleCount() == 2 && !pattern.contains(null)){
-            for(int i = 0; i < 3; i++){
-
-                UniConstants.slotState wanted = pattern.get(i);
-
-                for(int j = 0; j < 3; j++){
-
-                    if(pattern.get(j).equals(wanted) && !used.contains(slots.get(j))){
-                        used.add(slots.get(j));
-                        switch (i){
-                            case 0:
-                                first = slots.get(i);
-                                break;
-                            case 1:
-                                second = slots.get(i);
-                                break;
-                            case 2:
-                                third = slots.get(i);
-                                break;
-                        }
-                    }
+        for (UniConstants.slotState wanted : pattern) {
+            for (Slot slot : slots) {
+                if (slot.colorState == wanted && used.add(slot)) {
+                    result.add(slot);
+                    break;
                 }
             }
         }
-//        else {
-//             if(!allFull()) {
-//                if(leftSlot.isFull()){
-//                    first = leftSlot;
-//                    if(rightSlot.isFull()){
-//                        second = rightSlot;
-//                        third = backSlot;
-//                    } else {
-//                        second = backSlot;
-//                        third = rightSlot;
-//                    }
-//                }
-//                else if(rightSlot.isFull()){
-//                    first = rightSlot;
-//                    if(backSlot.isFull()){
-//                        second = backSlot;
-//                        third = leftSlot;
-//                    } else {
-//                        second = leftSlot;
-//                        third = backSlot;
-//                    }
-//                }
-//                else if(backSlot.isFull()){
-//                    first = backSlot;
-//                    if(rightSlot.isFull()){
-//                        second = rightSlot;
-//                        third = leftSlot;
-//                    } else {
-//                        second = leftSlot;
-//                        third = rightSlot;
-//                    }
-//                }
-//            }
-//        }
 
+        if(result.size() < 3){
+            return new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
+        }
 
-
-        return new ArrayList<>(Arrays.asList(first, second, third));
+        return result;
     }
+
 
     public boolean allFull() {
         return backSlot.isFull() && rightSlot.isFull() && leftSlot.isFull();
@@ -405,6 +359,7 @@ public class IntakeSortingSubsystem implements Subsystem {
 
 
         }
+
 
         public void setTelemetry(JoinedTelemetry telemetry){
             this.telemetry = telemetry;
