@@ -42,9 +42,6 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @Configurable
 public class Auto extends NextFTCOpMode {
     JoinedTelemetry joinedTelemetry;
-
-
-
     {
         addComponents(
                 new PedroComponent(Constants::createFollower),
@@ -104,7 +101,6 @@ public class Auto extends NextFTCOpMode {
                 TurretSubsystem.INSTANCE.SetMotorPower(.625),
                 new ParallelGroup(
                         Robot.INSTANCE.TurretObelisk(),
-
                         new FollowPath(paths.StartShoot),
                         new Delay(4) //For outtake
                 ),
@@ -112,7 +108,7 @@ public class Auto extends NextFTCOpMode {
 
                 Robot.INSTANCE.TurretGoal(),
 
-                Robot.INSTANCE.ShootWait(.7),
+                Robot.INSTANCE.ShootWait(),
                 new FollowPath(paths.ReadyIntakeTop),
                 new ParallelGroup(
                         new FollowPath(paths.IntakeTop),
@@ -120,7 +116,7 @@ public class Auto extends NextFTCOpMode {
                 ),
 //                Robot.INSTANCE.ActivePath(paths.IntakeTop, false, .75),
                 new FollowPath(paths.TopShoot, true),
-                Robot.INSTANCE.ShootWait(.7),
+                Robot.INSTANCE.ShootWait(),
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
                 new FollowPath(paths.ReadyIntakeMid),
                 new ParallelGroup(
@@ -129,7 +125,7 @@ public class Auto extends NextFTCOpMode {
                 ),
 //                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, .75),
                 new FollowPath(paths.MidShoot),
-                Robot.INSTANCE.ShootWait(.7),
+                Robot.INSTANCE.ShootWait(),
                 new ParallelGroup(
                         new FollowPath(paths.Park),
                         Robot.INSTANCE.StopSubsystems()

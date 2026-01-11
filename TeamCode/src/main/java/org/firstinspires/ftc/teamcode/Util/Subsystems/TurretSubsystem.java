@@ -50,8 +50,6 @@ public class TurretSubsystem implements Subsystem {
 
     public static final TurretSubsystem INSTANCE = new TurretSubsystem();
 
-    public TurretSubsystem(){}
-
 
 
     @Override

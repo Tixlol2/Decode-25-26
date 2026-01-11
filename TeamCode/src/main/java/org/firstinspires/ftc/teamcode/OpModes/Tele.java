@@ -66,7 +66,6 @@ public class Tele extends NextFTCOpMode {
 
     @Override
     public void onInit() {
-
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
     }
 
@@ -86,9 +85,7 @@ public class Tele extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-//        MecDriveSubsystem.INSTANCE.startTele();
         follower().startTeleopDrive();
-        //follower().setStartingPose(Robot.inTeleop ? (Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing) : follower().getPose());
         Robot.INSTANCE.setGlobalColor();
         createBindings();
         follower().setStartingPose(Auto.endPose);
@@ -133,13 +130,13 @@ public class Tele extends NextFTCOpMode {
             );
         }
 
-        if(gamepad1.right_bumper){
-            new SequentialGroup(
-                    shooter(Robot.order),
-                    new InstantCommand(() -> {follower().breakFollowing(); follower().startTeleopDrive();})
-            ).schedule();
-
-        }
+//        if(gamepad1.right_bumper){
+//            new SequentialGroup(
+//                    Robot.INSTANCE.ShootWait(),
+//                    new InstantCommand(() -> {follower().breakFollowing(); follower().startTeleopDrive();})
+//            ).schedule();
+//
+//        }
 
         Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
 
@@ -187,26 +184,13 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().x().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(debugPower);});
 
         //Shooting command
-//        Gamepads.gamepad1().rightBumper().whenBecomesTrue(
-//                new IfElseCommand(() -> autoShoot,
-//                        Robot.INSTANCE.PathShoot(),
-//                )
-//            );
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(Robot::ShootTest);
 
 
 
     }
 
-    public Command shooter(ArrayList<IntakeSortingSubsystem.Slot> order){
-        return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(Robot.order.get(0), false),
-                new Delay(.75),
-                IntakeSortingSubsystem.INSTANCE.Shoot(Robot.order.get(1), false),
-                new Delay(.75),
-                IntakeSortingSubsystem.INSTANCE.Shoot(Robot.order.get(2), true),
-                new InstantCommand(() -> Robot.shotTimer.reset())
-        );
-    }
+
 
 
     }

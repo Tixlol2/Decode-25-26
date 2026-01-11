@@ -39,10 +39,6 @@ public class MecDriveSubsystem implements Subsystem {
     private static double goalAngle = 0;
     private static double obeliskAngle = 0;
 
-    private static final MotorEx fl = new MotorEx(UniConstants.DRIVE_FRONT_LEFT_STRING).floatMode().reversed();
-    private static final MotorEx fr = new MotorEx(UniConstants.DRIVE_FRONT_RIGHT_STRING).floatMode().reversed();
-    private static final MotorEx bl = new MotorEx(UniConstants.DRIVE_BACK_LEFT_STRING).floatMode();
-    private static final MotorEx br = new MotorEx(UniConstants.DRIVE_BACK_RIGHT_STRING).floatMode().reversed();
 
     public static MecDriveSubsystem INSTANCE = new MecDriveSubsystem();
 
@@ -61,24 +57,13 @@ public class MecDriveSubsystem implements Subsystem {
 
     @Override
     public void periodic(){
-        //driving = !MecDriveSubsystem.INSTANCE.getFollower().getTeleopDriveVector().equals(new Vector(0, 0));
         updateDistanceAndAngle();
-        //follower.update();
     }
 
     public void startTele(){
         follower.startTeleopDrive();
         follower.update();
     }
-    public void updateTeleop(double forward, double strafe, double rotation, boolean botCentric){
-        if(follower != null) {
-            follower.setTeleOpDrive(forward, strafe, rotation, botCentric);
-            follower.update();
-        } else {
-            follower = Constants.createFollower(ActiveOpMode.hardwareMap());
-        }
-    }
-
     public void updateDistanceAndAngle() {
         double x = 0, y = 0, obX = 0, obY = 0;
 
@@ -141,43 +126,6 @@ public class MecDriveSubsystem implements Subsystem {
 
 
 
-    public Command FollowPathTime(PathChain path, boolean holdEnd, double seconds){
-        Timer timer = new Timer();
-        return new LambdaCommand("Follow Path Time Hold End: " + holdEnd)
-                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd); timer.reset(); Robot.automatedDrive = true;})
-                .setIsDone(() -> timer.getTimeSeconds() > seconds)
-                .setInterruptible(false)
-                .requires(MecDriveSubsystem.INSTANCE);
-    }
-
-    public Command FollowPathTime(PathChain path, boolean holdEnd, double maxPower, double seconds){
-        Timer timer = new Timer();
-        return new LambdaCommand("Follow Path Time Hold End: " + holdEnd)
-                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd); timer.reset(); Robot.automatedDrive = true;})
-                .setIsDone(() -> timer.getTimeSeconds() > seconds)
-                .setInterruptible(false)
-                .requires(MecDriveSubsystem.INSTANCE);
-    }
-
-    public Command PushForward(double power, double distance, boolean useIntake){
-        follower.startTeleopDrive();
-        Pose startDistance = follower.getPose();
-        Robot.automatedDrive = true;
-        return new SequentialGroup(
-                new IfElseCommand(() -> useIntake, IntakeSortingSubsystem.INSTANCE.runActive(), IntakeSortingSubsystem.INSTANCE.stopActive()),
-                new LambdaCommand()
-                        .setStart(() -> {
-                            setAllMotorPower(power);
-                        })
-
-                        .setIsDone(() -> Math.abs(follower.getPose().distanceFrom(startDistance)) >= distance || driving)
-                        .setStop(inter -> {
-                            setAllMotorPower(0);
-                        })
-                        .requires(INSTANCE, IntakeSortingSubsystem.INSTANCE)
-                        .setInterruptible(true)
-        );
-    }
 
     public Command TurnTo(double degree){
         return new LambdaCommand()
@@ -191,13 +139,7 @@ public class MecDriveSubsystem implements Subsystem {
 
     }
 
-    public void setAllMotorPower(double power){
-        power = Math.max(-1, Math.min(1, power));
-        fl.setPower(power);
-        fr.setPower(power);
-        bl.setPower(power);
-        br.setPower(power);
-    }
+
 
     public double getDistanceToGoal(){
         return distanceToGoal;
@@ -209,11 +151,6 @@ public class MecDriveSubsystem implements Subsystem {
 
     public double getObeliskAngle(){
         return obeliskAngle;
-    }
-
-
-    public void setPose(Pose pose) {
-        follower.setPose(pose);
     }
 
     public double getHeadingDegrees(){
@@ -236,12 +173,6 @@ public class MecDriveSubsystem implements Subsystem {
         return follower.pathBuilder()
                 .addPath(new BezierLine(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.blueShortScore : Poses.redShortScore))
                 .setConstantHeadingInterpolation(color == UniConstants.teamColor.BLUE ? Poses.blueShortScore.getHeading() : Poses.redShortScore.getHeading()).build();
-    }
-
-    public void setStartPose(Pose pose){
-        if(follower.atPose(new Pose(0, 0), 1, 1)){
-            follower.setStartingPose(pose);
-        }
     }
 
     public Follower getFollower(){

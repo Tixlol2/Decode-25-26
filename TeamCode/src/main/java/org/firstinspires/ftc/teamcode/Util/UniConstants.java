@@ -129,6 +129,9 @@ CONFIG
     public static double ANGLE_BLUE_GOAL_DEGREES = 137;
     public static double ANGLE_RED_GOAL_DEGREES = 44;
 
+    public static double standardWait = .75;
+
+
 
 
 
