@@ -4,25 +4,20 @@ import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
-import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
-import dev.nextftc.core.commands.utility.NullCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
@@ -30,27 +25,26 @@ import dev.nextftc.hardware.impl.ServoEx;
 
 @Configurable
 public class IntakeSortingSubsystem implements Subsystem {
-    //Class variables
-    JoinedTelemetry telemetry;
-    public boolean isEnabled = false;
     public static boolean isReversed = false;
-
-    //Active motor
-    MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
     public static UniConstants.servoState state = UniConstants.servoState.DOWN;
-
     public static Slot backSlot;
     public static Slot rightSlot;
     public static Slot leftSlot;
-
-    public ArrayList<Slot> slots;
-
     public static IntakeSortingSubsystem INSTANCE = new IntakeSortingSubsystem();
+    //BANGGGGGGGGGGG
+    public static ArrayList<Slot> result;
+    public boolean isEnabled = false;
+    public ArrayList<Slot> slots;
+    //Class variables
+    JoinedTelemetry telemetry;
+    //Active motor
+    MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
 
-    public IntakeSortingSubsystem(){}
+    public IntakeSortingSubsystem() {
+    }
 
     @Override
-    public void initialize(){
+    public void initialize() {
         backSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, UniConstants.LIGHT_BACK_STRING, telemetry);
         rightSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, UniConstants.LIGHT_RIGHT_STRING, telemetry);
         leftSlot = new Slot(ActiveOpMode.hardwareMap(), UniConstants.FLICKER_LEFT_STRING, UniConstants.COLOR_SENSOR_SLOT_LEFT_STRING, UniConstants.LIGHT_LEFT_STRING, telemetry);
@@ -58,11 +52,10 @@ public class IntakeSortingSubsystem implements Subsystem {
         slots = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
     }
 
-
     @Override
     public void periodic() {
 
-        if(ActiveOpMode.isStarted()) {
+        if (ActiveOpMode.isStarted()) {
 
             backSlot.update();
             rightSlot.update();
@@ -81,44 +74,54 @@ public class IntakeSortingSubsystem implements Subsystem {
     }
 
     //Active Methods
-    public void disableActive(){
+    public void disableActive() {
         isEnabled = false;
     }
 
-    public void enableActive(){
+    public void enableActive() {
         isEnabled = true;
     }
 
-    public void reverseIntake(){
+    public void reverseIntake() {
         isReversed = true;
         enableActive();
     }
 
-    public void forwardIntake(){
+    public void forwardIntake() {
         isReversed = false;
         enableActive();
     }
-    public boolean shouldRumble(){return allFull();}
 
-    public Command runActive(){
-        return new InstantCommand(() -> {forwardIntake(); enableActive();});
+    public boolean shouldRumble() {
+        return allFull();
     }
-    public Command stopActive(){
+
+    public Command runActive() {
+        return new InstantCommand(() -> {
+            forwardIntake();
+            enableActive();
+        });
+    }
+
+    public Command stopActive() {
         return new InstantCommand(this::disableActive);
     }
 
     public Command setServoState(Slot slot, UniConstants.servoState state) {
-        return new InstantCommand(() -> {slot.setTargetPosition(state);}).named(slot.name + " Set Servo State");
+        return new InstantCommand(() -> {
+            slot.setTargetPosition(state);
+        }).named(slot.name + " Set Servo State");
     }
 
-    public Command Shoot(Slot slot, boolean isLast){
+    public Command Shoot(Slot slot, boolean isLast) {
         return new SequentialGroup(
                 setServoState(slot, UniConstants.servoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
                 setServoState(slot, UniConstants.servoState.DOWN)
         );
     }
-    public Command Shoot(Slot slot){
+
+    public Command Shoot(Slot slot) {
         return new SequentialGroup(
                 setServoState(slot, UniConstants.servoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
@@ -126,9 +129,6 @@ public class IntakeSortingSubsystem implements Subsystem {
         );
     }
 
-
-    //BANGGGGGGGGGGG
-    public static ArrayList<Slot> result;
     public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern) {
         result = new ArrayList<>();
         Set<Slot> used = new HashSet<>();
@@ -140,7 +140,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 }
             }
         }
-        if(result.size() < 3){
+        if (result.size() < 3) {
             result = new ArrayList<>(Arrays.asList(backSlot, leftSlot, rightSlot));
         }
         return result;
@@ -156,15 +156,14 @@ public class IntakeSortingSubsystem implements Subsystem {
     }
 
 
-
-    public void sendSlotTelemetry(UniConstants.loggingState state){
+    public void sendSlotTelemetry(UniConstants.loggingState state) {
         backSlot.sendTelemetry(state);
         rightSlot.sendTelemetry(state);
         leftSlot.sendTelemetry(state);
     }
 
-    public void sendTelemetry(UniConstants.loggingState state){
-        switch(state){
+    public void sendTelemetry(UniConstants.loggingState state) {
+        switch (state) {
             case DISABLED:
                 break;
             case ENABLED:
@@ -185,7 +184,7 @@ public class IntakeSortingSubsystem implements Subsystem {
         }
     }
 
-    public void setTelemetry(JoinedTelemetry telemetry){
+    public void setTelemetry(JoinedTelemetry telemetry) {
         this.telemetry = telemetry;
     }
 
@@ -197,15 +196,13 @@ public class IntakeSortingSubsystem implements Subsystem {
         private final ColorSensor colorSensor;
 
         String name = "";
-
+        double up = 0;
+        double down = 0;
         private UniConstants.slotState colorState = UniConstants.slotState.EMPTY;
         private UniConstants.servoState servoState = UniConstants.servoState.DOWN;
         private JoinedTelemetry telemetry;
 
-        double up = 0;
-        double down = 0;
-
-        public Slot(HardwareMap hardwareMap, String kickerServoName, String colorSensorName, String lightName, JoinedTelemetry telemetry){
+        public Slot(HardwareMap hardwareMap, String kickerServoName, String colorSensorName, String lightName, JoinedTelemetry telemetry) {
 
             kickerServo = new ServoEx(kickerServoName);
             light = new ServoEx(lightName);
@@ -215,7 +212,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             this.telemetry = telemetry;
 
             //Identify slot and assign servo constants
-            if(name.equals(UniConstants.FLICKER_BACK_STRING)){
+            if (name.equals(UniConstants.FLICKER_BACK_STRING)) {
                 up = UniConstants.FLICKER_BACK_UP; //Back up
                 down = UniConstants.FLICKER_BACK_DOWN; //Back down
             } else if (name.equals(UniConstants.FLICKER_LEFT_STRING)) {
@@ -227,10 +224,9 @@ public class IntakeSortingSubsystem implements Subsystem {
             }
 
 
-
         }
 
-        public void update(){
+        public void update() {
 
 //            //ONLY UNCOMMENT FOR TESTING
 //            if(name.equals(UniConstants.FLICKER_BACK_STRING)){
@@ -252,7 +248,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             light.setPosition(isFull() ? (colorState.equals(UniConstants.slotState.GREEN) ? .5 : .722) : 0);
         }
 
-        public String getName(){
+        public String getName() {
             return name;
         }
 
@@ -266,22 +262,22 @@ public class IntakeSortingSubsystem implements Subsystem {
                 colorState = UniConstants.slotState.GREEN;
             } else if (((red > green) && (blue > green)) && (alpha < 5000)) {
                 colorState = UniConstants.slotState.PURPLE;
-            } else{
+            } else {
                 colorState = UniConstants.slotState.EMPTY;
             }
 
 
         }
 
-        public UniConstants.slotState getColorState(){
+        public UniConstants.slotState getColorState() {
             return colorState;
         }
 
-        public UniConstants.servoState getTargetPosition(){
+        public UniConstants.servoState getTargetPosition() {
             return servoState;
         }
 
-        public void setTargetPosition(UniConstants.servoState state){
+        public void setTargetPosition(UniConstants.servoState state) {
             servoState = state;
         }
 
@@ -289,8 +285,8 @@ public class IntakeSortingSubsystem implements Subsystem {
             return (colorState == UniConstants.slotState.PURPLE) || (colorState == UniConstants.slotState.GREEN);
         }
 
-        public void sendTelemetry(UniConstants.loggingState state){
-            switch(state){
+        public void sendTelemetry(UniConstants.loggingState state) {
+            switch (state) {
                 case DISABLED:
                     break;
                 case ENABLED:
@@ -316,15 +312,10 @@ public class IntakeSortingSubsystem implements Subsystem {
             }
 
 
-
-
-
-
-
         }
 
 
-        public void setTelemetry(JoinedTelemetry telemetry){
+        public void setTelemetry(JoinedTelemetry telemetry) {
             this.telemetry = telemetry;
         }
 

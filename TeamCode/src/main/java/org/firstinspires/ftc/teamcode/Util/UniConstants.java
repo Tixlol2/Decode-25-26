@@ -49,90 +49,65 @@ CONFIG
     public static final DcMotorEx.Direction DRIVE_BACK_LEFT_DIRECTION = DcMotorEx.Direction.FORWARD;
     public static final DcMotorEx.Direction DRIVE_BACK_RIGHT_DIRECTION = DcMotorEx.Direction.REVERSE;
     public static final String PINPOINT_STRING = "pp";
-
+    //Outtake Subsystem
+    public static final String LAUNCHER_STRING = "LAUNCHER";
+    //Rotary Subsystem
+    public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
+    //Flickers
+    public static final String FLICKER_BACK_STRING = "FBS";
+    public static final String FLICKER_RIGHT_STRING = "FRS";
+    public static final String FLICKER_LEFT_STRING = "FLS";
+    //Turret Control
+    public static final String TURRET_STRING = "TURR";
+    public static final double MOTOR_TURRET_RATIO = (double) 28 / 92;
+    public static final double TURRET_TICKS_PER_DEGREE = (537.7 / MOTOR_TURRET_RATIO) / 360;
+    //Color sensors
+    public static final String COLOR_SENSOR_SLOT_BACK_STRING = "CSB";
+    public static final String COLOR_SENSOR_SLOT_RIGHT_STRING = "CSR";
+    public static final String COLOR_SENSOR_SLOT_LEFT_STRING = "CSL";
+    //Light Names
+    public static final String LIGHT_BACK_STRING = "BACK";
+    public static final String LIGHT_RIGHT_STRING = "RIGHT";
+    public static final String LIGHT_LEFT_STRING = "LEFT";
+    //Launcher Speed Calculation variables
+    public static final double ANGLE_OF_LAUNCHER_IN_DEGREES = 35;
+    public static final double HEIGHT_OF_ROBOT_IN_METERS = 0.35; //TODO: Check to make sure this is right
+    public static final double HEIGHT_TO_GOAL_WITH_CLEARANCE_METERS = (1.11125) - (HEIGHT_OF_ROBOT_IN_METERS);
+    public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
+    public static double FLICKER_TIME_UP = 1.2;
+    public static double FLICKER_TIME_DOWN = .5;
+    public static double FAST_FLICKER_TIME_UP = .5;
+    public static double FAST_FLICKER_TIME_DOWN = .125;
+    public static double FLICKER_BACK_UP = .93;
+    public static double FLICKER_BACK_DOWN = .55;
+    public static double FLICKER_RIGHT_DOWN = .52;
+    public static double FLICKER_RIGHT_UP = .15;
+    public static double FLICKER_LEFT_DOWN = .19;
+    public static double FLICKER_LEFT_UP = .62;
+    public static double ANGLE_BLUE_GOAL_DEGREES = 137;
+    public static double ANGLE_RED_GOAL_DEGREES = 44;
+    public static double standardWait = .75;
     //Enums
-    public enum loggingState{
+    public enum loggingState {
         DISABLED,
         ENABLED,
         EXTREME
     }
 
-    public enum slotState{
+    public enum slotState {
         PURPLE,
         GREEN,
         EMPTY
     }
-
     public enum teamColor {
         RED,
         BLUE
     }
 
-    public enum servoState{
+    public enum servoState {
         DOWN,
         UP
     }
-
-
-    //Outtake Subsystem
-    public static final String LAUNCHER_STRING  = "LAUNCHER";
-
-
-    //Rotary Subsystem
-    public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
-
-    //Flickers
-    public static final String FLICKER_BACK_STRING = "FBS";
-    public static final String FLICKER_RIGHT_STRING = "FRS";
-    public static final String FLICKER_LEFT_STRING = "FLS";
-
-
-    //Turret Control
-    public static final String TURRET_STRING = "TURR";
-    public static final double MOTOR_TURRET_RATIO = (double) 28 / 92;
-    public static final double TURRET_TICKS_PER_DEGREE = (537.7 / MOTOR_TURRET_RATIO) / 360;
-
-
-    //Color sensors
-    public static final String COLOR_SENSOR_SLOT_BACK_STRING = "CSB";
-    public static final String COLOR_SENSOR_SLOT_RIGHT_STRING = "CSR";
-    public static final String COLOR_SENSOR_SLOT_LEFT_STRING = "CSL";
-
-    //Light Names
-    public static final String LIGHT_BACK_STRING = "BACK";
-    public static final String LIGHT_RIGHT_STRING = "RIGHT";
-    public static final String LIGHT_LEFT_STRING = "LEFT";
-
-    //Launcher Speed Calculation variables
-    public static final double ANGLE_OF_LAUNCHER_IN_DEGREES = 35;
-    public static  final double HEIGHT_OF_ROBOT_IN_METERS = 0.35; //TODO: Check to make sure this is right
-    public static  final double HEIGHT_TO_GOAL_WITH_CLEARANCE_METERS = (1.11125) - (HEIGHT_OF_ROBOT_IN_METERS);
-
-
-
-    public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
-    public static double FLICKER_TIME_UP = 1.2;
-    public static double FLICKER_TIME_DOWN = .5;
-
-    public static double FAST_FLICKER_TIME_UP = .5;
-    public static double FAST_FLICKER_TIME_DOWN = .125;
-
-    public static  double FLICKER_BACK_UP = .93;
-    public static  double FLICKER_BACK_DOWN = .55;
-
-    public static  double FLICKER_RIGHT_DOWN = .52;
-    public static  double FLICKER_RIGHT_UP = .15;
-
-    public static  double FLICKER_LEFT_DOWN = .19;
-    public static  double FLICKER_LEFT_UP = .62;
-
-    public static double ANGLE_BLUE_GOAL_DEGREES = 137;
-    public static double ANGLE_RED_GOAL_DEGREES = 44;
-
-    public static double standardWait = .75;
-
-
-
 
 
 }

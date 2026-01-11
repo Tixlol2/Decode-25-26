@@ -5,20 +5,19 @@ import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.ParallelGroup;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
@@ -39,20 +38,14 @@ public class Robot extends SubsystemGroup {
     public static UniConstants.teamColor color = UniConstants.teamColor.BLUE;
 
     public static UniConstants.loggingState loggingState = UniConstants.loggingState.ENABLED;
-
-    private double distanceToGoal = 0;
-    private JoinedTelemetry joinedTelemetry;
-
     public static boolean inTeleop = true;
     public static boolean automatedDrive = false;
-
     public static Timer shotTimer = new Timer();
-
-    ElapsedTime loopTimer = new ElapsedTime();
-
     public static ArrayList<IntakeSortingSubsystem.Slot> order;
-
     public static double standardWaitTime = .75;
+    ElapsedTime loopTimer = new ElapsedTime();
+    private double distanceToGoal = 0;
+    private JoinedTelemetry joinedTelemetry;
 
     private Robot() {
         super(
@@ -63,23 +56,23 @@ public class Robot extends SubsystemGroup {
         );
     }
 
+
+
     @Override
-    public void initialize(){
-
-
+    public void initialize() {
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         setGlobals();
         order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
     }
 
     @Override
-    public void periodic(){
+    public void periodic() {
 
         loopTimer.reset();
 
         distanceToGoal = MecDriveSubsystem.INSTANCE.getDistanceToGoal();
         //Handles turret aiming
-        switch(TurretSubsystem.state){
+        switch (TurretSubsystem.state) {
             case FORWARD:
                 TurretSubsystem.INSTANCE.setTargetAngle(0);
                 break;
@@ -93,7 +86,7 @@ public class Robot extends SubsystemGroup {
 
 
         //Handles pattern updating
-        if(pattern.contains(null)){
+        if (pattern.contains(null)) {
             pattern = BetterVisionTM.INSTANCE.getPattern();
             patternFull = !pattern.contains(null);
         }
@@ -110,22 +103,22 @@ public class Robot extends SubsystemGroup {
 
     }
 
-    public void orderTele(){
+    public void orderTele() {
         joinedTelemetry.addData("First: ", order.get(0).name);
         joinedTelemetry.addData("Second: ", order.get(1).name);
         joinedTelemetry.addData("Third: ", order.get(2).name);
 
     }
 
-    public double getDistanceToGoal(){
+    public double getDistanceToGoal() {
         return distanceToGoal;
     }
 
-    public JoinedTelemetry getJoinedTelemetry(){
+    public JoinedTelemetry getJoinedTelemetry() {
         return joinedTelemetry;
     }
 
-    public Command ShootWait(double waitTime){
+    public Command ShootWait(double waitTime) {
         order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
         return new SequentialGroup(
                 IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
@@ -137,7 +130,7 @@ public class Robot extends SubsystemGroup {
         );
     }
 
-    public Command ShootWait(){
+    public Command ShootWait() {
         order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
         return new SequentialGroup(
                 IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0)),
@@ -149,26 +142,35 @@ public class Robot extends SubsystemGroup {
         );
     }
 
-    public static void ShootTest(){
-        for(UniConstants.slotState state : pattern){
-            for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
-                if(slot.getColorState() == state){
+
+
+    public static void shootTest() {
+        Set<IntakeSortingSubsystem.Slot> used = new HashSet<>();
+        for (UniConstants.slotState wanted : pattern) {
+            for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
+                if (slot.getColorState() == wanted && used.add(slot)) {
                     IntakeSortingSubsystem.INSTANCE.Shoot(slot).schedule();
+                    break;
                 }
             }
         }
 
-        if(!IntakeSortingSubsystem.INSTANCE.allEmpty()){
-            for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
-                if(slot.isFull()){
+        if (!IntakeSortingSubsystem.INSTANCE.allEmpty()) {
+            for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
+                if (slot.isFull()) {
                     IntakeSortingSubsystem.INSTANCE.Shoot(slot).schedule();
                 }
             }
         }
-
     }
 
-    public Command ShootWait(ArrayList<IntakeSortingSubsystem.Slot> slots){
+    public Command ShootTest(){
+        return new LambdaCommand()
+                .setStart(Robot::shootTest)
+                .setIsDone(() -> IntakeSortingSubsystem.INSTANCE.allEmpty());
+    }
+
+    public Command ShootWait(ArrayList<IntakeSortingSubsystem.Slot> slots) {
         return new SequentialGroup(
                 IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(0)),
                 new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
@@ -181,49 +183,45 @@ public class Robot extends SubsystemGroup {
 
 
 
-    public Command Shoot(){
-        ArrayList<IntakeSortingSubsystem.Slot> order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
-        return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true),
-                new InstantCommand(() -> Robot.shotTimer.reset())
-        );
-    }
-
-    public Command TurretForward(){
+    public Command TurretForward() {
         return new LambdaCommand()
-                .setStart(() -> {TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.FORWARD);})
+                .setStart(() -> {
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.FORWARD);
+                })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
-    public Command TurretGoal(){
+    public Command TurretGoal() {
         return new LambdaCommand()
-                .setStart(() -> {TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.GOAL);})
+                .setStart(() -> {
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.GOAL);
+                })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
-    public Command TurretObelisk(){
+    public Command TurretObelisk() {
         return new LambdaCommand()
-                .setStart(() -> {TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.OBELISK);})
+                .setStart(() -> {
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.OBELISK);
+                })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
 
-    public Command FaceGoal(){
+    public Command FaceGoal() {
         return new ParallelGroup(
                 TurretGoal(),
                 new TurnTo(color == UniConstants.teamColor.BLUE ? Angle.fromDeg(UniConstants.ANGLE_BLUE_GOAL_DEGREES) : Angle.fromDeg(UniConstants.ANGLE_RED_GOAL_DEGREES))
         );
     }
 
-    public Command Park(){
+    public Command Park() {
         return new ParallelGroup(
                 StopSubsystems(),
                 new FollowPath(MecDriveSubsystem.INSTANCE.createParkPath(), true)
         );
     }
 
-    public Command StopSubsystems(){
+    public Command StopSubsystems() {
         return new ParallelGroup(
                 TurretForward(),
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
@@ -231,46 +229,31 @@ public class Robot extends SubsystemGroup {
         );
     }
 
-    public Command ActivePath(PathChain path){
-        return new ParallelGroup(
-                IntakeSortingSubsystem.INSTANCE.runActive(),
-                new FollowPath(path)
-        );
-    }
-
-    public Command ActivePath(PathChain path, boolean holdEnd, double maxPower){
-        return new ParallelGroup(
-                IntakeSortingSubsystem.INSTANCE.runActive(),
-                new FollowPath(path, holdEnd, maxPower)
-        );
-    }
-
-    public void setGlobalTelemetry(){
+    public void setGlobalTelemetry() {
         MecDriveSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         TurretSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         IntakeSortingSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         BetterVisionTM.INSTANCE.setTelemetry(joinedTelemetry);
     }
 
-    public void setGlobalColor(){
+    public void setGlobalColor() {
         MecDriveSubsystem.INSTANCE.setColor(color);
         BetterVisionTM.INSTANCE.setColor(color);
 
     }
 
-    public void setGlobals(){
+    public void setGlobals() {
         setGlobalTelemetry();
         setGlobalColor();
     }
 
 
-
-    public boolean withinRange(double value, double target, double range){
+    public boolean withinRange(double value, double target, double range) {
         return Math.abs(value - target) < range;
     }
 
 
-    public Command PathShoot(){
+    public Command PathShoot() {
         return new SequentialGroup(
                 Robot.INSTANCE.TurretGoal(),
                 new ParallelGroup(
@@ -287,8 +270,6 @@ public class Robot extends SubsystemGroup {
                 })
         );
     }
-
-
 
 
 }

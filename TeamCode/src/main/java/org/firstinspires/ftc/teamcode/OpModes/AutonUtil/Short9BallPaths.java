@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.OpModes.AutonUtil;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Util.Poses;
@@ -22,8 +21,8 @@ public class Short9BallPaths {
 
     public PathChain Park;
 
-    public Short9BallPaths(Follower follower, UniConstants.teamColor color){
-        if(color == UniConstants.teamColor.BLUE){
+    public Short9BallPaths(Follower follower, UniConstants.teamColor color) {
+        if (color == UniConstants.teamColor.BLUE) {
             blueShort(follower);
         } else {
             redShort(follower);
@@ -87,7 +86,7 @@ public class Short9BallPaths {
 
         TopShoot = follower
                 .pathBuilder()
-                .addPath(new BezierLine(Poses.redActiveTopStop,  Poses.redShortScore))
+                .addPath(new BezierLine(Poses.redActiveTopStop, Poses.redShortScore))
                 .setConstantHeadingInterpolation(Math.toRadians(37))
                 .build();
     }
@@ -152,7 +151,7 @@ public class Short9BallPaths {
 
         MidShoot = follower
                 .pathBuilder()
-                .addPath(new BezierCurve(Poses.blueActiveMidStop,Poses.blueMidCP, Poses.blueShortScore))
+                .addPath(new BezierCurve(Poses.blueActiveMidStop, Poses.blueMidCP, Poses.blueShortScore))
                 .setConstantHeadingInterpolation(Math.toRadians(144))
                 .build();
 

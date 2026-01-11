@@ -6,48 +6,38 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Poses;
-import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
-import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
-import dev.nextftc.hardware.impl.MotorEx;
 
 @Configurable
 //TODO: Tune all constants to ensure correctness awesome - prob not needed
 public class MecDriveSubsystem implements Subsystem {
-    //Class variables
-    JoinedTelemetry telemetry;
-    UniConstants.teamColor color = UniConstants.teamColor.BLUE;
     public static boolean debug = false;
-    private Follower follower;
-    private double distanceToGoal = 0;
-    private boolean driving = false;
-
-
+    public static MecDriveSubsystem INSTANCE = new MecDriveSubsystem();
     //For calculated turret angle
     private static double goalAngle = 0;
     private static double obeliskAngle = 0;
+    //Class variables
+    JoinedTelemetry telemetry;
+    UniConstants.teamColor color = UniConstants.teamColor.BLUE;
+    private Follower follower;
+    private double distanceToGoal = 0;
+    private final boolean driving = false;
 
 
-    public static MecDriveSubsystem INSTANCE = new MecDriveSubsystem();
-
-
-
-    public MecDriveSubsystem(){}
+    public MecDriveSubsystem() {
+    }
 
     @Override
-    public void initialize(){
+    public void initialize() {
         color = Robot.color;
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         follower = PedroComponent.follower();
@@ -56,14 +46,15 @@ public class MecDriveSubsystem implements Subsystem {
 
 
     @Override
-    public void periodic(){
+    public void periodic() {
         updateDistanceAndAngle();
     }
 
-    public void startTele(){
+    public void startTele() {
         follower.startTeleopDrive();
         follower.update();
     }
+
     public void updateDistanceAndAngle() {
         double x = 0, y = 0, obX = 0, obY = 0;
 
@@ -108,31 +99,38 @@ public class MecDriveSubsystem implements Subsystem {
     }
 
 
-    public Command FollowPath(PathChain path, boolean holdEnd){
+    public Command FollowPath(PathChain path, boolean holdEnd) {
         return new LambdaCommand("Follow Path Hold End: " + holdEnd)
-                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd); Robot.automatedDrive = true;})
+                .setStart(() -> {
+                    MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd);
+                    Robot.automatedDrive = true;
+                })
                 .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 1))
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
     }
 
-    public Command FollowPath(PathChain path, boolean holdEnd, double maxPower){
+    public Command FollowPath(PathChain path, boolean holdEnd, double maxPower) {
         return new LambdaCommand("Follow Path Hold End: " + holdEnd)
-                .setStart(() -> {MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd); Robot.automatedDrive = true;})
+                .setStart(() -> {
+                    MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd);
+                    Robot.automatedDrive = true;
+                })
                 .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3) || driving)
                 .setInterruptible(false)
                 .requires(MecDriveSubsystem.INSTANCE);
     }
 
 
-
-
-    public Command TurnTo(double degree){
+    public Command TurnTo(double degree) {
         return new LambdaCommand()
-                .setStart(() -> {follower.turnTo(Math.toRadians(degree)); Robot.automatedDrive = true;})
+                .setStart(() -> {
+                    follower.turnTo(Math.toRadians(degree));
+                    Robot.automatedDrive = true;
+                })
                 .setIsDone(() -> Math.abs(Math.toDegrees(follower.getPose().getHeading()) - degree) < 1d)
-                .setStop( interrupted -> {
-                    if(Robot.inTeleop){
+                .setStop(interrupted -> {
+                    if (Robot.inTeleop) {
                         follower.startTeleopDrive();
                     }
                 });
@@ -140,27 +138,27 @@ public class MecDriveSubsystem implements Subsystem {
     }
 
 
-
-    public double getDistanceToGoal(){
+    public double getDistanceToGoal() {
         return distanceToGoal;
     }
 
-    public double getGoalAngle(){
+    public double getGoalAngle() {
         return goalAngle;
     }
 
-    public double getObeliskAngle(){
+    public double getObeliskAngle() {
         return obeliskAngle;
     }
 
-    public double getHeadingDegrees(){
+    public double getHeadingDegrees() {
         return Math.toDegrees(follower.getPose().getHeading());
     }
 
-    public void setColor(UniConstants.teamColor color){
+    public void setColor(UniConstants.teamColor color) {
         this.color = color;
     }
-    public PathChain createParkPath(){
+
+    public PathChain createParkPath() {
         return follower.pathBuilder()
                 .addPath((follower.getPose().getX() >= 72) ?
                         new BezierCurve(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark, color == UniConstants.teamColor.BLUE ? Poses.blueParkCP : Poses.redParkCP) :
@@ -169,18 +167,18 @@ public class MecDriveSubsystem implements Subsystem {
     }
 
 
-    public PathChain createShootingPath(){
+    public PathChain createShootingPath() {
         return follower.pathBuilder()
                 .addPath(new BezierLine(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.blueShortScore : Poses.redShortScore))
                 .setConstantHeadingInterpolation(color == UniConstants.teamColor.BLUE ? Poses.blueShortScore.getHeading() : Poses.redShortScore.getHeading()).build();
     }
 
-    public Follower getFollower(){
+    public Follower getFollower() {
         return follower;
     }
 
-    public void sendTelemetry(UniConstants.loggingState state){
-        switch(state){
+    public void sendTelemetry(UniConstants.loggingState state) {
+        switch (state) {
             case DISABLED:
                 break;
             case ENABLED:
@@ -200,10 +198,9 @@ public class MecDriveSubsystem implements Subsystem {
         }
     }
 
-    public void setTelemetry(JoinedTelemetry telemetry){
+    public void setTelemetry(JoinedTelemetry telemetry) {
         this.telemetry = telemetry;
     }
-
 
 
 }

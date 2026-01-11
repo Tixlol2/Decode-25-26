@@ -13,7 +13,9 @@ public class Timer {
     /**
      * Constructor for Timer.
      */
-    public Timer() {reset();}
+    public Timer() {
+        reset();
+    }
 
     /**
      * Resets the timer.
@@ -24,6 +26,7 @@ public class Timer {
 
     /**
      * Gets the time in nanoseconds.
+     *
      * @return The time in nanoseconds
      */
     public long getTime() {
@@ -32,10 +35,11 @@ public class Timer {
 
     /**
      * Gets the time in seconds.
+     *
      * @return The time in seconds
      */
     public double getTimeSeconds() {
-        return (getTime()/ Math.pow(10.0,9));
+        return (getTime() / Math.pow(10.0, 9));
     }
 
 

@@ -46,7 +46,6 @@ public class Constants {
             .maxPower(1);
 
 
-
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(3.5)
             .strafePodX(4)

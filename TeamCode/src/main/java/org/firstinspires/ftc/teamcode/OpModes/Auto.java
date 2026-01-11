@@ -20,13 +20,10 @@ import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.ParallelGroup;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
@@ -41,7 +38,13 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @Autonomous(name = "Auto", group = "Main") //The name and group
 @Configurable
 public class Auto extends NextFTCOpMode {
+    public static Pose endPose = new Pose();
     JoinedTelemetry joinedTelemetry;
+
+//    public static Pose startPose = Poses.blueGoalTopStartFacing;
+    Supplier<PathChain> shootPath;
+    Short9BallPaths paths;
+
     {
         addComponents(
                 new PedroComponent(Constants::createFollower),
@@ -50,16 +53,6 @@ public class Auto extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         ); //Subsystems
     }
-
-//    public static Pose startPose = Poses.blueGoalTopStartFacing;
-
-    Supplier<PathChain> shootPath;
-
-    public static Pose endPose = new Pose();
-
-
-    Short9BallPaths paths;
-
 
     @Override
     public void onInit() {
@@ -90,8 +83,6 @@ public class Auto extends NextFTCOpMode {
     }
 
 
-
-
     @Override
     public void onStartButtonPressed() {
         follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
@@ -104,7 +95,9 @@ public class Auto extends NextFTCOpMode {
                         new FollowPath(paths.StartShoot),
                         new Delay(4) //For outtake
                 ),
-                new InstantCommand(() -> {Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);}),
+                new InstantCommand(() -> {
+                    Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
+                }),
 
                 Robot.INSTANCE.TurretGoal(),
 
@@ -120,8 +113,8 @@ public class Auto extends NextFTCOpMode {
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
                 new FollowPath(paths.ReadyIntakeMid),
                 new ParallelGroup(
-                new FollowPath(paths.IntakeMid),
-                IntakeSortingSubsystem.INSTANCE.runActive()
+                        new FollowPath(paths.IntakeMid),
+                        IntakeSortingSubsystem.INSTANCE.runActive()
                 ),
 //                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, .75),
                 new FollowPath(paths.MidShoot),

@@ -30,12 +30,10 @@ public class VisionTesting extends OpMode {
             .setDrawTagOutline(true)
             .setDrawAxes(true)
             .setDrawCubeProjection(true)
-            .build();;
+            .build();
     VisionPortal visionPortal;
 
     ArrayList<AprilTagDetection> detections = new ArrayList<>();
-
-
 
 
     AprilTagDetection detection;
@@ -56,7 +54,6 @@ public class VisionTesting extends OpMode {
                 .build();
 
 
-
     }
 
     @Override
@@ -73,7 +70,7 @@ public class VisionTesting extends OpMode {
             telemetry.addData("Distance To AprilTag ", detections.get(i).ftcPose.range);
             telemetry.addData("Change In Angle To Face AprilTag ", detections.get(i).ftcPose.bearing);
             telemetry.addLine();
-            if(UniConstants.obeliskIDs.contains(detection.id)){
+            if (UniConstants.obeliskIDs.contains(detection.id)) {
                 telemetry.addLine("If ID is Obelisk: ");
                 telemetry.addData("Pattern String ", getPatternAsString(obeliskTargetPattern(detection.id)));
                 telemetry.addData("Pattern Array ", obeliskTargetPattern(detection.id));
@@ -102,11 +99,11 @@ public class VisionTesting extends OpMode {
         }
     }
 
-    public String getPatternAsString(ArrayList<UniConstants.slotState> pattern){
+    public String getPatternAsString(ArrayList<UniConstants.slotState> pattern) {
         StringBuilder returnString = new StringBuilder();
 
-        for(UniConstants.slotState state : pattern){
-            switch(state) {
+        for (UniConstants.slotState state : pattern) {
+            switch (state) {
                 case GREEN:
                     returnString.append("G");
                     break;

@@ -7,8 +7,6 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
-import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
@@ -17,29 +15,27 @@ import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
-import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
-import dev.nextftc.core.commands.delays.Delay;
-import dev.nextftc.core.commands.groups.SequentialGroup;
-import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.PedroComponent;
-import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
-import kotlin.time.Instant;
 
 //Written by Noah Nottingham - 6566 Circuit Breakers
 
 @TeleOp(name = "Tele", group = "Main") //The name and group
 @Configurable
 public class Tele extends NextFTCOpMode {
+
+    public static double debugPower = .9;
+    JoinedTelemetry joinedTelemetry;
+    Timer rumblingTimer = new Timer();
+    private boolean isSlowed = false;
+    private boolean autoShoot = true;
+    private final boolean botCentric = true;
+    private final boolean enableRumble = false;
 
     {
         addComponents(
@@ -49,20 +45,6 @@ public class Tele extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         ); //Subsystems
     }
-
-
-    private boolean isSlowed = false;
-    private boolean autoShoot = true;
-
-    JoinedTelemetry joinedTelemetry;
-    private boolean botCentric = true;
-
-    private boolean enableRumble = false;
-    Timer rumblingTimer = new Timer();
-
-    public static double debugPower = .9;
-
-
 
     @Override
     public void onInit() {
@@ -105,23 +87,22 @@ public class Tele extends NextFTCOpMode {
         } //Reverse Active and Spin
         else if (gamepad1.left_trigger > 0) {
             IntakeSortingSubsystem.INSTANCE.reverseIntake();
-        }
-        else {
+        } else {
             IntakeSortingSubsystem.INSTANCE.disableActive();
         }
 
-        if(IntakeSortingSubsystem.INSTANCE.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble){
+        if (IntakeSortingSubsystem.INSTANCE.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble) {
             gamepad1.rumble(1000);
             rumblingTimer.reset();
         }
 
-        if ((gamepad1.yWasPressed())){
+        if ((gamepad1.yWasPressed())) {
             CommandManager.INSTANCE.cancelAll();
             follower().startTeleopDrive();
             Robot.automatedDrive = false;
         }
 
-        if(!Robot.automatedDrive){
+        if (!Robot.automatedDrive) {
             follower().setTeleOpDrive(
                     -gamepad1.left_stick_y * (isSlowed ? .25 : 1),
                     -gamepad1.left_stick_x * (isSlowed ? .25 : 1),
@@ -153,7 +134,7 @@ public class Tele extends NextFTCOpMode {
 
     }
 
-    void createBindings(){
+    void createBindings() {
 
         //Disable active when triggers not held down
         //Gamepads.gamepad1().rightTrigger().atMost(.1).and(Gamepads.gamepad1().leftTrigger().atMost(.1)).whenFalse(IntakeSortingSubsystem.INSTANCE::disableActive);
@@ -175,22 +156,27 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(() -> Robot.INSTANCE.TurretForward().schedule());
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(() -> Robot.INSTANCE.TurretGoal().schedule());
         Gamepads.gamepad1().dpadDown().whenBecomesTrue(Robot.INSTANCE.Park());
-        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(-.7);});
+        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {
+            TurretSubsystem.INSTANCE.setMotorPower(-.7);
+        });
 
 
         //Face buttons
-        Gamepads.gamepad1().a().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(.65);});
-        Gamepads.gamepad1().b().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(0);});
-        Gamepads.gamepad1().x().whenBecomesTrue(() -> {TurretSubsystem.INSTANCE.setMotorPower(debugPower);});
+        Gamepads.gamepad1().a().whenBecomesTrue(() -> {
+            TurretSubsystem.INSTANCE.setMotorPower(.65);
+        });
+        Gamepads.gamepad1().b().whenBecomesTrue(() -> {
+            TurretSubsystem.INSTANCE.setMotorPower(0);
+        });
+        Gamepads.gamepad1().x().whenBecomesTrue(() -> {
+            TurretSubsystem.INSTANCE.setMotorPower(debugPower);
+        });
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(Robot::ShootTest);
-
-
-
-    }
-
-
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(Robot::shootTest);
 
 
     }
+
+
+}
