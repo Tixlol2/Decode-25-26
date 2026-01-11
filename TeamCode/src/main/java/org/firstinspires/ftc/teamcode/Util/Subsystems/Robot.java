@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
@@ -50,6 +51,7 @@ public class Robot extends SubsystemGroup {
 
     ElapsedTime loopTimer = new ElapsedTime();
 
+    public static ArrayList<IntakeSortingSubsystem.Slot> order;
 
     public static double standardWaitTime = .75;
 
@@ -65,9 +67,10 @@ public class Robot extends SubsystemGroup {
     @Override
     public void initialize(){
 
+
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         setGlobals();
-
+        order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
     }
 
     @Override
@@ -82,10 +85,10 @@ public class Robot extends SubsystemGroup {
                 TurretSubsystem.INSTANCE.setTargetAngle(0);
                 break;
             case GOAL:
-                TurretSubsystem.INSTANCE.setTargetAngle(MecDriveSubsystem.INSTANCE.getGoalAngle());
+                TurretSubsystem.INSTANCE.setTargetAngle(-MecDriveSubsystem.INSTANCE.getGoalAngle());
                 break;
             case OBELISK:
-                TurretSubsystem.INSTANCE.setTargetAngle(MecDriveSubsystem.INSTANCE.getObeliskAngle());
+                TurretSubsystem.INSTANCE.setTargetAngle(-MecDriveSubsystem.INSTANCE.getObeliskAngle());
                 break;
         }
 
@@ -96,12 +99,23 @@ public class Robot extends SubsystemGroup {
             patternFull = !pattern.contains(null);
         }
 
+        order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
 
         joinedTelemetry.addData("Loop Time (ms) ", loopTimer.milliseconds());
         joinedTelemetry.addData("Pattern: ", pattern);
         joinedTelemetry.addData("Pattern Full: ", patternFull);
+        orderTele();
+
 
         joinedTelemetry.update();
+
+    }
+
+    public void orderTele(){
+
+        joinedTelemetry.addData("First: ", order.get(0).name);
+        joinedTelemetry.addData("Second: ", order.get(1).name);
+        joinedTelemetry.addData("Third: ", order.get(2).name);
 
     }
 
@@ -126,13 +140,13 @@ public class Robot extends SubsystemGroup {
     }
 
     public Command ShootWait(double waitTime){
-        ArrayList<IntakeSortingSubsystem.Slot> order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
+        order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
         return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
+                IntakeSortingSubsystem.INSTANCE.Shoot(Robot.order.get(0), false),
                 new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
+                IntakeSortingSubsystem.INSTANCE.Shoot(Robot.order.get(1), false),
                 new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true),
+                IntakeSortingSubsystem.INSTANCE.Shoot(Robot.order.get(2), true),
                 new InstantCommand(() -> Robot.shotTimer.reset())
         );
     }
@@ -237,11 +251,12 @@ public class Robot extends SubsystemGroup {
 
     public Command PathShoot(){
         return new SequentialGroup(
-                Robot.INSTANCE.TurretForward(),
+                Robot.INSTANCE.TurretGoal(),
                 new ParallelGroup(
                         //new IfElseCommand(() -> TurretSubsystem.debugPower == .75, new NullCommand(), new ParallelGroup(new Delay(5), TurretSubsystem.INSTANCE.SetMotorPower(.75))),
                         new FollowPath(MecDriveSubsystem.INSTANCE.createShootingPath(), true)
                 ),
+
                 Robot.INSTANCE.ShootWait(.75),
                 new InstantCommand(() -> {
                     follower().breakFollowing();

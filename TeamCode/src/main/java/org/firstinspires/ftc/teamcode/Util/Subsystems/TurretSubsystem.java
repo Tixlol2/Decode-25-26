@@ -57,7 +57,7 @@ public class TurretSubsystem implements Subsystem {
     @Override
     public void initialize() {
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
-        init();
+
     }
 
     @Override
@@ -99,7 +99,7 @@ public class TurretSubsystem implements Subsystem {
     }
 
     public void setMotorPower(double power){
-        debugPower = -Math.max(0, Math.min(1, power));
+        debugPower = -Math.max(-.7, Math.min(1, power));
     }
 
     public void setTurretState(turretState state) {
@@ -129,7 +129,7 @@ public class TurretSubsystem implements Subsystem {
     }
 
     public boolean turretFinished(){
-        return Robot.INSTANCE.withinRange(getCurrentAngle(), getTurretTargetAngle(), 2);
+        return Robot.INSTANCE.withinRange(getCurrentAngle(), getTurretTargetAngle(), 1);
     }
 
     public void init(){

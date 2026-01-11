@@ -122,8 +122,7 @@ public class IntakeSortingSubsystem implements Subsystem {
         return new SequentialGroup(
                 setServoState(slot, UniConstants.servoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(slot, UniConstants.servoState.DOWN),
-                new IfElseCommand(() -> isLast, new NullCommand(), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN))
+                setServoState(slot, UniConstants.servoState.DOWN)
         );
     }
 
@@ -167,9 +166,12 @@ public class IntakeSortingSubsystem implements Subsystem {
     }
 
     //BANGGGGGGGGGGG
+    public static ArrayList<Slot> result;
     public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern) {
-        ArrayList<Slot> result = new ArrayList<>();
+        result = new ArrayList<>();
         Set<Slot> used = new HashSet<>();
+
+
 
         for (UniConstants.slotState wanted : pattern) {
             for (Slot slot : slots) {
@@ -181,8 +183,9 @@ public class IntakeSortingSubsystem implements Subsystem {
         }
 
         if(result.size() < 3){
-            return new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
+            result = new ArrayList<>(Arrays.asList(backSlot, leftSlot, rightSlot));
         }
+
 
         return result;
     }
@@ -206,6 +209,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 break;
             case ENABLED:
                 telemetry.addLine("START OF SORTING LOG");
+                telemetry.addData("Result: ", result);
                 telemetry.addData("Purple Count: ", getPurpleCount());
                 telemetry.addData("Green Count: ", getGreenCount());
                 telemetry.addData("Intake Enabled ", isEnabled);

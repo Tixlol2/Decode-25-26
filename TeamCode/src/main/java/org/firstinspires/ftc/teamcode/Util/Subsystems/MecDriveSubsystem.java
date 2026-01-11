@@ -56,7 +56,6 @@ public class MecDriveSubsystem implements Subsystem {
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         follower = PedroComponent.follower();
 
-
     }
 
 

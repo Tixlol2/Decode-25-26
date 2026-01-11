@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.OpModes.AutonUtil;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Util.Poses;
@@ -12,8 +14,12 @@ public class Short9BallPaths {
     public PathChain StartShoot;
     public PathChain ReadyIntakeTop;
     public PathChain IntakeTop;
+    public PathChain TopShoot;
+
     public PathChain ReadyIntakeMid;
     public PathChain IntakeMid;
+    public PathChain MidShoot;
+
     public PathChain Park;
 
     public Short9BallPaths(Follower follower, UniConstants.teamColor color){
@@ -72,6 +78,18 @@ public class Short9BallPaths {
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
+
+        MidShoot = follower
+                .pathBuilder()
+                .addPath(new BezierCurve(Poses.redActiveMidStop, Poses.redMidCP, Poses.redShortScore))
+                .setConstantHeadingInterpolation(Math.toRadians(37))
+                .build();
+
+        TopShoot = follower
+                .pathBuilder()
+                .addPath(new BezierLine(Poses.redActiveTopStop,  Poses.redShortScore))
+                .setConstantHeadingInterpolation(Math.toRadians(37))
+                .build();
     }
 
     public void blueShort(Follower follower) {
@@ -97,6 +115,7 @@ public class Short9BallPaths {
                         new BezierLine(Poses.readyBlueActiveTop, Poses.blueActiveTopStop)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setNoDeceleration()
                 .build();
 
         ReadyIntakeMid = follower
@@ -113,6 +132,7 @@ public class Short9BallPaths {
                         new BezierLine(Poses.readyBlueActiveMid, Poses.blueActiveMidStop)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(180))
+                .setNoDeceleration()
                 .build();
 
         Park = follower
@@ -121,6 +141,20 @@ public class Short9BallPaths {
                         new BezierLine(Poses.blueShortScore, Poses.blueParkAuto)
                 )
                 .setConstantHeadingInterpolation(Math.toRadians(0))
+                .setNoDeceleration()
                 .build();
+
+        TopShoot = follower
+                .pathBuilder()
+                .addPath(new BezierLine(Poses.blueActiveTopStop, Poses.blueShortScore))
+                .setConstantHeadingInterpolation(Math.toRadians(144))
+                .build();
+
+        MidShoot = follower
+                .pathBuilder()
+                .addPath(new BezierCurve(Poses.blueActiveMidStop,Poses.blueMidCP, Poses.blueShortScore))
+                .setConstantHeadingInterpolation(Math.toRadians(144))
+                .build();
+
     }
 }
