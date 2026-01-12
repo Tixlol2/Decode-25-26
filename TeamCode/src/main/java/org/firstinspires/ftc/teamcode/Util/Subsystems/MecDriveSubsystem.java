@@ -18,7 +18,6 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 
 @Configurable
-//TODO: Tune all constants to ensure correctness awesome - prob not needed
 public class MecDriveSubsystem implements Subsystem {
     public static boolean debug = false;
     public static MecDriveSubsystem INSTANCE = new MecDriveSubsystem();

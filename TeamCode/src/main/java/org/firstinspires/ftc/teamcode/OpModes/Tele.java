@@ -91,17 +91,20 @@ public class Tele extends NextFTCOpMode {
             IntakeSortingSubsystem.INSTANCE.disableActive();
         }
 
+        //Rumble control
         if (IntakeSortingSubsystem.INSTANCE.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble) {
             gamepad1.rumble(1000);
             rumblingTimer.reset();
         }
 
+        //Kill button
         if ((gamepad1.yWasPressed())) {
             CommandManager.INSTANCE.cancelAll();
             follower().startTeleopDrive();
             Robot.automatedDrive = false;
         }
 
+        //Driver controlled
         if (!Robot.automatedDrive) {
             follower().setTeleOpDrive(
                     -gamepad1.left_stick_y * (isSlowed ? .25 : 1),
@@ -111,22 +114,10 @@ public class Tele extends NextFTCOpMode {
             );
         }
 
-//        if(gamepad1.right_bumper){
-//            new SequentialGroup(
-//                    Robot.INSTANCE.ShootWait(),
-//                    new InstantCommand(() -> {follower().breakFollowing(); follower().startTeleopDrive();})
-//            ).schedule();
-//
-//        }
 
-        Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
-
-
-        //TODO: Still have to integrate look up table or linreg for power as a function of distance
 
         joinedTelemetry.addData("Bot Centric: ", botCentric);
         joinedTelemetry.addData("Automated Shooting: ", autoShoot);
-        //joinedTelemetry.addData("Current Commands: ", CommandManager.INSTANCE.snapshot());
         TurretSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
         MecDriveSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
         IntakeSortingSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
@@ -137,28 +128,12 @@ public class Tele extends NextFTCOpMode {
     void createBindings() {
 
         //Disable active when triggers not held down
-        //Gamepads.gamepad1().rightTrigger().atMost(.1).and(Gamepads.gamepad1().leftTrigger().atMost(.1)).whenFalse(IntakeSortingSubsystem.INSTANCE::disableActive);
-
-        //Run active in direction based on trigger
-//        Gamepads.gamepad1().rightTrigger().greaterThan(0).whenTrue(
-//                () -> {
-//                    IntakeSortingSubsystem.INSTANCE.enableActive();
-//                    IntakeSortingSubsystem.INSTANCE.forwardIntake();
-//                });
-//
-//        Gamepads.gamepad1().leftTrigger().greaterThan(0).whenTrue(
-//                () -> {
-//                    IntakeSortingSubsystem.INSTANCE.enableActive();
-//                    IntakeSortingSubsystem.INSTANCE.reverseIntake();
-//                });
 
         //Toggle things based on dpad
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(() -> Robot.INSTANCE.TurretForward().schedule());
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(() -> Robot.INSTANCE.TurretGoal().schedule());
         Gamepads.gamepad1().dpadDown().whenBecomesTrue(Robot.INSTANCE.Park());
-        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {
-            TurretSubsystem.INSTANCE.setMotorPower(-.7);
-        });
+        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {});
 
 
         //Face buttons

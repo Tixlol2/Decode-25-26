@@ -5,7 +5,9 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configurable
 public class UniConstants {
@@ -108,6 +110,11 @@ CONFIG
         DOWN,
         UP
     }
+
+
+
+
+
 
 
 }

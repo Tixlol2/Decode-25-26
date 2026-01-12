@@ -40,7 +40,7 @@ public class Close12Ball extends NextFTCOpMode {
     JoinedTelemetry joinedTelemetry;
 
 //    public static Pose startPose = Poses.blueGoalTopStartFacing;
-    Paths paths;
+    Close12Paths paths;
 
     {
         addComponents(
@@ -56,20 +56,18 @@ public class Close12Ball extends NextFTCOpMode {
         Robot.inTeleop = false;
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
         TurretSubsystem.INSTANCE.init();
-        paths = new Paths(follower(), Robot.color);
-
     }
+
 
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
             Robot.color = UniConstants.teamColor.RED;
-            paths = new Paths(follower(), Robot.color);
         } else if (gamepad1.b) {
             Robot.color = UniConstants.teamColor.BLUE;
-            paths = new Paths(follower(), Robot.color);
         }
 
+        paths = new Close12Paths(follower(), Robot.color);
         joinedTelemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
         joinedTelemetry.addLine("Circle for Blue, X for Red ");
         joinedTelemetry.addData("Current Team Color ", Robot.color);
@@ -81,9 +79,10 @@ public class Close12Ball extends NextFTCOpMode {
         follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
         Robot.INSTANCE.setGlobalColor();
 
+
         new SequentialGroup(
                 new ParallelGroup(
-                        TurretSubsystem.INSTANCE.SetTargetVelo(4000, true),
+                        TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.SHORT),
                         new FollowPath(paths.ObeliskShoot, true),
                         new SequentialGroup(
                                 Robot.INSTANCE.TurretObelisk(),
@@ -131,7 +130,7 @@ public class Close12Ball extends NextFTCOpMode {
 }
 
 
-class Paths {
+class Close12Paths {
     public PathChain ObeliskShoot;
     public PathChain IntakeMidLeverTurnAtEnd;
     public PathChain ShootMid;
@@ -139,7 +138,7 @@ class Paths {
     public PathChain Bottom;
     public PathChain Park;
 
-    public Paths(Follower follower, UniConstants.teamColor color) {
+    public Close12Paths(Follower follower, UniConstants.teamColor color) {
 
         if(color == UniConstants.teamColor.BLUE){
 

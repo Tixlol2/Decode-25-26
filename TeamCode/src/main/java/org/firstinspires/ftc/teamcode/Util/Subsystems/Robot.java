@@ -85,6 +85,7 @@ public class Robot extends SubsystemGroup {
         }
 
 
+
         //Handles pattern updating
         if (pattern.contains(null)) {
             pattern = BetterVisionTM.INSTANCE.getPattern();
@@ -149,7 +150,7 @@ public class Robot extends SubsystemGroup {
         for (UniConstants.slotState wanted : pattern) {
             for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
                 if (slot.getColorState() == wanted && used.add(slot)) {
-                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).schedule();
+                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).run();
                     break;
                 }
             }
@@ -158,7 +159,7 @@ public class Robot extends SubsystemGroup {
         if (!IntakeSortingSubsystem.INSTANCE.allEmpty()) {
             for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
                 if (slot.isFull()) {
-                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).schedule();
+                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).run();
                 }
             }
         }
@@ -186,7 +187,7 @@ public class Robot extends SubsystemGroup {
     public Command TurretForward() {
         return new LambdaCommand()
                 .setStart(() -> {
-                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.FORWARD);
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.FORWARD);
                 })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
@@ -194,7 +195,7 @@ public class Robot extends SubsystemGroup {
     public Command TurretGoal() {
         return new LambdaCommand()
                 .setStart(() -> {
-                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.GOAL);
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.GOAL);
                 })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
@@ -202,7 +203,7 @@ public class Robot extends SubsystemGroup {
     public Command TurretObelisk() {
         return new LambdaCommand()
                 .setStart(() -> {
-                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.turretState.OBELISK);
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.OBELISK);
                 })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
     }
