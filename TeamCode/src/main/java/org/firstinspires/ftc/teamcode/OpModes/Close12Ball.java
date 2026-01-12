@@ -79,41 +79,51 @@ public class Close12Ball extends NextFTCOpMode {
         follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
         Robot.INSTANCE.setGlobalColor();
 
+        //FULL AUTO
+//        new SequentialGroup(
+//                new ParallelGroup(
+//                        TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.SHORT),
+//                        new FollowPath(paths.ObeliskShoot, true),
+//                        new SequentialGroup(
+//                                Robot.INSTANCE.TurretObelisk(),
+//                                new WaitUntil(() -> Robot.patternFull),
+//                                Robot.INSTANCE.TurretGoal()
+//                        )
+//                ),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//                IntakeSortingSubsystem.INSTANCE.runActive(),
+//                new FollowPath(paths.IntakeMidLeverTurnAtEnd),
+//                IntakeSortingSubsystem.INSTANCE.stopActive(),
+//                new TurnTo(Angle.fromDeg(90)),
+//                new FollowPath(paths.ShootMid, true),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//                IntakeSortingSubsystem.INSTANCE.runActive(),
+//                new FollowPath(paths.Top, true),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//                new FollowPath(paths.Bottom, true),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//                new ParallelGroup(
+//                        Robot.INSTANCE.StopSubsystems(),
+//                        new FollowPath(paths.Park)
+//                )
+//        ).schedule();
 
+        //Pathing
         new SequentialGroup(
-                new ParallelGroup(
-                        TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.SHORT),
-                        new FollowPath(paths.ObeliskShoot, true),
-                        new SequentialGroup(
-                                Robot.INSTANCE.TurretObelisk(),
-                                new WaitUntil(() -> Robot.patternFull),
-                                Robot.INSTANCE.TurretGoal()
-                        )
-                ),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
-                IntakeSortingSubsystem.INSTANCE.runActive(),
+                new FollowPath(paths.ObeliskShoot, true),
                 new FollowPath(paths.IntakeMidLeverTurnAtEnd),
-                IntakeSortingSubsystem.INSTANCE.stopActive(),
-                new TurnTo(Angle.fromDeg(90)),
                 new FollowPath(paths.ShootMid, true),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
-                IntakeSortingSubsystem.INSTANCE.runActive(),
                 new FollowPath(paths.Top, true),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
                 new FollowPath(paths.Bottom, true),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
-                new ParallelGroup(
-                        Robot.INSTANCE.StopSubsystems(),
-                        new FollowPath(paths.Park)
-                )
+                new FollowPath(paths.Park)
         ).schedule();
 
 

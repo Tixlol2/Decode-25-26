@@ -77,34 +77,42 @@ public class Far9Ball extends NextFTCOpMode {
         follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
         Robot.INSTANCE.setGlobalColor();
 
+        //Full auto
+//        new SequentialGroup(
+//                new ParallelGroup(
+//                        TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR),
+//                        new FollowPath(paths.ShootPreload, true),
+//                        new SequentialGroup(
+//                                Robot.INSTANCE.TurretObelisk(),
+//                                new WaitUntil(() -> Robot.patternFull),
+//                                Robot.INSTANCE.TurretGoal()
+//                        )
+//                ),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//                IntakeSortingSubsystem.INSTANCE.runActive(),
+//                new FollowPath(paths.GrabBottom, true),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//                new FollowPath(paths.GrabHuman, true),
+//                //TODO: Shoot command
+//                Robot.INSTANCE.ShootTest(),
+//
+//
+//                new ParallelGroup(
+//                        Robot.INSTANCE.StopSubsystems(),
+//                        new FollowPath(paths.Park)
+//                )
+//        ).schedule();
 
+        //Pathing
         new SequentialGroup(
-                new ParallelGroup(
-                        TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR),
-                        new FollowPath(paths.ShootPreload, true),
-                        new SequentialGroup(
-                                Robot.INSTANCE.TurretObelisk(),
-                                new WaitUntil(() -> Robot.patternFull),
-                                Robot.INSTANCE.TurretGoal()
-                        )
-                ),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
-                IntakeSortingSubsystem.INSTANCE.runActive(),
+                new FollowPath(paths.ShootPreload, true),
                 new FollowPath(paths.GrabBottom, true),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
                 new FollowPath(paths.GrabHuman, true),
-                //TODO: Shoot command
-                Robot.INSTANCE.ShootTest(),
-
-
-                new ParallelGroup(
-                        Robot.INSTANCE.StopSubsystems(),
-                        new FollowPath(paths.Park)
-                )
+                new FollowPath(paths.Park)
         ).schedule();
 
 
@@ -180,7 +188,7 @@ class Far9Paths {
                                     new Pose(39.018, 14.412)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(90))
-
+                    .setNoDeceleration()
                     .build();
         } else {
 
@@ -233,7 +241,7 @@ class Far9Paths {
                                     Poses.mirrorCoordinates(new Pose(39.018, 14.412), UniConstants.teamColor.RED)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(90))
-
+                    .setNoDeceleration()
                     .build();
         }
     }
