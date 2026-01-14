@@ -28,7 +28,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 //Written by Noah Nottingham - 6566 Circuit Breakers
 
-@Autonomous(name = "9 Far Ball Pathing", group = "Main") //The name and group
+@Autonomous(name = "Far 9", group = "Main") //The name and group
 @Configurable
 public class Far9Ball extends NextFTCOpMode {
     public static Pose endPose = new Pose();
@@ -123,124 +123,127 @@ public class Far9Ball extends NextFTCOpMode {
 
     }
 
-}
+    static class Far9Paths {
+        public PathChain ShootPreload;
+        public PathChain GrabBottom;
+        public PathChain GrabHuman;
+        public PathChain Park;
 
+        public Far9Paths(Follower follower, Robot.teamColor color) {
 
-class Far9Paths {
-    public PathChain ShootPreload;
-    public PathChain GrabBottom;
-    public PathChain GrabHuman;
-    public PathChain Park;
+            if (color == Robot.teamColor.BLUE) {
 
-    public Far9Paths(Follower follower, Robot.teamColor color) {
+                ShootPreload = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        new Pose(56.000, 8.000),
+                                        new Pose(56.000, 16.000)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(90))
+                        .build();
 
-        if (color == Robot.teamColor.BLUE) {
+                GrabBottom = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        new Pose(56.000, 16.000),
+                                        new Pose(63.880, 39.365),
+                                        new Pose(14.000, 36.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                        .addPath(
+                                new BezierLine(
+                                        new Pose(14.000, 36.000),
 
-            ShootPreload = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(56.000, 8.000),
-                                    new Pose(56.000, 16.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
-                    .build();
+                                        new Pose(56.000, 16.000)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(90))
 
-            GrabBottom = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(56.000, 16.000),
-                                    new Pose(63.880, 39.365),
-                                    new Pose(14.000, 36.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(14.000, 36.000),
+                        .build();
 
-                                    new Pose(56.000, 16.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
+                GrabHuman = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        new Pose(56.000, 16.000),
 
-                    .build();
+                                        new Pose(8.500, 8.000)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(180))
+                        .addPath(
+                                new BezierLine(
+                                        new Pose(8.500, 8.000),
 
-            GrabHuman = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(56.000, 16.000),
+                                        new Pose(56.000, 16.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
 
-                                    new Pose(8.500, 8.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(180))
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(8.500, 8.000),
+                        .build();
 
-                                    new Pose(56.000, 16.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+                Park = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        new Pose(56.000, 16.000),
 
-                    .build();
+                                        new Pose(39.018, 14.412)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(90))
+                        .setNoDeceleration()
+                        .build();
+            } else {
 
-            Park = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(56.000, 16.000),
+                ShootPreload = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(56.000, 8.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(90))
+                        .build();
 
-                                    new Pose(39.018, 14.412)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
-                    .setNoDeceleration()
-                    .build();
-        } else {
+                GrabBottom = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(63.880, 39.365), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(14.000, 36.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
+                        .addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(14.000, 36.000), Robot.teamColor.RED),
 
-            ShootPreload = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 8.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
-                    .build();
+                                        Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(90))
 
-            GrabBottom = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(63.880, 39.365), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(14.000, 36.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
-                    .addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(14.000, 36.000), Robot.teamColor.RED),
+                        .build();
 
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
+                GrabHuman = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
 
-                    .build();
+                                        Poses.mirrorCoordinates(new Pose(8.500, 8.000), Robot.teamColor.RED)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(0))
+                        .addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(8.500, 8.000), Robot.teamColor.RED),
 
-            GrabHuman = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
 
-                                    Poses.mirrorCoordinates(new Pose(8.500, 8.000), Robot.teamColor.RED)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(0))
-                    .addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(8.500, 8.000), Robot.teamColor.RED),
+                        .build();
 
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
+                Park = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
 
-                    .build();
-
-            Park = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
-
-                                    Poses.mirrorCoordinates(new Pose(39.018, 14.412), Robot.teamColor.RED)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(90))
-                    .setNoDeceleration()
-                    .build();
+                                        Poses.mirrorCoordinates(new Pose(39.018, 14.412), Robot.teamColor.RED)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(90))
+                        .setNoDeceleration()
+                        .build();
+            }
         }
     }
+
+
 }
+
+
+
 

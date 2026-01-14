@@ -28,7 +28,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 //Written by Noah Nottingham - 6566 Circuit Breakers
 
-@Autonomous(name = "12 Ball Pathing", group = "Main") //The name and group
+@Autonomous(name = "Close 12", group = "Main") //The name and group
 @Configurable
 public class Close12Ball extends NextFTCOpMode {
     public static Pose endPose = new Pose();
@@ -132,170 +132,170 @@ public class Close12Ball extends NextFTCOpMode {
 
     }
 
-}
+    static class Close12Paths {
+        public PathChain ObeliskShoot;
+        public PathChain IntakeMidLeverTurnAtEnd;
+        public PathChain ShootMid;
+        public PathChain Top;
+        public PathChain Bottom;
+        public PathChain Park;
+
+        public Close12Paths(Follower follower, Robot.teamColor color) {
+
+            if(color == Robot.teamColor.BLUE){
+
+                ObeliskShoot = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        new Pose(22.000, 124.000),
+                                        new Pose(48.000, 96.000)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(144))
+
+                        .build();
+
+                IntakeMidLeverTurnAtEnd = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        new Pose(48.000, 96.000),
+                                        new Pose(59.523, 54.254),
+                                        new Pose(16.000, 60.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+
+                        .build();
+
+                ShootMid = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        new Pose(16.000, 60.000),
+                                        new Pose(9.482, 77.487),
+                                        new Pose(48.000, 96.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+
+                        .build();
+
+                Top = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        new Pose(48.000, 96.000),
+                                        new Pose(38.433, 81.344),
+                                        new Pose(16.000, 84.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
+                        .addPath(
+                                new BezierLine(
+                                        new Pose(16.000, 84.000),
+
+                                        new Pose(48.000, 96.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+
+                        .build();
+
+                Bottom = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        new Pose(48.000, 96.000),
+                                        new Pose(69.423, 30.853),
+                                        new Pose(16.000, 36.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
+                        .addPath(
+                                new BezierLine(
+                                        new Pose(16.000, 36.000),
+                                        new Pose(48.000, 96.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
+
+                        .build();
 
 
-class Close12Paths {
-    public PathChain ObeliskShoot;
-    public PathChain IntakeMidLeverTurnAtEnd;
-    public PathChain ShootMid;
-    public PathChain Top;
-    public PathChain Bottom;
-    public PathChain Park;
-
-    public Close12Paths(Follower follower, Robot.teamColor color) {
-
-        if(color == Robot.teamColor.BLUE){
-
-            ObeliskShoot = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(22.000, 124.000),
-                                    new Pose(48.000, 96.000)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(144))
-
-                    .build();
-
-            IntakeMidLeverTurnAtEnd = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(48.000, 96.000),
-                                    new Pose(59.523, 54.254),
-                                    new Pose(16.000, 60.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
-
-                    .build();
-
-            ShootMid = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(16.000, 60.000),
-                                    new Pose(9.482, 77.487),
-                                    new Pose(48.000, 96.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
-
-                    .build();
-
-            Top = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(48.000, 96.000),
-                                    new Pose(38.433, 81.344),
-                                    new Pose(16.000, 84.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(180))
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(16.000, 84.000),
-
-                                    new Pose(48.000, 96.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
-
-                    .build();
-
-            Bottom = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    new Pose(48.000, 96.000),
-                                    new Pose(69.423, 30.853),
-                                    new Pose(16.000, 36.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(180))
-                    .addPath(
-                            new BezierLine(
-                                    new Pose(16.000, 36.000),
-                                    new Pose(48.000, 96.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(144))
-
-                    .build();
+                Park = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        new Pose(48.000, 96.000),
+                                        new Pose(48.000, 120.000)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(90))
+                        .setNoDeceleration()
+                        .build();
 
 
-            Park = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    new Pose(48.000, 96.000),
-                                    new Pose(48.000, 120.000)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(144), Math.toRadians(90))
-                    .setNoDeceleration()
-                    .build();
+        } else {
 
 
-    } else {
+                ObeliskShoot = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(22.000, 124.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
+                                )
+                        ).setConstantHeadingInterpolation(Math.toRadians(37))
+
+                        .build();
+
+                IntakeMidLeverTurnAtEnd = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(59.523, 54.254), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(16.000, 60.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
+
+                        .build();
+
+                ShootMid = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        Poses.mirrorCoordinates(new Pose(16.000, 60.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(9.482, 77.487), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
+
+                        .build();
+
+                Top = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(38.433, 81.344), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(16.000, 84.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
+                        .addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(16.000, 84.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
+
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(37))
+
+                        .build();
+
+                Bottom = follower.pathBuilder().addPath(
+                                new BezierCurve(
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(69.423, 30.853), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(16.000, 36.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(0))
+                        .addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(16.000, 36.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(37))
+
+                        .build();
 
 
-            ObeliskShoot = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(22.000, 124.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
-                            )
-                    ).setConstantHeadingInterpolation(Math.toRadians(37))
+                Park = follower.pathBuilder().addPath(
+                                new BezierLine(
+                                        Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                        Poses.mirrorCoordinates(new Pose(48.000, 120), Robot.teamColor.RED)
+                                )
+                        ).setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(90))
+                        .setNoDeceleration()
+                        .build();
 
-                    .build();
-
-            IntakeMidLeverTurnAtEnd = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(59.523, 54.254), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(16.000, 60.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
-
-                    .build();
-
-            ShootMid = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(16.000, 60.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(9.482, 77.487), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
-
-                    .build();
-
-            Top = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(38.433, 81.344), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(16.000, 84.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
-                    .addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(16.000, 84.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
-
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(37))
-
-                    .build();
-
-            Bottom = follower.pathBuilder().addPath(
-                            new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(69.423, 30.853), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(16.000, 36.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(0))
-                    .addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(16.000, 36.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(37))
-
-                    .build();
-
-
-            Park = follower.pathBuilder().addPath(
-                            new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 120), Robot.teamColor.RED)
-                            )
-                    ).setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(90))
-                    .setNoDeceleration()
-                    .build();
-
+            }
         }
-    }
 
+    }
 }
+
+
