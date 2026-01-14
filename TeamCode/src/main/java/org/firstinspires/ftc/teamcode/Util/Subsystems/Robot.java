@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
@@ -33,6 +34,7 @@ public class Robot extends SubsystemGroup {
     public static final Robot INSTANCE = new Robot();
 
     public static ArrayList<UniConstants.slotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
+    public static Supplier<ArrayList<UniConstants.slotState>> patternSupplier;
     public static boolean patternFull = false;
 
     public static UniConstants.teamColor color = UniConstants.teamColor.BLUE;
@@ -62,6 +64,7 @@ public class Robot extends SubsystemGroup {
     public void initialize() {
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         setGlobals();
+        patternSupplier = () -> pattern;
         order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
     }
 
@@ -119,68 +122,68 @@ public class Robot extends SubsystemGroup {
         return joinedTelemetry;
     }
 
-    public Command ShootWait(double waitTime) {
-        order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
-        return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
-                new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
-                new Delay(waitTime),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true),
-                new InstantCommand(() -> Robot.shotTimer.reset())
-        );
-    }
+//    public Command ShootWait(double waitTime) {
+//        order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
+//        return new SequentialGroup(
+//                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0), false),
+//                new Delay(waitTime),
+//                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1), false),
+//                new Delay(waitTime),
+//                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2), true),
+//                new InstantCommand(() -> Robot.shotTimer.reset())
+//        );
+//    }
+//
+//    public Command ShootWait() {
+//        order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
+//        return new SequentialGroup(
+//                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0)),
+//                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
+//                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1)),
+//                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
+//                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2)),
+//                new InstantCommand(() -> Robot.shotTimer.reset())
+//        );
+//    }
 
-    public Command ShootWait() {
-        order = IntakeSortingSubsystem.INSTANCE.determineOrder(pattern);
-        return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(0)),
-                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(1)),
-                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
-                IntakeSortingSubsystem.INSTANCE.Shoot(order.get(2)),
-                new InstantCommand(() -> Robot.shotTimer.reset())
-        );
-    }
 
 
+//    public static void shootTest() {
+//        Set<IntakeSortingSubsystem.Slot> used = new HashSet<>();
+//        for (UniConstants.slotState wanted : pattern) {
+//            for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
+//                if (slot.getColorState() == wanted && used.add(slot)) {
+//                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).run();
+//                    break;
+//                }
+//            }
+//        }
+//
+//        if (!IntakeSortingSubsystem.INSTANCE.allEmpty()) {
+//            for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
+//                if (slot.isFull()) {
+//                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).run();
+//                }
+//            }
+//        }
+//    }
 
-    public static void shootTest() {
-        Set<IntakeSortingSubsystem.Slot> used = new HashSet<>();
-        for (UniConstants.slotState wanted : pattern) {
-            for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
-                if (slot.getColorState() == wanted && used.add(slot)) {
-                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).run();
-                    break;
-                }
-            }
-        }
+//    public Command ShootTest(){
+//        return new LambdaCommand()
+//                .setStart(Robot::shootTest)
+//                .setIsDone(() -> IntakeSortingSubsystem.INSTANCE.allEmpty());
+//    }
 
-        if (!IntakeSortingSubsystem.INSTANCE.allEmpty()) {
-            for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
-                if (slot.isFull()) {
-                    IntakeSortingSubsystem.INSTANCE.Shoot(slot).run();
-                }
-            }
-        }
-    }
-
-    public Command ShootTest(){
-        return new LambdaCommand()
-                .setStart(Robot::shootTest)
-                .setIsDone(() -> IntakeSortingSubsystem.INSTANCE.allEmpty());
-    }
-
-    public Command ShootWait(ArrayList<IntakeSortingSubsystem.Slot> slots) {
-        return new SequentialGroup(
-                IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(0)),
-                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
-                IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(1)),
-                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
-                IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(2)),
-                new InstantCommand(() -> Robot.shotTimer.reset())
-        );
-    }
+//    public Command ShootWait(ArrayList<IntakeSortingSubsystem.Slot> slots) {
+//        return new SequentialGroup(
+//                IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(0)),
+//                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
+//                IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(1)),
+//                new ParallelGroup(new Delay(UniConstants.standardWait), new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)),
+//                IntakeSortingSubsystem.INSTANCE.Shoot(slots.get(2)),
+//                new InstantCommand(() -> Robot.shotTimer.reset())
+//        );
+//    }
 
 
 
@@ -235,6 +238,10 @@ public class Robot extends SubsystemGroup {
         TurretSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         IntakeSortingSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         BetterVisionTM.INSTANCE.setTelemetry(joinedTelemetry);
+
+        for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
+            slot.setTelemetry(joinedTelemetry);
+        }
     }
 
     public void setGlobalColor() {
@@ -254,23 +261,23 @@ public class Robot extends SubsystemGroup {
     }
 
 
-    public Command PathShoot() {
-        return new SequentialGroup(
-                Robot.INSTANCE.TurretGoal(),
-                new ParallelGroup(
-                        //new IfElseCommand(() -> TurretSubsystem.debugPower == .75, new NullCommand(), new ParallelGroup(new Delay(5), TurretSubsystem.INSTANCE.SetMotorPower(.75))),
-                        new FollowPath(MecDriveSubsystem.INSTANCE.createShootingPath(), true)
-                ),
-
-                Robot.INSTANCE.ShootWait(.75),
-                new InstantCommand(() -> {
-                    follower().breakFollowing();
-                    if (Robot.inTeleop) {
-                        follower().startTeleopDrive();
-                    }
-                })
-        );
-    }
+//    public Command PathShoot() {
+//        return new SequentialGroup(
+//                Robot.INSTANCE.TurretGoal(),
+//                new ParallelGroup(
+//                        //new IfElseCommand(() -> TurretSubsystem.debugPower == .75, new NullCommand(), new ParallelGroup(new Delay(5), TurretSubsystem.INSTANCE.SetMotorPower(.75))),
+//                        new FollowPath(MecDriveSubsystem.INSTANCE.createShootingPath(), true)
+//                ),
+//
+//                Robot.INSTANCE.ShootWait(.75),
+//                new InstantCommand(() -> {
+//                    follower().breakFollowing();
+//                    if (Robot.inTeleop) {
+//                        follower().startTeleopDrive();
+//                    }
+//                })
+//        );
+//    }
 
 
 }

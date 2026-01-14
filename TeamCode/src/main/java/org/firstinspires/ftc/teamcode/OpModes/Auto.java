@@ -83,48 +83,48 @@ public class Auto extends NextFTCOpMode {
     }
 
 
-    @Override
-    public void onStartButtonPressed() {
-        follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
-        Robot.INSTANCE.setGlobalColor();
-
-        new SequentialGroup(
-                TurretSubsystem.INSTANCE.SetMotorPower(.625),
-                new ParallelGroup(
-                        Robot.INSTANCE.TurretObelisk(),
-                        new FollowPath(paths.StartShoot),
-                        new Delay(4) //For outtake
-                ),
-                new InstantCommand(() -> {
-                    Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
-                }),
-
-                Robot.INSTANCE.TurretGoal(),
-
-                Robot.INSTANCE.ShootWait(),
-                new FollowPath(paths.ReadyIntakeTop),
-                new ParallelGroup(
-                        new FollowPath(paths.IntakeTop),
-                        IntakeSortingSubsystem.INSTANCE.runActive()
-                ),
-//                Robot.INSTANCE.ActivePath(paths.IntakeTop, false, .75),
-                new FollowPath(paths.TopShoot, true),
-                Robot.INSTANCE.ShootWait(),
-                IntakeSortingSubsystem.INSTANCE.stopActive(),
-                new FollowPath(paths.ReadyIntakeMid),
-                new ParallelGroup(
-                        new FollowPath(paths.IntakeMid),
-                        IntakeSortingSubsystem.INSTANCE.runActive()
-                ),
-//                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, .75),
-                new FollowPath(paths.MidShoot),
-                Robot.INSTANCE.ShootWait(),
-                new ParallelGroup(
-                        new FollowPath(paths.Park),
-                        Robot.INSTANCE.StopSubsystems()
-                )
-        ).schedule();
-    }
+//    @Override
+//    public void onStartButtonPressed() {
+//        follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
+//        Robot.INSTANCE.setGlobalColor();
+//
+//        new SequentialGroup(
+//                TurretSubsystem.INSTANCE.SetMotorPower(.625),
+//                new ParallelGroup(
+//                        Robot.INSTANCE.TurretObelisk(),
+//                        new FollowPath(paths.StartShoot),
+//                        new Delay(4) //For outtake
+//                ),
+//                new InstantCommand(() -> {
+//                    Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
+//                }),
+//
+//                Robot.INSTANCE.TurretGoal(),
+//
+//                Robot.INSTANCE.ShootWait(),
+//                new FollowPath(paths.ReadyIntakeTop),
+//                new ParallelGroup(
+//                        new FollowPath(paths.IntakeTop),
+//                        IntakeSortingSubsystem.INSTANCE.runActive()
+//                ),
+////                Robot.INSTANCE.ActivePath(paths.IntakeTop, false, .75),
+//                new FollowPath(paths.TopShoot, true),
+//                Robot.INSTANCE.ShootWait(),
+//                IntakeSortingSubsystem.INSTANCE.stopActive(),
+//                new FollowPath(paths.ReadyIntakeMid),
+//                new ParallelGroup(
+//                        new FollowPath(paths.IntakeMid),
+//                        IntakeSortingSubsystem.INSTANCE.runActive()
+//                ),
+////                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, .75),
+//                new FollowPath(paths.MidShoot),
+//                Robot.INSTANCE.ShootWait(),
+//                new ParallelGroup(
+//                        new FollowPath(paths.Park),
+//                        Robot.INSTANCE.StopSubsystems()
+//                )
+//        ).schedule();
+//    }
 
     @Override
     public void onUpdate() {

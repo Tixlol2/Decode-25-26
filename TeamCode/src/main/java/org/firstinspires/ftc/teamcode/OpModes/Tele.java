@@ -29,7 +29,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @Configurable
 public class Tele extends NextFTCOpMode {
 
-    public static double debugPower = .9;
+    public static double debugPower = .4;
     JoinedTelemetry joinedTelemetry;
     Timer rumblingTimer = new Timer();
     private boolean isSlowed = false;
@@ -121,6 +121,7 @@ public class Tele extends NextFTCOpMode {
         TurretSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
         MecDriveSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
         IntakeSortingSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
+        joinedTelemetry.addData("Commands: ", CommandManager.INSTANCE.snapshot());
 
 
     }
