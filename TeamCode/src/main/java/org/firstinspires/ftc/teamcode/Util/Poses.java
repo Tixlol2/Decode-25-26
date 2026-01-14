@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Util;
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
+
 
 //Make your poses using THIS website: https://visualizer.pedropathing.com
 
@@ -29,26 +31,26 @@ public class Poses {
 
 
     public static Pose readyRedActiveTop = new Pose(92.000, 83.500);
-    public static Pose readyBlueActiveTop = mirrorCoordinates(readyRedActiveTop, UniConstants.teamColor.BLUE);
+    public static Pose readyBlueActiveTop = mirrorCoordinates(readyRedActiveTop, Robot.teamColor.BLUE);
     public static Pose redActiveTopStop = new Pose(112, 83.500);
-    public static Pose blueActiveTopStop = mirrorCoordinates(redActiveTopStop, UniConstants.teamColor.BLUE);
+    public static Pose blueActiveTopStop = mirrorCoordinates(redActiveTopStop, Robot.teamColor.BLUE);
 
     public static Pose readyRedActiveMid = new Pose(92.000, 60.000);
-    public static Pose readyBlueActiveMid = mirrorCoordinates(readyRedActiveMid, UniConstants.teamColor.BLUE);
+    public static Pose readyBlueActiveMid = mirrorCoordinates(readyRedActiveMid, Robot.teamColor.BLUE);
     public static Pose redActiveMidStop = new Pose(112, 60.000);
-    public static Pose blueActiveMidStop = mirrorCoordinates(redActiveMidStop, UniConstants.teamColor.BLUE);
+    public static Pose blueActiveMidStop = mirrorCoordinates(redActiveMidStop, Robot.teamColor.BLUE);
 
     public static Pose redMidCP = new Pose(87.14223693655666, 66.59257151401363);
-    public static Pose blueMidCP = mirrorCoordinates(redMidCP, UniConstants.teamColor.BLUE);
+    public static Pose blueMidCP = mirrorCoordinates(redMidCP, Robot.teamColor.BLUE);
 
     public static Pose blueParkAuto = new Pose(48, 128);
-    public static Pose redParkAuto = mirrorCoordinates(blueParkAuto, UniConstants.teamColor.RED);
+    public static Pose redParkAuto = mirrorCoordinates(blueParkAuto, Robot.teamColor.RED);
 
 
-    public static Pose mirrorCoordinates(Pose pose, UniConstants.teamColor targetColor) {
+    public static Pose mirrorCoordinates(Pose pose, Robot.teamColor targetColor) {
         double deltaX = Math.abs(72 - pose.getX());
         double angle = Math.toRadians((Math.toDegrees(pose.getHeading()) + 180) % 360);
-        if (targetColor == UniConstants.teamColor.BLUE) {
+        if (targetColor == Robot.teamColor.BLUE) {
             return new Pose(72 - deltaX, pose.getY(), angle);
         } else {
             return new Pose(72 + deltaX, pose.getY(), angle);

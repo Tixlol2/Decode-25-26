@@ -5,9 +5,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Configurable
 public class UniConstants {
@@ -71,13 +69,7 @@ CONFIG
     public static final String LIGHT_BACK_STRING = "BACK";
     public static final String LIGHT_RIGHT_STRING = "RIGHT";
     public static final String LIGHT_LEFT_STRING = "LEFT";
-    //Launcher Speed Calculation variables
-    public static final double ANGLE_OF_LAUNCHER_IN_DEGREES = 35;
-    public static final double HEIGHT_OF_ROBOT_IN_METERS = 0.35; //TODO: Check to make sure this is right
-    public static final double HEIGHT_TO_GOAL_WITH_CLEARANCE_METERS = (1.11125) - (HEIGHT_OF_ROBOT_IN_METERS);
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
-    public static double FLICKER_TIME_UP = 1.2;
-    public static double FLICKER_TIME_DOWN = .5;
     public static double FAST_FLICKER_TIME_UP = .5;
     public static double FAST_FLICKER_TIME_DOWN = .125;
     public static double FLICKER_BACK_UP = .93;
@@ -89,32 +81,6 @@ CONFIG
     public static double ANGLE_BLUE_GOAL_DEGREES = 137;
     public static double ANGLE_RED_GOAL_DEGREES = 44;
     public static double standardWait = .75;
-    //Enums
-    public enum loggingState {
-        DISABLED,
-        ENABLED,
-        EXTREME
-    }
-
-    public enum slotState {
-        PURPLE,
-        GREEN,
-        EMPTY
-    }
-    public enum teamColor {
-        RED,
-        BLUE
-    }
-
-    public enum servoState {
-        DOWN,
-        UP
-    }
-
-
-
-
-
 
 
 }

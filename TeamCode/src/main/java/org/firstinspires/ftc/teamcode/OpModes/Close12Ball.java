@@ -16,18 +16,13 @@ import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
-import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
-import dev.nextftc.core.commands.delays.WaitUntil;
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
-import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
@@ -62,9 +57,9 @@ public class Close12Ball extends NextFTCOpMode {
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
-            Robot.color = UniConstants.teamColor.RED;
+            Robot.color = Robot.teamColor.RED;
         } else if (gamepad1.b) {
-            Robot.color = UniConstants.teamColor.BLUE;
+            Robot.color = Robot.teamColor.BLUE;
         }
 
         paths = new Close12Paths(follower(), Robot.color);
@@ -76,7 +71,7 @@ public class Close12Ball extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
+        follower().setStartingPose(Robot.color == Robot.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
         Robot.INSTANCE.setGlobalColor();
 
         //FULL AUTO
@@ -148,9 +143,9 @@ class Close12Paths {
     public PathChain Bottom;
     public PathChain Park;
 
-    public Close12Paths(Follower follower, UniConstants.teamColor color) {
+    public Close12Paths(Follower follower, Robot.teamColor color) {
 
-        if(color == UniConstants.teamColor.BLUE){
+        if(color == Robot.teamColor.BLUE){
 
             ObeliskShoot = follower.pathBuilder().addPath(
                             new BezierLine(
@@ -230,8 +225,8 @@ class Close12Paths {
 
             ObeliskShoot = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(22.000, 124.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(22.000, 124.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(37))
 
@@ -239,9 +234,9 @@ class Close12Paths {
 
             IntakeMidLeverTurnAtEnd = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(59.523, 54.254), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(16.000, 60.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(59.523, 54.254), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(16.000, 60.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(0))
 
@@ -249,9 +244,9 @@ class Close12Paths {
 
             ShootMid = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(16.000, 60.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(9.482, 77.487), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(16.000, 60.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(9.482, 77.487), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
 
@@ -259,15 +254,15 @@ class Close12Paths {
 
             Top = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(38.433, 81.344), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(16.000, 84.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(38.433, 81.344), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(16.000, 84.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
                     .addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(16.000, 84.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(16.000, 84.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
 
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(37))
@@ -276,15 +271,15 @@ class Close12Paths {
 
             Bottom = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(69.423, 30.853), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(16.000, 36.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(69.423, 30.853), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(16.000, 36.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(0))
                     .addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(16.000, 36.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(16.000, 36.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(37))
 
@@ -293,8 +288,8 @@ class Close12Paths {
 
             Park = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(48.000, 120), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(48.000, 96.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(48.000, 120), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(37), Math.toRadians(90))
                     .setNoDeceleration()

@@ -93,16 +93,6 @@ public class TurretSubsystem implements Subsystem {
     }
 
 
-//    public double getTargetVelocity(double distanceToGoalInMeters) {
-//        //https://www.desmos.com/calculator/yw7iis7m3w
-//        //https://medium.com/@vikramaditya.nishant/programming-a-decode-shooter-4ab114dac01f
-//        return Math.sqrt(
-//                ((9.81) * (Math.pow(distanceToGoalInMeters, 2)))
-//                        /
-//                        (Math.pow(2 * (Math.cos(Math.toRadians(UniConstants.ANGLE_OF_LAUNCHER_IN_DEGREES))), 2) * ((distanceToGoalInMeters * Math.tan(Math.toRadians(UniConstants.ANGLE_OF_LAUNCHER_IN_DEGREES))) - UniConstants.HEIGHT_TO_GOAL_WITH_CLEARANCE_METERS))
-//        );
-//    }
-
 
     public void setTargetVelocityTicks(int velo) {
         targetVelocity = velo;
@@ -123,7 +113,7 @@ public class TurretSubsystem implements Subsystem {
     public Command SetFlywheelState(FlywheelState state) {
         return new LambdaCommand()
                 .setStart(() -> setFlywheelState(state))
-                .setIsDone(this::withinRangeBool);
+                .setIsDone(this::veloWithinRangeBool);
     }
 
     public Command SetTargetVelo(int velo, boolean usingRPM) {
@@ -135,10 +125,10 @@ public class TurretSubsystem implements Subsystem {
                         setTargetVelocityTicks(velo);
                     }
                 })
-                .setIsDone(this::withinRangeBool);
+                .setIsDone(this::veloWithinRangeBool);
     }
 
-    public boolean withinRangeBool() {
+    public boolean veloWithinRangeBool() {
         return (Math.abs(targetVelocity - launcherCurrentVelo) < 60);
     }
 
@@ -198,7 +188,7 @@ public class TurretSubsystem implements Subsystem {
         return new InstantCommand(() -> setMotorPower(power));
     }
 
-    public void sendTelemetry(UniConstants.loggingState state) {
+    public void sendTelemetry(Robot.loggingState state) {
         switch (state) {
             case DISABLED:
                 break;

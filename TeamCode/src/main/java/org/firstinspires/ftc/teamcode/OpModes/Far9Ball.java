@@ -16,11 +16,8 @@ import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
-import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
-import dev.nextftc.core.commands.delays.WaitUntil;
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -60,9 +57,9 @@ public class Far9Ball extends NextFTCOpMode {
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
-            Robot.color = UniConstants.teamColor.RED;
+            Robot.color = Robot.teamColor.RED;
         } else if (gamepad1.b) {
-            Robot.color = UniConstants.teamColor.BLUE;
+            Robot.color = Robot.teamColor.BLUE;
         }
 
         paths = new Far9Paths(follower(), Robot.color);
@@ -74,7 +71,7 @@ public class Far9Ball extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        follower().setStartingPose(Robot.color == UniConstants.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
+        follower().setStartingPose(Robot.color == Robot.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
         Robot.INSTANCE.setGlobalColor();
 
         //Full auto
@@ -135,9 +132,9 @@ class Far9Paths {
     public PathChain GrabHuman;
     public PathChain Park;
 
-    public Far9Paths(Follower follower, UniConstants.teamColor color) {
+    public Far9Paths(Follower follower, Robot.teamColor color) {
 
-        if (color == UniConstants.teamColor.BLUE) {
+        if (color == Robot.teamColor.BLUE) {
 
             ShootPreload = follower.pathBuilder().addPath(
                             new BezierLine(
@@ -194,24 +191,24 @@ class Far9Paths {
 
             ShootPreload = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 8.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(56.000, 8.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(90))
                     .build();
 
             GrabBottom = follower.pathBuilder().addPath(
                             new BezierCurve(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(63.880, 39.365), UniConstants.teamColor.RED),
-                                    Poses.mirrorCoordinates(new Pose(14.000, 36.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(63.880, 39.365), Robot.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(14.000, 36.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(0))
                     .addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(14.000, 36.000), UniConstants.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(14.000, 36.000), Robot.teamColor.RED),
 
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(90))
 
@@ -219,16 +216,16 @@ class Far9Paths {
 
             GrabHuman = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), UniConstants.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
 
-                                    Poses.mirrorCoordinates(new Pose(8.500, 8.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(8.500, 8.000), Robot.teamColor.RED)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(0))
                     .addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(8.500, 8.000), UniConstants.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(8.500, 8.000), Robot.teamColor.RED),
 
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED)
                             )
                     ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(90))
 
@@ -236,9 +233,9 @@ class Far9Paths {
 
             Park = follower.pathBuilder().addPath(
                             new BezierLine(
-                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), UniConstants.teamColor.RED),
+                                    Poses.mirrorCoordinates(new Pose(56.000, 16.000), Robot.teamColor.RED),
 
-                                    Poses.mirrorCoordinates(new Pose(39.018, 14.412), UniConstants.teamColor.RED)
+                                    Poses.mirrorCoordinates(new Pose(39.018, 14.412), Robot.teamColor.RED)
                             )
                     ).setConstantHeadingInterpolation(Math.toRadians(90))
                     .setNoDeceleration()

@@ -9,10 +9,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Util.Poses;
-import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
-import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
@@ -26,7 +23,7 @@ public class MecDriveSubsystem implements Subsystem {
     private static double obeliskAngle = 0;
     //Class variables
     JoinedTelemetry telemetry;
-    UniConstants.teamColor color = UniConstants.teamColor.BLUE;
+    Robot.teamColor color = Robot.teamColor.BLUE;
     private Follower follower;
     private double distanceToGoal = 0;
     private final boolean driving = false;
@@ -97,46 +94,6 @@ public class MecDriveSubsystem implements Subsystem {
         distanceToGoal = Math.hypot(x, y) / 39.37;
     }
 
-
-    public Command FollowPath(PathChain path, boolean holdEnd) {
-        return new LambdaCommand("Follow Path Hold End: " + holdEnd)
-                .setStart(() -> {
-                    MecDriveSubsystem.INSTANCE.getFollower().followPath(path, holdEnd);
-                    Robot.automatedDrive = true;
-                })
-                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 1))
-                .setInterruptible(false)
-                .requires(MecDriveSubsystem.INSTANCE);
-    }
-
-    public Command FollowPath(PathChain path, boolean holdEnd, double maxPower) {
-        return new LambdaCommand("Follow Path Hold End: " + holdEnd)
-                .setStart(() -> {
-                    MecDriveSubsystem.INSTANCE.getFollower().followPath(path, maxPower, holdEnd);
-                    Robot.automatedDrive = true;
-                })
-                .setIsDone(() -> follower.getPose().roughlyEquals(path.endPose(), 3) || driving)
-                .setInterruptible(false)
-                .requires(MecDriveSubsystem.INSTANCE);
-    }
-
-
-    public Command TurnTo(double degree) {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    follower.turnTo(Math.toRadians(degree));
-                    Robot.automatedDrive = true;
-                })
-                .setIsDone(() -> Math.abs(Math.toDegrees(follower.getPose().getHeading()) - degree) < 1d)
-                .setStop(interrupted -> {
-                    if (Robot.inTeleop) {
-                        follower.startTeleopDrive();
-                    }
-                });
-
-    }
-
-
     public double getDistanceToGoal() {
         return distanceToGoal;
     }
@@ -153,30 +110,19 @@ public class MecDriveSubsystem implements Subsystem {
         return Math.toDegrees(follower.getPose().getHeading());
     }
 
-    public void setColor(UniConstants.teamColor color) {
+    public void setColor(Robot.teamColor color) {
         this.color = color;
     }
 
     public PathChain createParkPath() {
         return follower.pathBuilder()
                 .addPath((follower.getPose().getX() >= 72) ?
-                        new BezierCurve(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark, color == UniConstants.teamColor.BLUE ? Poses.blueParkCP : Poses.redParkCP) :
-                        new BezierLine(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.bluePark : Poses.redPark))
+                        new BezierCurve(follower.getPose(), color == Robot.teamColor.BLUE ? Poses.bluePark : Poses.redPark, color == Robot.teamColor.BLUE ? Poses.blueParkCP : Poses.redParkCP) :
+                        new BezierLine(follower.getPose(), color == Robot.teamColor.BLUE ? Poses.bluePark : Poses.redPark))
                 .setConstantHeadingInterpolation(Math.toRadians(90)).build();
     }
 
-
-    public PathChain createShootingPath() {
-        return follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), color == UniConstants.teamColor.BLUE ? Poses.blueShortScore : Poses.redShortScore))
-                .setConstantHeadingInterpolation(color == UniConstants.teamColor.BLUE ? Poses.blueShortScore.getHeading() : Poses.redShortScore.getHeading()).build();
-    }
-
-    public Follower getFollower() {
-        return follower;
-    }
-
-    public void sendTelemetry(UniConstants.loggingState state) {
+    public void sendTelemetry(Robot.loggingState state) {
         switch (state) {
             case DISABLED:
                 break;

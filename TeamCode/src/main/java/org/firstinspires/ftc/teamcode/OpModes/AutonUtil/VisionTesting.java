@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -86,23 +87,23 @@ public class VisionTesting extends OpMode {
     }
 
 
-    public ArrayList<UniConstants.slotState> obeliskTargetPattern(int ID) {
+    public ArrayList<IntakeSortingSubsystem.Slot.slotState> obeliskTargetPattern(int ID) {
         switch (ID) {
             case 21:
-                return new ArrayList<>(List.of(UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE));
+                return new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.GREEN, IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.PURPLE));
             case 22:
-                return new ArrayList<>(List.of(UniConstants.slotState.PURPLE, UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE));
+                return new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.GREEN, IntakeSortingSubsystem.Slot.slotState.PURPLE));
             case 23:
-                return new ArrayList<>(List.of(UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE, UniConstants.slotState.GREEN));
+                return new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.GREEN));
             default:
                 return new ArrayList<>(List.of(null, null, null));
         }
     }
 
-    public String getPatternAsString(ArrayList<UniConstants.slotState> pattern) {
+    public String getPatternAsString(ArrayList<IntakeSortingSubsystem.Slot.slotState> pattern) {
         StringBuilder returnString = new StringBuilder();
 
-        for (UniConstants.slotState state : pattern) {
+        for (IntakeSortingSubsystem.Slot.slotState state : pattern) {
             switch (state) {
                 case GREEN:
                     returnString.append("G");

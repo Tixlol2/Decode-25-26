@@ -7,7 +7,6 @@ import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Util.Timer;
-import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -22,11 +21,11 @@ public class BetterVisionTM implements Subsystem {
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
     private JoinedTelemetry telemetry;
-    private final UniConstants.loggingState state = UniConstants.loggingState.ENABLED;
-    private UniConstants.teamColor color = UniConstants.teamColor.BLUE;
+    private final Robot.loggingState state = Robot.logstate.ENABLED;
+    private Robot.teamColor color = Robot.teamColor.BLUE;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
-    private ArrayList<UniConstants.slotState> pattern = new ArrayList<>();
+    private ArrayList<IntakeSortingSubsystem.Slot.slotState> pattern = new ArrayList<>();
     private double distanceToGoal = 0;
     private double deltaAngle = 0;
     private final Timer timer = new Timer();
@@ -85,17 +84,17 @@ public class BetterVisionTM implements Subsystem {
 
                 double hypotenuse = Math.hypot(x, y);
 
-                if ((color == UniConstants.teamColor.BLUE && tagData.id == 20) || (color == UniConstants.teamColor.RED && tagData.id == 24)) {
+                if ((color == Robot.teamColor.BLUE && tagData.id == 20) || (color == Robot.teamColor.RED && tagData.id == 24)) {
                     distanceToGoal = dist;
                 }
 
 
-                if (state == UniConstants.loggingState.ENABLED) {
+                if (state == Robot.loggingState.ENABLED) {
                     telemetry.addData("Tag ID: ", tagData.id);
                     telemetry.addData("X: ", x);
                     telemetry.addData("Y: ", y);
                     telemetry.update();
-                } else if (state == UniConstants.loggingState.EXTREME) {
+                } else if (state == Robot.loggingState.EXTREME) {
                     telemetry.addData("Tag ID: ", tagData.id);
                     telemetry.addData("X: ", x);
                     telemetry.addData("Y: ", y);
@@ -117,7 +116,7 @@ public class BetterVisionTM implements Subsystem {
                 double dist = detection.ftcPose.range;
                 double pitch = detection.ftcPose.pitch;
 
-                if ((color == UniConstants.teamColor.BLUE && detection.id == 20) || (color == UniConstants.teamColor.RED && detection.id == 24)) {
+                if ((color == Robot.teamColor.BLUE && detection.id == 20) || (color == Robot.teamColor.RED && detection.id == 24)) {
                     distanceToGoal = dist;
                     deltaAngle = pitch;
                 }
@@ -145,7 +144,7 @@ public class BetterVisionTM implements Subsystem {
         return -1;
     }
 
-    public ArrayList<UniConstants.slotState> getPattern() {
+    public ArrayList<IntakeSortingSubsystem.Slot.slotState> getPattern() {
         obeliskTargetPattern(getObeliskID());
         return pattern;
     }
@@ -180,19 +179,19 @@ public class BetterVisionTM implements Subsystem {
                 pattern = new ArrayList<>(List.of(null, null, null));
                 break;
             case 21:
-                pattern = new ArrayList<>(List.of(UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE));
+                pattern = new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.GREEN, IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.PURPLE));
                 break;
             case 22:
-                pattern = new ArrayList<>(List.of(UniConstants.slotState.PURPLE, UniConstants.slotState.GREEN, UniConstants.slotState.PURPLE));
+                pattern = new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.GREEN, IntakeSortingSubsystem.Slot.slotState.PURPLE));
                 break;
             case 23:
-                pattern = new ArrayList<>(List.of(UniConstants.slotState.PURPLE, UniConstants.slotState.PURPLE, UniConstants.slotState.GREEN));
+                pattern = new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.GREEN));
                 break;
         }
 
     }
 
-    public void setColor(UniConstants.teamColor col) {
+    public void setColor(Robot.teamColor col) {
         color = col;
     }
 

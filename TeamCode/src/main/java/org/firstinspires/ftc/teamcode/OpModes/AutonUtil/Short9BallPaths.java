@@ -6,7 +6,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Util.Poses;
-import org.firstinspires.ftc.teamcode.Util.UniConstants;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 
 public class Short9BallPaths {
 
@@ -21,8 +21,8 @@ public class Short9BallPaths {
 
     public PathChain Park;
 
-    public Short9BallPaths(Follower follower, UniConstants.teamColor color) {
-        if (color == UniConstants.teamColor.BLUE) {
+    public Short9BallPaths(Follower follower, Robot.teamColor color) {
+        if (color == Robot.teamColor.BLUE) {
             blueShort(follower);
         } else {
             redShort(follower);

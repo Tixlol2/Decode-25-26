@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
-import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.CommandManager;
@@ -28,12 +27,10 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @TeleOp(name = "Tele", group = "Main") //The name and group
 @Configurable
 public class Tele extends NextFTCOpMode {
-
     public static double debugPower = .4;
     JoinedTelemetry joinedTelemetry;
     Timer rumblingTimer = new Timer();
     private boolean isSlowed = false;
-    private boolean autoShoot = true;
     private final boolean botCentric = true;
     private final boolean enableRumble = false;
 
@@ -54,9 +51,9 @@ public class Tele extends NextFTCOpMode {
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
-            Robot.color = UniConstants.teamColor.RED;
+            Robot.color = Robot.teamColor.RED;
         } else if (gamepad1.b) {
-            Robot.color = UniConstants.teamColor.BLUE;
+            Robot.color = Robot.teamColor.BLUE;
         }
 
         joinedTelemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
@@ -71,7 +68,6 @@ public class Tele extends NextFTCOpMode {
         Robot.INSTANCE.setGlobalColor();
         createBindings();
         follower().setStartingPose(Auto.endPose);
-        autoShoot = true;
 
 
     }
@@ -117,10 +113,9 @@ public class Tele extends NextFTCOpMode {
 
 
         joinedTelemetry.addData("Bot Centric: ", botCentric);
-        joinedTelemetry.addData("Automated Shooting: ", autoShoot);
-        TurretSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
-        MecDriveSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
-        IntakeSortingSubsystem.INSTANCE.sendTelemetry(UniConstants.loggingState.ENABLED);
+        TurretSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
+        MecDriveSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
+        IntakeSortingSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
         joinedTelemetry.addData("Commands: ", CommandManager.INSTANCE.snapshot());
 
 
@@ -149,7 +144,7 @@ public class Tele extends NextFTCOpMode {
         });
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.Shoot(Robot.pattern));
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.Shoot());
 
 
     }
