@@ -148,7 +148,7 @@ public class Tele extends NextFTCOpMode {
         });
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(Robot::shootTest);
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.Shoot(Robot.pattern));
 
 
     }

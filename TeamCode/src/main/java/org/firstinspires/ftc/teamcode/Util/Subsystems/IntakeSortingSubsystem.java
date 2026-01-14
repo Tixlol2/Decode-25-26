@@ -7,6 +7,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import java.util.ArrayList;
@@ -16,8 +17,10 @@ import java.util.Set;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
@@ -40,8 +43,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     //Active motor
     MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
 
-    public IntakeSortingSubsystem() {
-    }
+    public IntakeSortingSubsystem() {}
 
     @Override
     public void initialize() {
@@ -68,6 +70,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 state = UniConstants.servoState.UP;
             }
             active.setPower(isEnabled ? (isReversed ? -1 : 1) : 0);
+
 
         }
 
@@ -107,28 +110,6 @@ public class IntakeSortingSubsystem implements Subsystem {
         return new InstantCommand(this::disableActive);
     }
 
-    public Command setServoState(Slot slot, UniConstants.servoState state) {
-        return new InstantCommand(() -> {
-            slot.setTargetPosition(state);
-        }).named(slot.name + " Set Servo State");
-    }
-
-    public Command Shoot(Slot slot, boolean isLast) {
-        return new SequentialGroup(
-                setServoState(slot, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(slot, UniConstants.servoState.DOWN)
-        );
-    }
-
-    public Command Shoot(Slot slot) {
-        return new SequentialGroup(
-                setServoState(slot, UniConstants.servoState.UP),
-                new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(slot, UniConstants.servoState.DOWN)
-        );
-    }
-
     public ArrayList<Slot> determineOrder(@NonNull ArrayList<UniConstants.slotState> pattern) {
         result = new ArrayList<>();
         Set<Slot> used = new HashSet<>();
@@ -144,6 +125,47 @@ public class IntakeSortingSubsystem implements Subsystem {
             result = new ArrayList<>(Arrays.asList(backSlot, leftSlot, rightSlot));
         }
         return result;
+    }
+
+    public Command Shoot(ArrayList<UniConstants.slotState> pattern){
+        return new SequentialGroup(
+                new LambdaCommand()
+                        .setStart(() -> {
+                                    backSlot.readSlot();
+                                    rightSlot.readSlot();
+                                    leftSlot.readSlot();
+                                    result = determineOrder(pattern);
+                                }),
+                new SequentialGroup(
+                        result.get(0).basicShootDown(),
+                        result.get(1).basicShootDown(),
+                        result.get(2).basicShoot()
+                )
+        ).setInterruptible(false).addRequirements(backSlot, rightSlot, leftSlot);
+    }
+
+    public int getGreenCount() {
+        int count = 0;
+
+        for (Slot slot : slots) {
+            if (slot.colorState == UniConstants.slotState.GREEN) {
+                count++;
+            }
+
+        }
+        return count;
+    }
+
+    public int getPurpleCount() {
+        int count = 0;
+
+        for (Slot slot : slots) {
+            if (slot.colorState == UniConstants.slotState.PURPLE) {
+                count++;
+            }
+
+        }
+        return count;
     }
 
 
@@ -283,6 +305,28 @@ public class IntakeSortingSubsystem implements Subsystem {
 
         public boolean isFull() {
             return (colorState == UniConstants.slotState.PURPLE) || (colorState == UniConstants.slotState.GREEN);
+        }
+
+
+        public Command basicShoot(){
+            return new SequentialGroup(
+                    setServoState(UniConstants.servoState.UP),
+                    new Delay(UniConstants.FAST_FLICKER_TIME_UP),
+                    setServoState(UniConstants.servoState.DOWN)
+            );
+        }
+
+        public Command basicShootDown(){
+            return new SequentialGroup(
+                    setServoState(UniConstants.servoState.UP),
+                    new Delay(UniConstants.FAST_FLICKER_TIME_UP),
+                    setServoState(UniConstants.servoState.DOWN),
+                    new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)
+            );
+        }
+
+        public Command setServoState(UniConstants.servoState state){
+            return new InstantCommand(() -> servoState = state);
         }
 
         public void sendTelemetry(UniConstants.loggingState state) {
