@@ -25,6 +25,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
+import dev.nextftc.hardware.powerable.SetPower;
 
 @Configurable
 public class IntakeSortingSubsystem implements Subsystem {
@@ -36,6 +37,7 @@ public class IntakeSortingSubsystem implements Subsystem {
     public static IntakeSortingSubsystem INSTANCE = new IntakeSortingSubsystem();
     //BANGGGGGGGGGGG
     public static Supplier<ArrayList<Slot>> result;
+    public static Timer shotTimer = new Timer();
     public boolean isEnabled = false;
     public ArrayList<Slot> slots;
     //Class variables
@@ -43,9 +45,8 @@ public class IntakeSortingSubsystem implements Subsystem {
     //Active motor
     MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
 
-    public static Timer shotTimer = new Timer();
-
-    public IntakeSortingSubsystem() {}
+    public IntakeSortingSubsystem() {
+    }
 
     @Override
     public void initialize() {
@@ -76,7 +77,8 @@ public class IntakeSortingSubsystem implements Subsystem {
             } else {
                 state = servoState.UP;
             }
-            active.setPower(isEnabled ? (isReversed ? -1 : 1) : 0);
+
+            new SetPower(active, isEnabled ? (isReversed ? -1 : 1) : 0).run();
 
 
         }
@@ -129,22 +131,45 @@ public class IntakeSortingSubsystem implements Subsystem {
                 }
             }
         }
-        if (result1.size() < 3) {
-            result1 = new ArrayList<>(Arrays.asList(backSlot, leftSlot, rightSlot));
+
+        if (result1.size() >= 3) {
+            return result1;
         }
-        return result1;
+
+        // Not full - add slots that are full first, then empty ones
+        ArrayList<Slot> orderedResult = new ArrayList<>();
+
+        // Add full slots first
+        for (Slot slot : slots) {
+            if (slot.colorState != Slot.slotState.EMPTY) {
+                orderedResult.add(slot);
+            }
+        }
+
+        // Then add empty slots
+        for (Slot slot : slots) {
+            if (slot.colorState == Slot.slotState.EMPTY) {
+                orderedResult.add(slot);
+            }
+        }
+
+        if (orderedResult.size() < 3) {
+            orderedResult = new ArrayList<>(Arrays.asList(backSlot, rightSlot, leftSlot));
+        }
+
+        return orderedResult;
     }
 
-    public String slotTele(ArrayList<Slot> awesome){
+    public String slotTele(ArrayList<Slot> awesome) {
         StringBuilder ret = new StringBuilder();
-        for(Slot slot : awesome){
+        for (Slot slot : awesome) {
             ret.append(slot.name).append(", ");
         }
         return ret.toString();
     }
 
 
-    public Command Shoot(){
+    public Command Shoot() {
 
         Supplier<Slot> first = () -> result.get().get(0);
         Supplier<Slot> second = () -> result.get().get(1);
@@ -154,10 +179,10 @@ public class IntakeSortingSubsystem implements Subsystem {
         return new SequentialGroup(
                 new LambdaCommand()
                         .setStart(() -> {
-                                    backSlot.readSlot();
-                                    rightSlot.readSlot();
-                                    leftSlot.readSlot();
-                                }),
+                            backSlot.readSlot();
+                            rightSlot.readSlot();
+                            leftSlot.readSlot();
+                        }),
                 new SequentialGroup(
                         new LambdaCommand()
                                 .setStart(() -> first.get().basicShootDown().named("Result 1 " + first.get().getName()).run())
@@ -168,7 +193,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                         new LambdaCommand()
                                 .setStart(() -> third.get().basicShoot().named("Result 3 " + third.get().getName()).run())
                                 .setIsDone(() -> third.get().finishedShot())
-                        ),
+                ),
                 new InstantCommand(() -> shotTimer.reset())
         ).setInterruptible(false).addRequirements(backSlot, rightSlot, leftSlot);
     }
@@ -226,15 +251,13 @@ public class IntakeSortingSubsystem implements Subsystem {
         private final ServoEx kickerServo;
         private final ServoEx light;
         private final ColorSensor colorSensor;
-
+        private final Timer shotTimer = new Timer();
         String name = "";
         double up = 0;
         double down = 0;
         private slotState colorState = slotState.EMPTY;
         private servoState servoState = IntakeSortingSubsystem.servoState.DOWN;
         private JoinedTelemetry telemetry;
-
-        private final Timer shotTimer = new Timer();
 
         public Slot(HardwareMap hardwareMap, String kickerServoName, String colorSensorName, String lightName) {
 
@@ -285,11 +308,11 @@ public class IntakeSortingSubsystem implements Subsystem {
             return name;
         }
 
-        public Timer getShotTimer(){
+        public Timer getShotTimer() {
             return shotTimer;
         }
 
-        public boolean finishedShot(){
+        public boolean finishedShot() {
             return shotTimer.getTimeSeconds() < 2;
         }
 
@@ -302,7 +325,7 @@ public class IntakeSortingSubsystem implements Subsystem {
                 colorState = slotState.GREEN;
             } else if (((red > green) && (blue > green)) && (alpha < 5000)) {
                 colorState = slotState.PURPLE;
-            } else if(IntakeSortingSubsystem.shotTimer.getTimeSeconds() < 2) {
+            } else if (IntakeSortingSubsystem.shotTimer.getTimeSeconds() < 2) {
                 colorState = slotState.EMPTY;
             }
         }
@@ -324,7 +347,7 @@ public class IntakeSortingSubsystem implements Subsystem {
         }
 
 
-        public Command basicShoot(){
+        public Command basicShoot() {
             return new SequentialGroup(
                     setServoState(IntakeSortingSubsystem.servoState.UP),
                     new Delay(UniConstants.FAST_FLICKER_TIME_UP),
@@ -333,7 +356,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             ).requires("Shooting");
         }
 
-        public Command basicShootDown(){
+        public Command basicShootDown() {
             return new SequentialGroup(
                     setServoState(IntakeSortingSubsystem.servoState.UP),
                     new Delay(UniConstants.FAST_FLICKER_TIME_UP),
@@ -343,7 +366,7 @@ public class IntakeSortingSubsystem implements Subsystem {
             ).requires("Shooting");
         }
 
-        public Command setServoState(servoState state){
+        public Command setServoState(servoState state) {
             return new InstantCommand(() -> servoState = state);
         }
 

@@ -18,17 +18,17 @@ import dev.nextftc.ftc.ActiveOpMode;
 
 public class BetterVisionTM implements Subsystem {
     public static final BetterVisionTM INSTANCE = new BetterVisionTM();
+    private final Robot.loggingState state = Robot.loggingState.ENABLED;
+    private final Timer timer = new Timer();
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
     private JoinedTelemetry telemetry;
-    private final Robot.loggingState state = Robot.logstate.ENABLED;
     private Robot.teamColor color = Robot.teamColor.BLUE;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
     private ArrayList<IntakeSortingSubsystem.Slot.slotState> pattern = new ArrayList<>();
     private double distanceToGoal = 0;
     private double deltaAngle = 0;
-    private final Timer timer = new Timer();
 
 
     public BetterVisionTM() {

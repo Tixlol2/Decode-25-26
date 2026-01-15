@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.ParallelGroup;
-import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
 import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
@@ -52,7 +51,6 @@ public class Robot extends SubsystemGroup {
     }
 
 
-
     @Override
     public void initialize() {
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
@@ -81,7 +79,6 @@ public class Robot extends SubsystemGroup {
         }
 
 
-
         //Handles pattern updating
         if (pattern.contains(null)) {
             pattern = BetterVisionTM.INSTANCE.getPattern();
@@ -89,17 +86,14 @@ public class Robot extends SubsystemGroup {
         }
 
 
-
         joinedTelemetry.addData("Loop Time (ms) ", loopTimer.milliseconds());
         joinedTelemetry.addData("Pattern: ", pattern);
         joinedTelemetry.addData("Pattern Full: ", patternFull);
 
 
-
         joinedTelemetry.update();
 
     }
-
 
 
     public double getDistanceToGoal() {
@@ -110,33 +104,10 @@ public class Robot extends SubsystemGroup {
         return joinedTelemetry;
     }
 
-    public Command TurretForward() {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.FORWARD);
-                })
-                .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
-    }
-
-    public Command TurretGoal() {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.GOAL);
-                })
-                .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
-    }
-
-    public Command TurretObelisk() {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.OBELISK);
-                })
-                .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
-    }
 
     public Command FaceGoal() {
         return new ParallelGroup(
-                TurretGoal(),
+                TurretSubsystem.INSTANCE.TurretGoal(),
                 new TurnTo(color == teamColor.BLUE ? Angle.fromDeg(UniConstants.ANGLE_BLUE_GOAL_DEGREES) : Angle.fromDeg(UniConstants.ANGLE_RED_GOAL_DEGREES))
         );
     }
@@ -150,7 +121,7 @@ public class Robot extends SubsystemGroup {
 
     public Command StopSubsystems() {
         return new ParallelGroup(
-                TurretForward(),
+                TurretSubsystem.INSTANCE.TurretForward(),
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
                 TurretSubsystem.INSTANCE.SetMotorPower(0)
         );
@@ -162,7 +133,7 @@ public class Robot extends SubsystemGroup {
         IntakeSortingSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         BetterVisionTM.INSTANCE.setTelemetry(joinedTelemetry);
 
-        for(IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots){
+        for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
             slot.setTelemetry(joinedTelemetry);
         }
     }

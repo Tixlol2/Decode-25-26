@@ -7,6 +7,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
@@ -28,11 +29,11 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @Configurable
 public class Tele extends NextFTCOpMode {
     public static double debugPower = .4;
+    private final boolean botCentric = true;
+    private final boolean enableRumble = false;
     JoinedTelemetry joinedTelemetry;
     Timer rumblingTimer = new Timer();
     private boolean isSlowed = false;
-    private final boolean botCentric = true;
-    private final boolean enableRumble = false;
 
     {
         addComponents(
@@ -111,8 +112,6 @@ public class Tele extends NextFTCOpMode {
         }
 
 
-
-        joinedTelemetry.addData("Bot Centric: ", botCentric);
         TurretSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
         MecDriveSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
         IntakeSortingSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
@@ -126,10 +125,12 @@ public class Tele extends NextFTCOpMode {
         //Disable active when triggers not held down
 
         //Toggle things based on dpad
-        Gamepads.gamepad1().dpadUp().whenBecomesTrue(() -> Robot.INSTANCE.TurretForward().schedule());
-        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(() -> Robot.INSTANCE.TurretGoal().schedule());
+        Gamepads.gamepad1().dpadUp().whenBecomesTrue(() -> TurretSubsystem.INSTANCE.TurretForward().schedule());
+        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(() -> TurretSubsystem.INSTANCE.TurretGoal().schedule());
         Gamepads.gamepad1().dpadDown().whenBecomesTrue(Robot.INSTANCE.Park());
-        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {});
+        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {
+            follower().setStartingPose(Poses.blueGoalTopStartFacing);
+        });
 
 
         //Face buttons

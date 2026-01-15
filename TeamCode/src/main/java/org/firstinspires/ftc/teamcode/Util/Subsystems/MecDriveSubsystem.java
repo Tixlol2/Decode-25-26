@@ -21,12 +21,12 @@ public class MecDriveSubsystem implements Subsystem {
     //For calculated turret angle
     private static double goalAngle = 0;
     private static double obeliskAngle = 0;
+    private final boolean driving = false;
     //Class variables
     JoinedTelemetry telemetry;
     Robot.teamColor color = Robot.teamColor.BLUE;
     private Follower follower;
     private double distanceToGoal = 0;
-    private final boolean driving = false;
 
 
     public MecDriveSubsystem() {

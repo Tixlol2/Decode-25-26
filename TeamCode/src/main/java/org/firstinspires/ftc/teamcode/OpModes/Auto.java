@@ -41,7 +41,7 @@ public class Auto extends NextFTCOpMode {
     public static Pose endPose = new Pose();
     JoinedTelemetry joinedTelemetry;
 
-//    public static Pose startPose = Poses.blueGoalTopStartFacing;
+    //    public static Pose startPose = Poses.blueGoalTopStartFacing;
     Supplier<PathChain> shootPath;
     Short9BallPaths paths;
 
@@ -92,9 +92,9 @@ public class Auto extends NextFTCOpMode {
                 TurretSubsystem.INSTANCE.SetMotorPower(.625),
                 new ParallelGroup(
                         new SequentialGroup(
-                                Robot.INSTANCE.TurretObelisk(),
+                                TurretSubsystem.INSTANCE.TurretObelisk(),
                                 new WaitUntil(() -> Robot.patternFull),
-                                Robot.INSTANCE.TurretGoal()
+                                TurretSubsystem.INSTANCE.TurretGoal()
                         ),
                         new FollowPath(paths.StartShoot),
                         new Delay(4) //For outtake

@@ -50,7 +50,8 @@ CONFIG
     public static final DcMotorEx.Direction DRIVE_BACK_RIGHT_DIRECTION = DcMotorEx.Direction.REVERSE;
     public static final String PINPOINT_STRING = "pp";
     //Outtake Subsystem
-    public static final String LAUNCHER_STRING = "LAUNCHER";
+    public static final String LAUNCHER_TOP_STRING = "LAUNCHTOP";
+    public static final String LAUNCHER_BOTTOM_STRING = "LAUNCHBOT";
     //Rotary Subsystem
     public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
     //Flickers
@@ -70,17 +71,17 @@ CONFIG
     public static final String LIGHT_RIGHT_STRING = "RIGHT";
     public static final String LIGHT_LEFT_STRING = "LEFT";
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
+    public static final double FLICKER_BACK_UP = .93;
+    public static final double FLICKER_BACK_DOWN = .55;
+    public static final double FLICKER_RIGHT_DOWN = .52;
+    public static final double FLICKER_RIGHT_UP = .15;
+    public static final double FLICKER_LEFT_DOWN = .19;
+    public static final double FLICKER_LEFT_UP = .62;
+    public static final double ANGLE_BLUE_GOAL_DEGREES = 137;
+    public static final double ANGLE_RED_GOAL_DEGREES = 44;
+    public static final double standardWait = .75;
     public static double FAST_FLICKER_TIME_UP = .5;
     public static double FAST_FLICKER_TIME_DOWN = .125;
-    public static double FLICKER_BACK_UP = .93;
-    public static double FLICKER_BACK_DOWN = .55;
-    public static double FLICKER_RIGHT_DOWN = .52;
-    public static double FLICKER_RIGHT_UP = .15;
-    public static double FLICKER_LEFT_DOWN = .19;
-    public static double FLICKER_LEFT_UP = .62;
-    public static double ANGLE_BLUE_GOAL_DEGREES = 137;
-    public static double ANGLE_RED_GOAL_DEGREES = 44;
-    public static double standardWait = .75;
 
 
 }

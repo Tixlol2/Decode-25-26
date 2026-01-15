@@ -34,7 +34,7 @@ public class Close12Ball extends NextFTCOpMode {
     public static Pose endPose = new Pose();
     JoinedTelemetry joinedTelemetry;
 
-//    public static Pose startPose = Poses.blueGoalTopStartFacing;
+    //    public static Pose startPose = Poses.blueGoalTopStartFacing;
     Close12Paths paths;
 
     {
@@ -142,7 +142,7 @@ public class Close12Ball extends NextFTCOpMode {
 
         public Close12Paths(Follower follower, Robot.teamColor color) {
 
-            if(color == Robot.teamColor.BLUE){
+            if (color == Robot.teamColor.BLUE) {
 
                 ObeliskShoot = follower.pathBuilder().addPath(
                                 new BezierLine(
@@ -217,7 +217,7 @@ public class Close12Ball extends NextFTCOpMode {
                         .build();
 
 
-        } else {
+            } else {
 
 
                 ObeliskShoot = follower.pathBuilder().addPath(

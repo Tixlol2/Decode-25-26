@@ -14,6 +14,7 @@ public class Lerp {
     public double time;
     public Timer timer = new Timer();
     public double oldTime;
+
     /**
      * Constructor for Lerp.
      *
