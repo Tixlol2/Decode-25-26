@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Util.Timer;
@@ -40,6 +41,8 @@ public class Robot extends SubsystemGroup {
     ElapsedTime loopTimer = new ElapsedTime();
     private double distanceToGoal = 0;
     private JoinedTelemetry joinedTelemetry;
+
+    private VoltageSensor voltageSensor;
 
     private Robot() {
         super(
@@ -123,7 +126,7 @@ public class Robot extends SubsystemGroup {
         return new ParallelGroup(
                 TurretSubsystem.INSTANCE.TurretForward(),
                 IntakeSortingSubsystem.INSTANCE.stopActive(),
-                TurretSubsystem.INSTANCE.SetMotorPower(0)
+                TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.OFF)
         );
     }
 

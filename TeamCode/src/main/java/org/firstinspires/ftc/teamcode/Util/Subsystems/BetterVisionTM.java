@@ -161,6 +161,8 @@ public class BetterVisionTM implements Subsystem {
 
         if (!Robot.patternFull) {
             getDetections();
+        } else {
+            stop();
         }
 
     }

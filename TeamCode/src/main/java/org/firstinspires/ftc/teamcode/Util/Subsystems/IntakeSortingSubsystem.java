@@ -17,7 +17,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
@@ -114,6 +116,12 @@ public class IntakeSortingSubsystem implements Subsystem {
             enableActive();
         });
     }
+    public Command reverseActive() {
+        return new InstantCommand(() -> {
+            reverseIntake();
+            enableActive();
+        });
+    }
 
     public Command stopActive() {
         return new InstantCommand(this::disableActive);
@@ -160,15 +168,6 @@ public class IntakeSortingSubsystem implements Subsystem {
         return orderedResult;
     }
 
-    public String slotTele(ArrayList<Slot> awesome) {
-        StringBuilder ret = new StringBuilder();
-        for (Slot slot : awesome) {
-            ret.append(slot.name).append(", ");
-        }
-        return ret.toString();
-    }
-
-
     public Command Shoot() {
 
         Supplier<Slot> first = () -> result.get().get(0);
@@ -186,14 +185,16 @@ public class IntakeSortingSubsystem implements Subsystem {
                 new SequentialGroup(
                         new LambdaCommand()
                                 .setStart(() -> first.get().basicShootDown().named("Result 1 " + first.get().getName()).run())
-                                .setIsDone(() -> first.get().finishedShot()),
+                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
                         new LambdaCommand()
                                 .setStart(() -> second.get().basicShootDown().named("Result 2 " + second.get().getName()).run())
-                                .setIsDone(() -> second.get().finishedShot()),
+                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+
                         new LambdaCommand()
                                 .setStart(() -> third.get().basicShoot().named("Result 3 " + third.get().getName()).run())
-                                .setIsDone(() -> third.get().finishedShot())
-                ),
+                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
+
+                        ),
                 new InstantCommand(() -> shotTimer.reset())
         ).setInterruptible(false).addRequirements(backSlot, rightSlot, leftSlot);
     }
@@ -201,10 +202,6 @@ public class IntakeSortingSubsystem implements Subsystem {
 
     public boolean allFull() {
         return backSlot.isFull() && rightSlot.isFull() && leftSlot.isFull();
-    }
-
-    public boolean allEmpty() {
-        return !backSlot.isFull() && !rightSlot.isFull() && !leftSlot.isFull();
     }
 
 
@@ -239,6 +236,23 @@ public class IntakeSortingSubsystem implements Subsystem {
     public void setTelemetry(JoinedTelemetry telemetry) {
         this.telemetry = telemetry;
     }
+
+    public Command SetAllSlotState(servoState state) {
+        return new ParallelGroup(
+                backSlot.setServoState(state),
+                rightSlot.setServoState(state),
+                leftSlot.setServoState(state)
+        );
+    }
+
+    public String slotTele(ArrayList<Slot> awesome) {
+        StringBuilder ret = new StringBuilder();
+        for (Slot slot : awesome) {
+            ret.append(slot.name).append(", ");
+        }
+        return ret.toString();
+    }
+
 
     public enum servoState {
         DOWN,

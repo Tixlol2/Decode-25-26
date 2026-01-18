@@ -9,8 +9,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -20,12 +18,12 @@ import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
-import java.util.function.Supplier;
-
-import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.FollowPath;
@@ -37,12 +35,13 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous(name = "Close 9", group = "Main") //The name and group
 @Configurable
-public class Auto extends NextFTCOpMode {
+public class Close9Ball extends NextFTCOpMode {
     public static Pose endPose = new Pose();
     JoinedTelemetry joinedTelemetry;
 
     //    public static Pose startPose = Poses.blueGoalTopStartFacing;
-    Supplier<PathChain> shootPath;
+    int pathState = 0;
+    int oldPathState = 0;
     Short9BallPaths paths;
 
     {
@@ -60,10 +59,6 @@ public class Auto extends NextFTCOpMode {
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
         TurretSubsystem.INSTANCE.init();
         paths = new Short9BallPaths(follower(), Robot.color);
-
-        shootPath = () -> follower().pathBuilder()
-                .addPath(new Path(new BezierLine(follower()::getPose, Robot.color == Robot.teamColor.BLUE ? Poses.blueShortScore : Poses.redShortScore)))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower()::getHeading, Robot.color == Robot.teamColor.BLUE ? Poses.blueShortScore.getHeading() : Poses.redShortScore.getHeading(), 0.8)).build();
 
     }
 
@@ -87,48 +82,94 @@ public class Auto extends NextFTCOpMode {
     public void onStartButtonPressed() {
         follower().setStartingPose(Robot.color == Robot.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
         Robot.INSTANCE.setGlobalColor();
-
-        new SequentialGroup(
-                TurretSubsystem.INSTANCE.SetMotorPower(.625),
-                new ParallelGroup(
-                        new SequentialGroup(
-                                TurretSubsystem.INSTANCE.TurretObelisk(),
-                                new WaitUntil(() -> Robot.patternFull),
-                                TurretSubsystem.INSTANCE.TurretGoal()
-                        ),
-                        new FollowPath(paths.StartShoot),
-                        new Delay(4) //For outtake
-                ),
-
-                IntakeSortingSubsystem.INSTANCE.Shoot(),
-                new FollowPath(paths.ReadyIntakeTop),
-                new ParallelGroup(
-                        new FollowPath(paths.IntakeTop),
-                        IntakeSortingSubsystem.INSTANCE.runActive()
-                ),
-//                Robot.INSTANCE.ActivePath(paths.IntakeTop, false, .75),
-                new FollowPath(paths.TopShoot, true),
-                IntakeSortingSubsystem.INSTANCE.Shoot(),
-                IntakeSortingSubsystem.INSTANCE.stopActive(),
-                new FollowPath(paths.ReadyIntakeMid),
-                new ParallelGroup(
-                        new FollowPath(paths.IntakeMid),
-                        IntakeSortingSubsystem.INSTANCE.runActive()
-                ),
-//                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, .75),
-                new FollowPath(paths.MidShoot),
-                IntakeSortingSubsystem.INSTANCE.Shoot(),
-                new ParallelGroup(
-                        new FollowPath(paths.Park),
-                        Robot.INSTANCE.StopSubsystems()
-                )
-        ).schedule();
+        setPathState(1);
     }
 
     @Override
     public void onUpdate() {
-        Robot.order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
         endPose = follower().getPose();
+        if (pathState != oldPathState) {
+            oldPathState = pathState;
+            pathUpdate();
+        }
+
+        joinedTelemetry.addData("Path state: ", pathState);
+        joinedTelemetry.addData("Commands: ", CommandManager.INSTANCE.snapshot());
+
+    }
+
+    public void setPathState(int state) {
+        pathState = state;
+    }
+
+    public Command SetPathState(int state) {
+        return new InstantCommand(() -> setPathState(state));
+    }
+
+    public void pathUpdate() {
+
+        switch (pathState) {
+            case 0:
+                break;
+            case 1:
+                new SequentialGroup(
+                        TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.SHORT),
+                        new ParallelGroup(
+                                new SequentialGroup(
+                                        TurretSubsystem.INSTANCE.TurretObelisk(),
+                                        new WaitUntil(() -> Robot.patternFull),
+                                        TurretSubsystem.INSTANCE.TurretGoal()
+                                ),
+                                new FollowPath(paths.StartShoot)
+                        ),
+
+                        IntakeSortingSubsystem.INSTANCE.Shoot(),
+                        IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN),
+                        SetPathState(2)
+                ).schedule();
+                break;
+            case 2:
+                new SequentialGroup(
+                        new FollowPath(paths.ReadyIntakeTop),
+                        new ParallelGroup(
+                                new FollowPath(paths.IntakeTop),
+                                IntakeSortingSubsystem.INSTANCE.runActive()
+                        ),
+                        IntakeSortingSubsystem.INSTANCE.reverseActive(),
+//                Robot.INSTANCE.ActivePath(paths.IntakeTop, false, .75),
+                        new FollowPath(paths.TopShoot, true),
+                        IntakeSortingSubsystem.INSTANCE.Shoot(),
+                        IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN),
+                        IntakeSortingSubsystem.INSTANCE.stopActive(),
+                        SetPathState(3)
+                ).schedule();
+                break;
+            case 3:
+                new SequentialGroup(
+                        new FollowPath(paths.ReadyIntakeMid),
+                        new ParallelGroup(
+                                new FollowPath(paths.IntakeMid),
+                                IntakeSortingSubsystem.INSTANCE.runActive()
+                        ),
+                        IntakeSortingSubsystem.INSTANCE.reverseActive(),
+
+//                Robot.INSTANCE.ActivePath(paths.IntakeMid, false, .75),
+                        new FollowPath(paths.MidShoot, true),
+                        IntakeSortingSubsystem.INSTANCE.Shoot(),
+                        IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN),
+                        SetPathState(4)
+                ).schedule();
+                break;
+            case 4:
+                new ParallelGroup(
+                        new FollowPath(paths.Park),
+                        Robot.INSTANCE.StopSubsystems()
+                )
+                        .schedule();
+                break;
+        }
+
+
     }
 
     public static class Short9BallPaths {
@@ -220,7 +261,7 @@ public class Auto extends NextFTCOpMode {
                     .addPath(
                             new BezierLine(Poses.blueGoalTopStartFacing, Poses.blueShortScore)
                     )
-                    .setConstantHeadingInterpolation(Poses.blueShortScore.getHeading())
+                    .setConstantHeadingInterpolation(Math.toRadians(75))
                     .build();
 
             ReadyIntakeTop = follower
@@ -237,7 +278,7 @@ public class Auto extends NextFTCOpMode {
                             new BezierLine(Poses.readyBlueActiveTop, Poses.blueActiveTopStop)
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .setNoDeceleration()
+
                     .build();
 
             ReadyIntakeMid = follower
@@ -254,7 +295,7 @@ public class Auto extends NextFTCOpMode {
                             new BezierLine(Poses.readyBlueActiveMid, Poses.blueActiveMidStop)
                     )
                     .setConstantHeadingInterpolation(Math.toRadians(180))
-                    .setNoDeceleration()
+                    //.setNoDeceleration()
                     .build();
 
             Park = follower

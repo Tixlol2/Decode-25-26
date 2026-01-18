@@ -75,12 +75,11 @@ CONFIG
     public static final double FLICKER_BACK_DOWN = .55;
     public static final double FLICKER_RIGHT_DOWN = .52;
     public static final double FLICKER_RIGHT_UP = .15;
-    public static final double FLICKER_LEFT_DOWN = .19;
+    public static final double FLICKER_LEFT_DOWN = .22;
     public static final double FLICKER_LEFT_UP = .62;
     public static final double ANGLE_BLUE_GOAL_DEGREES = 137;
     public static final double ANGLE_RED_GOAL_DEGREES = 44;
-    public static final double standardWait = .75;
-    public static double FAST_FLICKER_TIME_UP = .5;
+   public static double FAST_FLICKER_TIME_UP = .75;
     public static double FAST_FLICKER_TIME_DOWN = .125;
 
 

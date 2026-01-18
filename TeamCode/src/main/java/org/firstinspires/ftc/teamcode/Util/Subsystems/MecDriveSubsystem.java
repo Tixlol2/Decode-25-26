@@ -77,7 +77,7 @@ public class MecDriveSubsystem implements Subsystem {
         double targetObelisk = Math.toDegrees(Math.atan2(obY, obX)) - 90;
 
         // Get robot heading in degrees (0 = facing +X, 90 = facing +Y)
-        double robotHeading = getHeadingDegrees() - 90;
+        double robotHeading = (getHeadingDegrees() - 90);
 
         // Calculate turret angle relative to robot
         goalAngle = fieldAngleToTarget - robotHeading;

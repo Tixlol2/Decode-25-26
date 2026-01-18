@@ -5,6 +5,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Lerp;
 import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -13,30 +14,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.controllable.MotorGroup;
 import dev.nextftc.hardware.impl.MotorEx;
-import dev.nextftc.hardware.powerable.SetPower;
 
 @Configurable
 public class TurretSubsystem implements Subsystem {
     public static final TurretSubsystem INSTANCE = new TurretSubsystem();
-    public static int targetVelocity = 0;
-    public static double pLaunch = .00, dLaunch = 0, fLaunch = 0, lLaunch = 0.01;
+    public static final HashMap<FlywheelState, Double> flywheelSpeedRPM = new HashMap<>(
+            Map.of(FlywheelState.SHORT, 2600.0  , FlywheelState.FAR, 3000.0, FlywheelState.OFF, 0.0, FlywheelState.INTERPOLATED, 0.0)
+    );
+    public static double targetVelocity = 0;
+    public static double pLaunch = 0.000005, dLaunch = 0, fLaunch = 0, lLaunch = 0;
     public static double turretTargetAngle = 0;
-    public static double pTurret = 0.0025, dTurret = 0, lTurret = 0.125, fTurret = 0;
+    public static double pTurret = 0.003, dTurret = 0, lTurret = .1, fTurret = 0;
     public static boolean debug = false;
     public static double debugPower = 0;
     public static TurretState state = TurretState.FORWARD;
-    public static boolean launcherPDFL = false;
-    public static double veloLinReg = 0.0000001;
+    public static boolean launcherPDFL = true;
+    public static double veloLinReg = 1 / 4846.75334;
     public static double posLinReg = 0.0000001;
-    public static HashMap<FlywheelState, Integer> flywheelSpeedsRPM = new HashMap<>(
-            Map.of(FlywheelState.SHORT, 2500, FlywheelState.FAR, 4000, FlywheelState.OFF, 0)
-    );
     private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private final PDFLController launcherController = new PDFLController(pLaunch, dLaunch, fLaunch, lLaunch);
     public Lerp lerp = new Lerp(0, 0, 0);
@@ -57,6 +59,9 @@ public class TurretSubsystem implements Subsystem {
     public void initialize() {
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         FWState = FlywheelState.OFF;
+        turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
+        launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
+
     }
 
     @Override
@@ -64,44 +69,30 @@ public class TurretSubsystem implements Subsystem {
         if (!ActiveOpMode.opModeInInit()) {
             // Launcher control (this looks fine)
             if (!launcherPDFL) {
-                new SetPower(launcherGroup, debugPower).run();
+                launcherGroup.setPower(debugPower);
             } else {
-                if (!debug) {
-                    if (FWState != FlywheelState.INTERPOLATED) {
-                        targetVelocity = getTargetFromMap();
-                    } else {
-                        targetVelocity = (int) (posLinReg * Robot.INSTANCE.getDistanceToGoal()); //TODO: Do pos vs velo linreg
-                    }
-                }
 
-                launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
-
-                launcherCurrentVelo = getCurrentVelocityRPM();
+                targetVelocity = getTargetFromMap();
+                launcherCurrentVelo = -getCurrentVelocityRPM();
                 launcherController.setTarget(targetVelocity);
                 launcherController.update(launcherCurrentVelo);
-                power += lerp.constantLerp(power, targetVelocity * veloLinReg, 1);//Math.min(pdfl.runPDFL(20),.1); //TODO: Do own linreg
+                power += lerp.constantLerp(power, targetVelocity * veloLinReg, 1);//Math.min(pdfl.runPDFL(20),.1);
                 // clamp power to valid motor range
                 if (Double.isNaN(power)) {
                     power = 0;
                 }
-                power = Math.max(0.0, Math.min(1.0, power));
-                new SetPower(launcherGroup, power + launcherController.runPDFL(10)).run();
+                power = Math.max(0.0, Math.min(1.0, power + launcherController.runPDFL(10)));
+                launcherGroup.setPower(power);
             }
-
             //Full turret control
-            //turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
             turretCurrentPos = turret.getCurrentPosition();
-            turretTargetAngle = Math.max(-265, Math.min(45, turretTargetAngle)); //Negative is ccw
+            turretTargetAngle = Math.max(-180, Math.min(35, turretTargetAngle)); //Negative is ccw
             turretControl.setTarget(angleToTicks(turretTargetAngle));
             turretControl.update(turretCurrentPos);
-            new SetPower(turret, turretControl.runPDFL(angleToTicks(0.5))).run();
+            turret.setPower(turretControl.runPDFL(angleToTicks(0.5)));
         }
     }
 
-
-    public void setTargetVelocityTicks(int velo) {
-        targetVelocity = velo;
-    }
 
     public FlywheelState getFlywheelState() {
         return FWState;
@@ -111,46 +102,20 @@ public class TurretSubsystem implements Subsystem {
         FWState = state;
     }
 
-    public int getTargetFromMap() {
-        return (int) (flywheelSpeedsRPM.get(FWState) / 2.1);
+    public double getTargetFromMap() {
+        return (flywheelSpeedRPM.get(FWState));
     }
 
     public Command SetFlywheelState(FlywheelState state) {
-        return new LambdaCommand()
-                .setStart(() -> setFlywheelState(state))
-                .setIsDone(this::veloWithinRangeBool);
-    }
-
-    public Command SetTargetVelo(int velo, boolean usingRPM) {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    if (usingRPM) {
-                        setTargetVelocityRPM(velo);
-                    } else {
-                        setTargetVelocityTicks(velo);
-                    }
-                })
-                .setIsDone(this::veloWithinRangeBool);
-    }
-
-    public Command SetTargetVelo(int velo) {
-        return new LambdaCommand()
-                .setStart(() -> {
-                    setTargetVelocityRPM(velo);
-                })
-                .setIsDone(this::veloWithinRangeBool);
+        return new SequentialGroup(
+                new LambdaCommand()
+                        .setStart(() -> setFlywheelState(state))
+                        .setIsDone(() -> true));
+                //new IfElseCommand(() -> state != FlywheelState.OFF, new Delay(2)));
     }
 
     public boolean veloWithinRangeBool() {
         return (Math.abs(targetVelocity - launcherCurrentVelo) < 200);
-    }
-
-    public void setTargetVelocityRPM(int velo) {
-        targetVelocity = velo;
-    }
-
-    public void setMotorPower(double power) {
-        debugPower = Math.max(-.7, Math.min(1, power));
     }
 
     public void setTurretState(TurretState state) {
@@ -197,10 +162,6 @@ public class TurretSubsystem implements Subsystem {
         return turretTargetAngle;
     }
 
-    public Command SetMotorPower(double power) {
-        return new InstantCommand(() -> setMotorPower(power));
-    }
-
     public Command TurretForward() {
         return new LambdaCommand()
                 .setStart(() -> {
@@ -231,6 +192,7 @@ public class TurretSubsystem implements Subsystem {
                 break;
             case ENABLED:
                 telemetry.addLine("START OF OUTTAKE LOG");
+                telemetry.addData("Target RPM ", targetVelocity);
                 telemetry.addData("Current RPM ", (getCurrentVelocityRPM()));
                 telemetry.addData("Power: ", power);
                 telemetry.addLine();
@@ -259,8 +221,8 @@ public class TurretSubsystem implements Subsystem {
     public enum FlywheelState {
         SHORT,
         FAR,
-        INTERPOLATED,
-        OFF
+        OFF,
+        INTERPOLATED
     }
 
 

@@ -7,7 +7,6 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
@@ -28,7 +27,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @TeleOp(name = "Tele", group = "Main") //The name and group
 @Configurable
 public class Tele extends NextFTCOpMode {
-    public static double debugPower = .4;
+
     private final boolean botCentric = true;
     private final boolean enableRumble = false;
     JoinedTelemetry joinedTelemetry;
@@ -57,6 +56,7 @@ public class Tele extends NextFTCOpMode {
             Robot.color = Robot.teamColor.BLUE;
         }
 
+
         joinedTelemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
         joinedTelemetry.addLine("Circle for Blue, X for Red ");
         joinedTelemetry.addData("Current Team Color ", Robot.color);
@@ -68,8 +68,7 @@ public class Tele extends NextFTCOpMode {
         follower().startTeleopDrive();
         Robot.INSTANCE.setGlobalColor();
         createBindings();
-        follower().setStartingPose(Auto.endPose);
-
+        follower().setStartingPose(Close9Ball.endPose);
 
     }
 
@@ -97,6 +96,7 @@ public class Tele extends NextFTCOpMode {
         //Kill button
         if ((gamepad1.yWasPressed())) {
             CommandManager.INSTANCE.cancelAll();
+            IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN).schedule();
             follower().startTeleopDrive();
             Robot.automatedDrive = false;
         }
@@ -114,7 +114,7 @@ public class Tele extends NextFTCOpMode {
 
         TurretSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
         MecDriveSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
-        IntakeSortingSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
+        //IntakeSortingSubsystem.INSTANCE.sendTelemetry(Robot.loggingState.ENABLED);
         joinedTelemetry.addData("Commands: ", CommandManager.INSTANCE.snapshot());
 
 
@@ -125,24 +125,16 @@ public class Tele extends NextFTCOpMode {
         //Disable active when triggers not held down
 
         //Toggle things based on dpad
-        Gamepads.gamepad1().dpadUp().whenBecomesTrue(() -> TurretSubsystem.INSTANCE.TurretForward().schedule());
-        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(() -> TurretSubsystem.INSTANCE.TurretGoal().schedule());
-        Gamepads.gamepad1().dpadDown().whenBecomesTrue(Robot.INSTANCE.Park());
-        Gamepads.gamepad1().dpadRight().whenBecomesTrue(() -> {
-            follower().setStartingPose(Poses.blueGoalTopStartFacing);
-        });
+        Gamepads.gamepad1().dpadUp().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretForward());
+        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretGoal());
+        Gamepads.gamepad1().dpadRight().whenBecomesTrue(TurretSubsystem.INSTANCE::init);
+        Gamepads.gamepad1().dpadDown().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN));
 
 
         //Face buttons
-        Gamepads.gamepad1().a().whenBecomesTrue(() -> {
-            TurretSubsystem.INSTANCE.setMotorPower(.65);
-        });
-        Gamepads.gamepad1().b().whenBecomesTrue(() -> {
-            TurretSubsystem.INSTANCE.setMotorPower(0);
-        });
-        Gamepads.gamepad1().x().whenBecomesTrue(() -> {
-            TurretSubsystem.INSTANCE.setMotorPower(debugPower);
-        });
+        Gamepads.gamepad1().a().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.SHORT));
+        Gamepads.gamepad1().b().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.OFF));
+        Gamepads.gamepad1().x().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR));
 
         //Shooting command
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.Shoot());
