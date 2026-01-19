@@ -26,7 +26,7 @@ public class SlotSubsystem extends SubsystemGroup {
 
     public static final SlotSubsystem INSTANCE = new SlotSubsystem();
     public static Supplier<ArrayList<Slot>> result;
-    private static Timer shotTimer = new Timer();
+    private static final Timer shotTimer = new Timer();
     public ArrayList<Slot> slots = new ArrayList<>(Arrays.asList(LeftSlot.INSTANCE, RightSlot.INSTANCE, BackSlot.INSTANCE));
 
     public SlotSubsystem() {

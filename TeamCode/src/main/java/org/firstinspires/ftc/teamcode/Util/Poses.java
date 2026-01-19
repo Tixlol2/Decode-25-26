@@ -16,8 +16,10 @@ public class Poses {
 
     public static Pose blueGoalTopStartFacing = new Pose(22, 124, Math.toRadians(144));
     public static Pose redGoalTopStartFacing = new Pose(122, 127, Math.toRadians(37));
-    public static Pose blueShortScore = new Pose(44, 112, Math.toRadians(144));
-    public static Pose redShortScore = new Pose(96, 108, Math.toRadians(37));
+    public static Pose blueShortScore = new Pose(44, 112);
+    public static Pose redShortScore = new Pose(96, 108);
+    public static Pose blueFarScore = new Pose(44, 112);
+    public static Pose redFarScore = new Pose(96, 108);
 
     public static Pose obelisk = new Pose(72, 148);
 
@@ -30,21 +32,19 @@ public class Poses {
     public static Pose redParkCP = new Pose(38.5, 120);
 
 
-    public static Pose readyRedActiveTop = new Pose(92.000, 90);
-    public static Pose readyBlueActiveTop = mirrorCoordinates(readyRedActiveTop, Robot.teamColor.BLUE);
     public static Pose redActiveTopStop = new Pose(120, 90);
     public static Pose blueActiveTopStop = mirrorCoordinates(redActiveTopStop, Robot.teamColor.BLUE);
 
-    public static Pose readyRedActiveMid = new Pose(92.000, 63);
-    public static Pose readyBlueActiveMid = mirrorCoordinates(readyRedActiveMid, Robot.teamColor.BLUE);
     public static Pose redActiveMidStop = new Pose(122, 63);
     public static Pose blueActiveMidStop = mirrorCoordinates(redActiveMidStop, Robot.teamColor.BLUE);
 
     public static Pose redMidCP = new Pose(87.14223693655666, 66.59257151401363);
     public static Pose blueMidCP = mirrorCoordinates(redMidCP, Robot.teamColor.BLUE);
 
-    public static Pose blueParkAuto = new Pose(48, 128);
-    public static Pose redParkAuto = mirrorCoordinates(blueParkAuto, Robot.teamColor.RED);
+    public static Pose blueShortParkAuto = new Pose(48, 128);
+    public static Pose redShortParkAuto = mirrorCoordinates(blueShortParkAuto, Robot.teamColor.RED);
+    public static Pose blueFarParkAuto = new Pose(24, 12);
+    public static Pose redFarParkAuto = mirrorCoordinates(blueFarParkAuto, Robot.teamColor.RED);
 
 
     public static Pose mirrorCoordinates(Pose pose, Robot.teamColor targetColor) {

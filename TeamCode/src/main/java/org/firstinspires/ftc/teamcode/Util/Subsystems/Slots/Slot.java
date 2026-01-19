@@ -19,11 +19,11 @@ public class Slot implements Subsystem {
 
     private final Timer shotTimer = new Timer();
     private ServoEx light;
-    private String lightName;
+    private final String lightName;
     private ColorSensor colorSensor;
-    private String colorSensorName;
+    private final String colorSensorName;
     private ServoEx kickerServo;
-    private String kickerName;
+    private final String kickerName;
     private double up = 0;
     private double down = 0;
     private SlotState colorState = SlotState.EMPTY;

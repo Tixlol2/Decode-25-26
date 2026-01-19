@@ -4,7 +4,6 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
@@ -40,11 +39,10 @@ public class Robot extends SubsystemGroup {
     public static Timer shotTimer = new Timer();
     public static ArrayList<Slot> order;
     public static double standardWaitTime = .75;
+    public static Pose previousPose = new Pose();
     ElapsedTime loopTimer = new ElapsedTime();
     private double distanceToGoal = 0;
     private JoinedTelemetry joinedTelemetry;
-
-    public static Pose previousPose = new Pose();
 
     private Robot() {
         super(
