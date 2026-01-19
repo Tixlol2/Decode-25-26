@@ -62,11 +62,10 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name = "Concept: LED Stick", group = "Concept")
 @Disabled
 public class ConceptLEDStick extends OpMode {
+    private final static double END_GAME_TIME = 120 - 30;
     private boolean wasUp;
     private boolean wasDown;
     private int brightness = 5;  // this needs to be between 0 and 31
-    private final static double END_GAME_TIME = 120 - 30;
-
     private SparkFunLEDStick ledStick;
 
     @Override

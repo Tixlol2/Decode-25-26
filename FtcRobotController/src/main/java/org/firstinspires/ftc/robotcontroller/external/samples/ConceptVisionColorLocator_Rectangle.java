@@ -65,11 +65,9 @@ import java.util.List;
 
 @Disabled
 @TeleOp(name = "Concept: Color-Locator (Rectangle)", group = "Concept")
-public class ConceptVisionColorLocator_Rectangle extends LinearOpMode
-{
+public class ConceptVisionColorLocator_Rectangle extends LinearOpMode {
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
         /* Build a "Color Locator" vision processor based on the ColorBlobLocatorProcessor class.
          * - Specify the color range you are looking for. Use a predefined color, or create your own
          *
@@ -147,8 +145,7 @@ public class ConceptVisionColorLocator_Rectangle extends LinearOpMode
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
         // WARNING:  To view the stream preview on the Driver Station, this code runs in INIT mode.
-        while (opModeIsActive() || opModeInInit())
-        {
+        while (opModeIsActive() || opModeInInit()) {
             telemetry.addData("preview on/off", "... Camera Stream\n");
 
             // Read the current list
@@ -202,8 +199,7 @@ public class ConceptVisionColorLocator_Rectangle extends LinearOpMode
             telemetry.addLine("Ctr:(X,Y)  Area Dens Aspect Arc  Circ");
 
             // Display the size (area) and center location for each Blob.
-            for(ColorBlobLocatorProcessor.Blob b : blobs)
-            {
+            for (ColorBlobLocatorProcessor.Blob b : blobs) {
                 RotatedRect boxFit = b.getBoxFit();
                 telemetry.addLine(String.format("(%3d,%3d) %5d %4.2f  %5.2f %3d %5.3f ",
                         (int) boxFit.center.x, (int) boxFit.center.y, b.getContourArea(), b.getDensity(),

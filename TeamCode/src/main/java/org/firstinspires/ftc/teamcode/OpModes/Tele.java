@@ -7,9 +7,11 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSortingSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
@@ -65,38 +67,33 @@ public class Tele extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+        follower().setStartingPose(Robot.previousPose);
         follower().startTeleopDrive();
         Robot.INSTANCE.setGlobalColor();
         createBindings();
-        follower().setStartingPose(Close9Ball.endPose);
 
     }
 
     @Override
     public void onUpdate() {
+        Robot.previousPose = follower().getPose();
 
         isSlowed = gamepad1.left_bumper;
 
         //Spin active forward
         if (gamepad1.right_trigger > 0) {
-            IntakeSortingSubsystem.INSTANCE.forwardIntake();
+            IntakeSubsystem.INSTANCE.forwardIntake();
         } //Reverse Active and Spin
         else if (gamepad1.left_trigger > 0) {
-            IntakeSortingSubsystem.INSTANCE.reverseIntake();
+            IntakeSubsystem.INSTANCE.reverseIntake();
         } else {
-            IntakeSortingSubsystem.INSTANCE.disableActive();
-        }
-
-        //Rumble control
-        if (IntakeSortingSubsystem.INSTANCE.shouldRumble() && rumblingTimer.getTimeSeconds() > 3 && enableRumble) {
-            gamepad1.rumble(1000);
-            rumblingTimer.reset();
+            IntakeSubsystem.INSTANCE.disableActive();
         }
 
         //Kill button
         if ((gamepad1.yWasPressed())) {
             CommandManager.INSTANCE.cancelAll();
-            IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN).schedule();
+            SlotSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN).schedule();
             follower().startTeleopDrive();
             Robot.automatedDrive = false;
         }
@@ -122,13 +119,12 @@ public class Tele extends NextFTCOpMode {
 
     void createBindings() {
 
-        //Disable active when triggers not held down
 
         //Toggle things based on dpad
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretForward());
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretGoal());
         Gamepads.gamepad1().dpadRight().whenBecomesTrue(TurretSubsystem.INSTANCE::init);
-        Gamepads.gamepad1().dpadDown().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.SetAllSlotState(IntakeSortingSubsystem.servoState.DOWN));
+        Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
 
 
         //Face buttons
@@ -137,7 +133,7 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().x().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR));
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(IntakeSortingSubsystem.INSTANCE.Shoot());
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(SlotSubsystem.INSTANCE.Shoot());
 
 
     }

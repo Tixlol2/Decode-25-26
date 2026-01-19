@@ -5,7 +5,6 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Lerp;
 import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -14,9 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
-import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
@@ -27,7 +24,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class TurretSubsystem implements Subsystem {
     public static final TurretSubsystem INSTANCE = new TurretSubsystem();
     public static final HashMap<FlywheelState, Double> flywheelSpeedRPM = new HashMap<>(
-            Map.of(FlywheelState.SHORT, 2600.0  , FlywheelState.FAR, 3000.0, FlywheelState.OFF, 0.0, FlywheelState.INTERPOLATED, 0.0)
+            Map.of(FlywheelState.SHORT, 2600.0, FlywheelState.FAR, 3000.0, FlywheelState.OFF, 0.0, FlywheelState.INTERPOLATED, 0.0)
     );
     public static double targetVelocity = 0;
     public static double pLaunch = 0.000005, dLaunch = 0, fLaunch = 0, lLaunch = 0;
@@ -111,7 +108,7 @@ public class TurretSubsystem implements Subsystem {
                 new LambdaCommand()
                         .setStart(() -> setFlywheelState(state))
                         .setIsDone(() -> true));
-                //new IfElseCommand(() -> state != FlywheelState.OFF, new Delay(2)));
+        //new IfElseCommand(() -> state != FlywheelState.OFF, new Delay(2)));
     }
 
     public boolean veloWithinRangeBool() {

@@ -72,8 +72,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  */
 @TeleOp(name = "Sensor: IMU Non-Orthogonal", group = "Sensor")
 @Disabled     // Comment this out to add to the OpMode list
-public class SensorIMUNonOrthogonal extends LinearOpMode
-{
+public class SensorIMUNonOrthogonal extends LinearOpMode {
     // The IMU sensor object
     IMU imu;
 
@@ -81,7 +80,8 @@ public class SensorIMUNonOrthogonal extends LinearOpMode
     // Main logic
     //----------------------------------------------------------------------------------------------
 
-    @Override public void runOpMode() throws InterruptedException {
+    @Override
+    public void runOpMode() throws InterruptedException {
 
         // Retrieve and initialize the IMU.
         // This sample expects the IMU to be in a REV Hub and named "imu".

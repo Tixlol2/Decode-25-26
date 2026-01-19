@@ -121,13 +121,13 @@ public class ConceptAprilTagSwitchableCameras extends LinearOpMode {
         webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
         webcam2 = hardwareMap.get(WebcamName.class, "Webcam 2");
         CameraName switchableCamera = ClassFactory.getInstance()
-            .getCameraManager().nameForSwitchableCamera(webcam1, webcam2);
+                .getCameraManager().nameForSwitchableCamera(webcam1, webcam2);
 
         // Create the vision portal by using a builder.
         visionPortal = new VisionPortal.Builder()
-            .setCamera(switchableCamera)
-            .addProcessor(aprilTag)
-            .build();
+                .setCamera(switchableCamera)
+                .addProcessor(aprilTag)
+                .build();
 
     }   // end method initAprilTag()
 

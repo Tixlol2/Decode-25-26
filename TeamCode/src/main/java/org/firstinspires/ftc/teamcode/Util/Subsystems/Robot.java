@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.Util.Subsystems;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
@@ -26,8 +28,8 @@ public class Robot extends SubsystemGroup {
 
     public static final Robot INSTANCE = new Robot();
 
-    public static ArrayList<IntakeSortingSubsystem.Slot.slotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
-    public static Supplier<ArrayList<IntakeSortingSubsystem.Slot.slotState>> patternSupplier;
+    public static ArrayList<Slot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
+    public static Supplier<ArrayList<Slot.SlotState>> patternSupplier;
     public static boolean patternFull = false;
 
     public static teamColor color = teamColor.BLUE;
@@ -36,20 +38,21 @@ public class Robot extends SubsystemGroup {
     public static boolean inTeleop = true;
     public static boolean automatedDrive = false;
     public static Timer shotTimer = new Timer();
-    public static ArrayList<IntakeSortingSubsystem.Slot> order;
+    public static ArrayList<Slot> order;
     public static double standardWaitTime = .75;
     ElapsedTime loopTimer = new ElapsedTime();
     private double distanceToGoal = 0;
     private JoinedTelemetry joinedTelemetry;
 
-    private VoltageSensor voltageSensor;
+    public static Pose previousPose = new Pose();
 
     private Robot() {
         super(
                 MecDriveSubsystem.INSTANCE,
                 TurretSubsystem.INSTANCE,
-                IntakeSortingSubsystem.INSTANCE,
-                BetterVisionTM.INSTANCE
+                IntakeSubsystem.INSTANCE,
+                VisionSubsystem.INSTANCE,
+                SlotSubsystem.INSTANCE
         );
     }
 
@@ -59,7 +62,6 @@ public class Robot extends SubsystemGroup {
         joinedTelemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         setGlobals();
         patternSupplier = () -> pattern;
-        order = IntakeSortingSubsystem.INSTANCE.determineOrder(Robot.pattern);
     }
 
     @Override
@@ -84,7 +86,7 @@ public class Robot extends SubsystemGroup {
 
         //Handles pattern updating
         if (pattern.contains(null)) {
-            pattern = BetterVisionTM.INSTANCE.getPattern();
+            pattern = VisionSubsystem.INSTANCE.getPattern();
             patternFull = !pattern.contains(null);
         }
 
@@ -125,7 +127,7 @@ public class Robot extends SubsystemGroup {
     public Command StopSubsystems() {
         return new ParallelGroup(
                 TurretSubsystem.INSTANCE.TurretForward(),
-                IntakeSortingSubsystem.INSTANCE.stopActive(),
+                IntakeSubsystem.INSTANCE.stopActive(),
                 TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.OFF)
         );
     }
@@ -133,17 +135,17 @@ public class Robot extends SubsystemGroup {
     public void setGlobalTelemetry() {
         MecDriveSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         TurretSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
-        IntakeSortingSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
-        BetterVisionTM.INSTANCE.setTelemetry(joinedTelemetry);
+        IntakeSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
+        VisionSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
 
-        for (IntakeSortingSubsystem.Slot slot : IntakeSortingSubsystem.INSTANCE.slots) {
+        for (Slot slot : SlotSubsystem.INSTANCE.slots) {
             slot.setTelemetry(joinedTelemetry);
         }
     }
 
     public void setGlobalColor() {
         MecDriveSubsystem.INSTANCE.setColor(color);
-        BetterVisionTM.INSTANCE.setColor(color);
+        VisionSubsystem.INSTANCE.setColor(color);
 
     }
 

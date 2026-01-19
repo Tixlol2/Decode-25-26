@@ -6,6 +6,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -16,8 +17,8 @@ import java.util.ArrayList;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
-public class BetterVisionTM implements Subsystem {
-    public static final BetterVisionTM INSTANCE = new BetterVisionTM();
+public class VisionSubsystem implements Subsystem {
+    public static final VisionSubsystem INSTANCE = new VisionSubsystem();
     private final Robot.loggingState state = Robot.loggingState.ENABLED;
     private final Timer timer = new Timer();
     private AprilTagProcessor aprilTagProcessor;
@@ -26,12 +27,12 @@ public class BetterVisionTM implements Subsystem {
     private Robot.teamColor color = Robot.teamColor.BLUE;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private ArrayList<Integer> detectionIDs = new ArrayList<>();
-    private ArrayList<IntakeSortingSubsystem.Slot.slotState> pattern = new ArrayList<>();
+    private ArrayList<Slot.SlotState> pattern = new ArrayList<>();
     private double distanceToGoal = 0;
     private double deltaAngle = 0;
 
 
-    public BetterVisionTM() {
+    public VisionSubsystem() {
     }
 
 
@@ -144,7 +145,7 @@ public class BetterVisionTM implements Subsystem {
         return -1;
     }
 
-    public ArrayList<IntakeSortingSubsystem.Slot.slotState> getPattern() {
+    public ArrayList<Slot.SlotState> getPattern() {
         obeliskTargetPattern(getObeliskID());
         return pattern;
     }
@@ -181,13 +182,13 @@ public class BetterVisionTM implements Subsystem {
                 pattern = new ArrayList<>(List.of(null, null, null));
                 break;
             case 21:
-                pattern = new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.GREEN, IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.PURPLE));
+                pattern = new ArrayList<>(List.of(Slot.SlotState.GREEN, Slot.SlotState.PURPLE, Slot.SlotState.PURPLE));
                 break;
             case 22:
-                pattern = new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.GREEN, IntakeSortingSubsystem.Slot.slotState.PURPLE));
+                pattern = new ArrayList<>(List.of(Slot.SlotState.PURPLE, Slot.SlotState.GREEN, Slot.SlotState.PURPLE));
                 break;
             case 23:
-                pattern = new ArrayList<>(List.of(IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.PURPLE, IntakeSortingSubsystem.Slot.slotState.GREEN));
+                pattern = new ArrayList<>(List.of(Slot.SlotState.PURPLE, Slot.SlotState.PURPLE, Slot.SlotState.GREEN));
                 break;
         }
 

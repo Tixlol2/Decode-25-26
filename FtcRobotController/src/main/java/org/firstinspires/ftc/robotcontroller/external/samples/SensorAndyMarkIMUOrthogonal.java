@@ -81,8 +81,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  */
 @TeleOp(name = "Sensor: AndyMark IMU Orthogonal", group = "Sensor")
 @Disabled   // Comment this out to add to the OpMode list
-public class SensorAndyMarkIMUOrthogonal extends LinearOpMode
-{
+public class SensorAndyMarkIMUOrthogonal extends LinearOpMode {
     // The AndyMark IMU sensor object
     private IMU imu;
 
@@ -90,7 +89,8 @@ public class SensorAndyMarkIMUOrthogonal extends LinearOpMode
     // Main logic
     //----------------------------------------------------------------------------------------------
 
-    @Override public void runOpMode() throws InterruptedException {
+    @Override
+    public void runOpMode() throws InterruptedException {
 
         // Retrieve and initialize the AndyMark IMU.
         // This sample expects the AndyMark IMU to be named "imu".
