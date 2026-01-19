@@ -23,7 +23,7 @@ public class Auto extends NextFTCOpMode {
 
 
     JoinedTelemetry joinedTelemetry;
-    MainPaths paths = new Close6();
+    MainPaths paths;
     private int pathState = 0;
     private int oldPathState = 0;
 
@@ -41,6 +41,7 @@ public class Auto extends NextFTCOpMode {
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
         Robot.inTeleop = false;
         TurretSubsystem.INSTANCE.init();
+        paths = new Close6();
     }
 
     @Override
