@@ -27,6 +27,7 @@ android {
 repositories {
 
 
+
 }
 
 dependencies {
@@ -35,4 +36,5 @@ dependencies {
     implementation 'dev.nextftc:hardware:1.0.1'// If you would like to use the hardware module
 
     implementation 'dev.nextftc.extensions:pedro:1.0.0'
+
 }

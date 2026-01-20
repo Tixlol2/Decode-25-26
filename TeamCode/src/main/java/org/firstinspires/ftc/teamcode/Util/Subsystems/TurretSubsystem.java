@@ -134,7 +134,7 @@ public class TurretSubsystem implements Subsystem {
     }
 
     public double getCurrentVelocityRPM() {
-        return -(launcherBottomWithEncoder.getVelocity() * 60 / 28);
+        return -(launcherGroup.getVelocity() * 60 / 28);
     }
 
     public double getCurrentAngle() {
@@ -181,6 +181,14 @@ public class TurretSubsystem implements Subsystem {
                     TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.OBELISK);
                 })
                 .setIsDone(TurretSubsystem.INSTANCE::turretFinished);
+    }
+
+    public Command ScanPattern(){
+        return new LambdaCommand()
+                .setStart(() -> {
+                    TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.OBELISK);
+                })
+                .setIsDone(() -> Robot.patternFull);
     }
 
     public void sendTelemetry(Robot.loggingState state) {

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import com.bylazar.telemetry.JoinedTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.OpModes.Paths.Close6;
 import org.firstinspires.ftc.teamcode.OpModes.Paths.Close9;
@@ -19,6 +20,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
+@Autonomous(name = "Auto", group = "Main")
 public class Auto extends NextFTCOpMode {
 
 
@@ -100,46 +102,25 @@ public class Auto extends NextFTCOpMode {
             case -1:
                 break;
             case 0:
-                paths.command1.schedule();
-                if (paths.command1.isDone()) {
-                    setPathState(1);
-                }
+                paths.command1.then(SetPathState(1)).schedule();
                 break;
             case 1:
-                paths.command2.schedule();
-                if (paths.command2.isDone()) {
-                    setPathState(2);
-                }
+                paths.command2.then(SetPathState(2)).schedule();
                 break;
             case 2:
-                paths.command3.schedule();
-                if (paths.command3.isDone()) {
-                    setPathState(3);
-                }
+                paths.command3.then(SetPathState(3)).schedule();
                 break;
             case 3:
-                paths.command4.schedule();
-                if (paths.command4.isDone()) {
-                    setPathState(4);
-                }
+                paths.command4.then(SetPathState(4)).schedule();
                 break;
             case 4:
-                paths.command5.schedule();
-                if (paths.command5.isDone()) {
-                    setPathState(5);
-                }
+                paths.command5.then(SetPathState(5)).schedule();
                 break;
             case 5:
-                paths.command6.schedule();
-                if (paths.command6.isDone()) {
-                    setPathState(6);
-                }
+                paths.command6.then(SetPathState(6)).schedule();
                 break;
             case 6:
-                paths.command7.schedule();
-                if (paths.command7.isDone()) {
-                    setPathState(7);
-                }
+                paths.command7.then(SetPathState(7)).schedule();
                 break;
 
         }

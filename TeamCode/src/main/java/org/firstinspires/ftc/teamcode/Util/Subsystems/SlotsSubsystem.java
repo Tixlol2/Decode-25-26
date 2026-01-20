@@ -22,14 +22,14 @@ import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
 
-public class SlotSubsystem extends SubsystemGroup {
+public class SlotsSubsystem extends SubsystemGroup {
 
-    public static final SlotSubsystem INSTANCE = new SlotSubsystem();
+    public static final SlotsSubsystem INSTANCE = new SlotsSubsystem();
     public static Supplier<ArrayList<Slot>> result;
     private static final Timer shotTimer = new Timer();
     public ArrayList<Slot> slots = new ArrayList<>(Arrays.asList(LeftSlot.INSTANCE, RightSlot.INSTANCE, BackSlot.INSTANCE));
 
-    public SlotSubsystem() {
+    public SlotsSubsystem() {
         super(
                 LeftSlot.INSTANCE,
                 RightSlot.INSTANCE,

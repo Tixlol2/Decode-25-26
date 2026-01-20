@@ -50,7 +50,7 @@ public class Robot extends SubsystemGroup {
                 TurretSubsystem.INSTANCE,
                 IntakeSubsystem.INSTANCE,
                 VisionSubsystem.INSTANCE,
-                SlotSubsystem.INSTANCE
+                SlotsSubsystem.INSTANCE
         );
     }
 
@@ -136,7 +136,7 @@ public class Robot extends SubsystemGroup {
         IntakeSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         VisionSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
 
-        for (Slot slot : SlotSubsystem.INSTANCE.slots) {
+        for (Slot slot : SlotsSubsystem.INSTANCE.slots) {
             slot.setTelemetry(joinedTelemetry);
         }
     }

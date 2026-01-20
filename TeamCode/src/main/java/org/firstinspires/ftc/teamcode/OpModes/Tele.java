@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotsSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
@@ -93,7 +93,7 @@ public class Tele extends NextFTCOpMode {
         //Kill button
         if ((gamepad1.yWasPressed())) {
             CommandManager.INSTANCE.cancelAll();
-            SlotSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN).schedule();
+            SlotsSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN).schedule();
             follower().startTeleopDrive();
             Robot.automatedDrive = false;
         }
@@ -123,8 +123,8 @@ public class Tele extends NextFTCOpMode {
         //Toggle things based on dpad
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretForward());
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretGoal());
-        Gamepads.gamepad1().dpadRight().whenBecomesTrue(TurretSubsystem.INSTANCE::init);
-        Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
+        //Gamepads.gamepad1().dpadRight().whenBecomesTrue(TurretSubsystem.INSTANCE::init);
+        Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotsSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
 
 
         //Face buttons
@@ -133,7 +133,7 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().x().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR));
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(SlotSubsystem.INSTANCE.Shoot());
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(SlotsSubsystem.INSTANCE.Shoot());
 
 
     }

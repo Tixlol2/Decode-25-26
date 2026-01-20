@@ -5,15 +5,18 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotsSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 
 import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.ParallelGroup;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
@@ -73,7 +76,6 @@ public class MainPaths {
         this.command7 = command7;
     }
 
-
     public PathChain getShootingPath() {
         Supplier<PathChain> path = () -> PedroComponent.follower().pathBuilder()
                 .addPath(
@@ -127,9 +129,12 @@ public class MainPaths {
     }
 
     public Command MoveShoot() {
-        return new ParallelGroup(
-                new FollowPath(getShootingPath()),
-                SlotSubsystem.INSTANCE.Shoot()
+        return new SequentialGroup(
+                new ParallelGroup(
+                    new IfElseCommand(() -> !Robot.patternFull, TurretSubsystem.INSTANCE.ScanPattern(), TurretSubsystem.INSTANCE.TurretGoal()),
+                    new FollowPath(getShootingPath(), true)
+                ),
+                SlotsSubsystem.INSTANCE.Shoot()
         );
     }
 
