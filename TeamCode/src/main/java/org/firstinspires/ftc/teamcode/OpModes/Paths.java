@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpModes.Paths;
+package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -20,7 +20,7 @@ import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
-public class MainPaths {
+public class Paths {
 
     public String name;
     public int numCommands;
@@ -34,12 +34,7 @@ public class MainPaths {
     public Command command6;
     public Command command7;
 
-    public MainPaths(String name, int numCommands, ShootingLocation shootingLocation, Pose startingPose) {
-        this.name = name;
-        this.numCommands = numCommands;
-        this.shootingLocation = shootingLocation;
-        this.startingPose = startingPose;
-    }
+    public Paths(){}
 
     public void setCommand(int num, Command command) {
         switch (num) {
@@ -138,7 +133,7 @@ public class MainPaths {
         );
     }
 
-    public Command Park() {
+    public Command AutoPark() {
         return new ParallelGroup(
                 new FollowPath(getParkPath()),
                 Robot.INSTANCE.StopSubsystems()
@@ -157,6 +152,31 @@ public class MainPaths {
     }
     public Command IntakeMid() {
         return ActivePath(getMidIntakePath());
+    }
+
+    public void setConstants(String name, int numCommands, ShootingLocation shootingLocation,Pose startingPose){
+        this.name = name;
+        this.numCommands = numCommands;
+        this.shootingLocation = shootingLocation;
+        this.startingPose = startingPose;
+    }
+
+    public void setPathsClose6() {
+        setConstants("Close 6", 4, ShootingLocation.SHORT, Robot.color == Robot.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
+        setCommand(1, MoveShoot());
+        setCommand(2, IntakeTop());
+        setCommand(3, MoveShoot());
+        setCommand(4, AutoPark());
+    }
+
+    public void setPathsClose9() {
+        setConstants("Close 9", 6, ShootingLocation.SHORT, Robot.color == Robot.teamColor.BLUE ? Poses.blueGoalTopStartFacing : Poses.redGoalTopStartFacing);
+        setCommand(1, MoveShoot());
+        setCommand(2, IntakeTop());
+        setCommand(3, MoveShoot());
+        setCommand(4, IntakeMid());
+        setCommand(5, MoveShoot());
+        setCommand(6, AutoPark());
     }
 
     public enum ShootingLocation {

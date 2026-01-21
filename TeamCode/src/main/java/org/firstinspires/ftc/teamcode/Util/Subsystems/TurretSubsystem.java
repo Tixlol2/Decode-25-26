@@ -12,6 +12,9 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import java.util.HashMap;
 import java.util.Map;
 
+import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
+import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
@@ -24,20 +27,17 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class TurretSubsystem implements Subsystem {
     public static final TurretSubsystem INSTANCE = new TurretSubsystem();
     public static final HashMap<FlywheelState, Double> flywheelSpeedRPM = new HashMap<>(
-            Map.of(FlywheelState.SHORT, 2600.0, FlywheelState.FAR, 3000.0, FlywheelState.OFF, 0.0, FlywheelState.INTERPOLATED, 0.0)
+            Map.of(FlywheelState.SHORT, 2600.0, FlywheelState.FAR, 3000.0, FlywheelState.OFF, 0.0)
     );
     public static double targetVelocity = 0;
-    public static double pLaunch = 0.000005, dLaunch = 0, fLaunch = 0, lLaunch = 0;
+    public static double pLaunch = 0, iLaunch = 0, dLaunch = 0;
     public static double turretTargetAngle = 0;
     public static double pTurret = 0.003, dTurret = 0, lTurret = .1, fTurret = 0;
     public static boolean debug = false;
-    public static double debugPower = 0;
     public static TurretState state = TurretState.FORWARD;
-    public static boolean launcherPDFL = true;
-    public static double veloLinReg = 1 / 4846.75334;
-    public static double posLinReg = 0.0000001;
+
     private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
-    private final PDFLController launcherController = new PDFLController(pLaunch, dLaunch, fLaunch, lLaunch);
+    public static ControlSystem controller;
     public Lerp lerp = new Lerp(0, 0, 0);
     // put hardware, commands, etc here
     JoinedTelemetry telemetry;
@@ -48,16 +48,19 @@ public class TurretSubsystem implements Subsystem {
 
     MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).floatMode().zeroed().brakeMode();
     private double launcherCurrentVelo = 0;
-    private double power = 0;
+
     private double turretCurrentPos = 0;
     private FlywheelState FWState = FlywheelState.OFF;
+    public static PIDCoefficients coefficients = new PIDCoefficients(pLaunch, iLaunch, dLaunch);
 
     @Override
     public void initialize() {
         telemetry = new JoinedTelemetry(ActiveOpMode.telemetry(), PanelsTelemetry.INSTANCE.getFtcTelemetry());
         FWState = FlywheelState.OFF;
         turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
-        launcherController.setPDFL(pLaunch, dLaunch, fLaunch, lLaunch);
+        controller = ControlSystem.builder()
+                .velPid(coefficients)
+                .build();
 
     }
 
@@ -65,22 +68,11 @@ public class TurretSubsystem implements Subsystem {
     public void periodic() {
         if (!ActiveOpMode.opModeInInit()) {
             // Launcher control (this looks fine)
-            if (!launcherPDFL) {
-                launcherGroup.setPower(debugPower);
-            } else {
+            targetVelocity = getTargetFromMap();
+            controller.setGoal(new KineticState(0, targetVelocity));
+            launcherGroup.setPower(controller.calculate(new KineticState(0, getCurrentVelocityRPM())));
 
-                targetVelocity = getTargetFromMap();
-                launcherCurrentVelo = -getCurrentVelocityRPM();
-                launcherController.setTarget(targetVelocity);
-                launcherController.update(launcherCurrentVelo);
-                power += lerp.constantLerp(power, targetVelocity * veloLinReg, 1);//Math.min(pdfl.runPDFL(20),.1);
-                // clamp power to valid motor range
-                if (Double.isNaN(power)) {
-                    power = 0;
-                }
-                power = Math.max(0.0, Math.min(1.0, power + launcherController.runPDFL(10)));
-                launcherGroup.setPower(power);
-            }
+
             //Full turret control
             turretCurrentPos = turret.getCurrentPosition();
             turretTargetAngle = Math.max(-180, Math.min(35, turretTargetAngle)); //Negative is ccw
@@ -107,7 +99,7 @@ public class TurretSubsystem implements Subsystem {
         return new SequentialGroup(
                 new LambdaCommand()
                         .setStart(() -> setFlywheelState(state))
-                        .setIsDone(() -> true));
+                        .setIsDone(() -> controller.isWithinTolerance(new KineticState(0, 200))));
         //new IfElseCommand(() -> state != FlywheelState.OFF, new Delay(2)));
     }
 
@@ -151,7 +143,7 @@ public class TurretSubsystem implements Subsystem {
         turretCurrentPos = 0;
         turretTargetAngle = 0;
         targetVelocity = 0;
-        power = 0;
+        controller.setGoal(new KineticState(0.0));
     }
 
 
@@ -188,7 +180,8 @@ public class TurretSubsystem implements Subsystem {
                 .setStart(() -> {
                     TurretSubsystem.INSTANCE.setTurretState(TurretSubsystem.TurretState.OBELISK);
                 })
-                .setIsDone(() -> Robot.patternFull);
+                .setIsDone(() -> Robot.patternFull)
+                .setStop((interrupted) -> {TurretSubsystem.INSTANCE.setTurretState(TurretState.GOAL);});
     }
 
     public void sendTelemetry(Robot.loggingState state) {
@@ -199,7 +192,6 @@ public class TurretSubsystem implements Subsystem {
                 telemetry.addLine("START OF OUTTAKE LOG");
                 telemetry.addData("Target RPM ", targetVelocity);
                 telemetry.addData("Current RPM ", (getCurrentVelocityRPM()));
-                telemetry.addData("Power: ", power);
                 telemetry.addLine();
                 telemetry.addData("Turret Position Deg ", ticksToAngle(turretCurrentPos));
                 telemetry.addData("Turret Target Deg ", turretTargetAngle);
@@ -226,8 +218,7 @@ public class TurretSubsystem implements Subsystem {
     public enum FlywheelState {
         SHORT,
         FAR,
-        OFF,
-        INTERPOLATED
+        OFF
     }
 
 
