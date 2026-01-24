@@ -57,7 +57,7 @@ public class Slot implements Subsystem {
     }
 
     public String getKickerServoName() {
-        return UniConstants.LIGHT_LEFT_STRING;
+        return kickerName;
     }
 
     public Timer getShotTimer() {

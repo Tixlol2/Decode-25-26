@@ -5,16 +5,12 @@ import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.OpModes.Paths.Close6;
-import org.firstinspires.ftc.teamcode.OpModes.Paths.Close9;
-import org.firstinspires.ftc.teamcode.OpModes.Paths.MainPaths;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.utility.InstantCommand;
-import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -25,16 +21,15 @@ public class Auto extends NextFTCOpMode {
 
 
     JoinedTelemetry joinedTelemetry;
-    MainPaths paths;
+    Paths paths;
     private int pathState = 0;
-    private int oldPathState = 0;
+    private int oldPathState = -1;
 
     {
         addComponents(
                 new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(Robot.INSTANCE),
-                BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE
+                BulkReadComponent.INSTANCE
         ); //Subsystems
     }
 
@@ -43,7 +38,8 @@ public class Auto extends NextFTCOpMode {
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
         Robot.inTeleop = false;
         TurretSubsystem.INSTANCE.init();
-        paths = new Close6();
+        paths = new Paths();
+        paths.setPathsClose6();
     }
 
     @Override
@@ -55,9 +51,9 @@ public class Auto extends NextFTCOpMode {
         }
 
         if (gamepad1.dpad_up) {
-            paths = new Close6();
+            paths.setPathsClose6();
         } else if (gamepad1.dpad_down){
-            paths = new Close9();
+            paths.setPathsClose9();
         }
 
         joinedTelemetry.addLine("CHANGE THIS IF NEED BE!!!! ");

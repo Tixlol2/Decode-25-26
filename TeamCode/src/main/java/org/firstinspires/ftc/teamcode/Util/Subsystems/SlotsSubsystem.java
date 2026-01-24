@@ -27,7 +27,6 @@ public class SlotsSubsystem extends SubsystemGroup {
     public static final SlotsSubsystem INSTANCE = new SlotsSubsystem();
     public static Supplier<ArrayList<Slot>> result;
     private static final Timer shotTimer = new Timer();
-    public ArrayList<Slot> slots = new ArrayList<>(Arrays.asList(LeftSlot.INSTANCE, RightSlot.INSTANCE, BackSlot.INSTANCE));
 
     public SlotsSubsystem() {
         super(
@@ -36,6 +35,8 @@ public class SlotsSubsystem extends SubsystemGroup {
                 BackSlot.INSTANCE
         );
     }
+
+    public ArrayList<Slot> slots = new ArrayList<>(Arrays.asList(LeftSlot.INSTANCE, RightSlot.INSTANCE, BackSlot.INSTANCE));
 
     @Override
     public void initialize() {
@@ -119,7 +120,7 @@ public class SlotsSubsystem extends SubsystemGroup {
                                 .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
 
                 ),
-                new InstantCommand(() -> shotTimer.reset())
+                new InstantCommand(shotTimer::reset)
         ).setInterruptible(false).addRequirements(this);
     }
 

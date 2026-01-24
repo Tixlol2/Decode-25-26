@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotsSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotsSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
@@ -44,6 +44,7 @@ public class Tele extends NextFTCOpMode {
                 BindingsComponent.INSTANCE
         ); //Subsystems
     }
+
 
     @Override
     public void onInit() {
@@ -124,7 +125,7 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretForward());
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(TurretSubsystem.INSTANCE.TurretGoal());
         //Gamepads.gamepad1().dpadRight().whenBecomesTrue(TurretSubsystem.INSTANCE::init);
-        Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotsSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
+        //Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotsSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
 
 
         //Face buttons
