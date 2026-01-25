@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
+import androidx.annotation.NonNull;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -10,13 +12,28 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.MecDriveSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.BackSlot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.LeftSlot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.RightSlot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.SlotsSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Supplier;
+
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.ParallelGroup;
+import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -45,10 +62,14 @@ public class Tele extends NextFTCOpMode {
         ); //Subsystems
     }
 
+    public static Supplier<ArrayList<Slot>> result;
+
 
     @Override
     public void onInit() {
         joinedTelemetry = Robot.INSTANCE.getJoinedTelemetry();
+        result = () -> determineOrder(Robot.patternSupplier.get());
+
     }
 
     @Override
@@ -134,9 +155,72 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().x().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR));
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(SlotsSubsystem.INSTANCE.Shoot());
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(Shoot());
 
 
+    }
+
+    public ArrayList<Slot> determineOrder(@NonNull ArrayList<Slot.SlotState> pattern) {
+
+        ArrayList<Slot> result1 = new ArrayList<>();
+        Set<Slot> used = new HashSet<>();
+        for (Slot.SlotState wanted : pattern) {
+            for (Slot slot : Robot.INSTANCE.slots) {
+                if (slot.getColorState() == wanted && used.add(slot)) {
+                    result1.add(slot);
+                    break;
+                }
+            }
+        }
+
+        if (result1.size() >= 3) {
+            return result1;
+        }
+
+        // Not full - add slots that are full first, then empty ones
+        ArrayList<Slot> orderedResult = new ArrayList<>();
+
+        // Add full slots first
+        for (Slot slot : Robot.INSTANCE.slots) {
+            if (slot.getColorState() != Slot.SlotState.EMPTY) {
+                orderedResult.add(slot);
+            }
+        }
+
+        // Then add empty slots
+        for (Slot slot : Robot.INSTANCE.slots) {
+            if (slot.getColorState() == Slot.SlotState.EMPTY) {
+                orderedResult.add(slot);
+            }
+        }
+
+        return orderedResult;
+    }
+
+    public Command Shoot() {
+
+        Supplier<Slot> first = () -> result.get().get(0);
+        Supplier<Slot> second = () -> result.get().get(1);
+        Supplier<Slot> third = () -> result.get().get(2);
+
+
+        return new SequentialGroup(
+                new ParallelGroup(
+                        new LambdaCommand()
+                                .setStart(() -> first.get().basicShootDown().named("Result 1 " + first.get().getKickerServoName()).run())
+                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+                        new Delay(1)),
+                        new LambdaCommand()
+                                .setStart(() -> second.get().basicShootDown().named("Result 2 " + second.get().getKickerServoName()).run())
+                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+
+                        new LambdaCommand()
+                                .setStart(() -> third.get().basicShoot().named("Result 3 " + third.get().getKickerServoName()).run())
+                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
+
+
+                //new InstantCommand(shotTimer::reset)
+        ).setInterruptible(false).addRequirements(this);
     }
 
 

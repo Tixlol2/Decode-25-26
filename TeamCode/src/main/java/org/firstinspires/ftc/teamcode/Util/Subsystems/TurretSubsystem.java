@@ -34,6 +34,7 @@ public class TurretSubsystem implements Subsystem {
     public static double turretTargetAngle = 0;
     public static double pTurret = 0.003, dTurret = 0, lTurret = .1, fTurret = 0;
     public static boolean debug = false;
+    public static double debugPower = 0;
     public static TurretState state = TurretState.FORWARD;
 
     private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
@@ -68,10 +69,11 @@ public class TurretSubsystem implements Subsystem {
     public void periodic() {
         if (!ActiveOpMode.opModeInInit()) {
             // Launcher control (this looks fine)
-            targetVelocity = getTargetFromMap();
-            controller.setGoal(new KineticState(0, targetVelocity));
-            launcherGroup.setPower(controller.calculate(new KineticState(0, getCurrentVelocityRPM())));
-
+            if(!debug) {
+                targetVelocity = getTargetFromMap();
+                controller.setGoal(new KineticState(0, targetVelocity));
+                launcherGroup.setPower(controller.calculate(new KineticState(0, getCurrentVelocityRPM())));
+            } else {launcherGroup.setPower(debugPower);}
 
             //Full turret control
             turretCurrentPos = turret.getCurrentPosition();

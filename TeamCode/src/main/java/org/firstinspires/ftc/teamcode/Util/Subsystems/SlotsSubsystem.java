@@ -25,8 +25,7 @@ import dev.nextftc.core.subsystems.SubsystemGroup;
 public class SlotsSubsystem extends SubsystemGroup {
 
     public static final SlotsSubsystem INSTANCE = new SlotsSubsystem();
-    public static Supplier<ArrayList<Slot>> result;
-    private static final Timer shotTimer = new Timer();
+
 
     public SlotsSubsystem() {
         super(
@@ -36,11 +35,10 @@ public class SlotsSubsystem extends SubsystemGroup {
         );
     }
 
-    public ArrayList<Slot> slots = new ArrayList<>(Arrays.asList(LeftSlot.INSTANCE, RightSlot.INSTANCE, BackSlot.INSTANCE));
+    private static final Timer shotTimer = new Timer();
 
     @Override
     public void initialize() {
-        result = () -> determineOrder(Robot.patternSupplier.get());
     }
 
     @Override
@@ -57,71 +55,6 @@ public class SlotsSubsystem extends SubsystemGroup {
         );
     }
 
-    public ArrayList<Slot> determineOrder(@NonNull ArrayList<Slot.SlotState> pattern) {
 
-        ArrayList<Slot> result1 = new ArrayList<>();
-        Set<Slot> used = new HashSet<>();
-        for (Slot.SlotState wanted : pattern) {
-            for (Slot slot : slots) {
-                if (slot.getColorState() == wanted && used.add(slot)) {
-                    result1.add(slot);
-                    break;
-                }
-            }
-        }
-
-        if (result1.size() >= 3) {
-            return result1;
-        }
-
-        // Not full - add slots that are full first, then empty ones
-        ArrayList<Slot> orderedResult = new ArrayList<>();
-
-        // Add full slots first
-        for (Slot slot : slots) {
-            if (slot.getColorState() != Slot.SlotState.EMPTY) {
-                orderedResult.add(slot);
-            }
-        }
-
-        // Then add empty slots
-        for (Slot slot : slots) {
-            if (slot.getColorState() == Slot.SlotState.EMPTY) {
-                orderedResult.add(slot);
-            }
-        }
-
-        if (orderedResult.size() < 3) {
-            orderedResult = slots;
-        }
-
-        return orderedResult;
-    }
-
-    public Command Shoot() {
-
-        Supplier<Slot> first = () -> result.get().get(0);
-        Supplier<Slot> second = () -> result.get().get(1);
-        Supplier<Slot> third = () -> result.get().get(2);
-
-
-        return new SequentialGroup(
-
-                new SequentialGroup(
-                        new LambdaCommand()
-                                .setStart(() -> first.get().basicShootDown().named("Result 1 " + first.get().getKickerServoName()).run())
-                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
-                        new LambdaCommand()
-                                .setStart(() -> second.get().basicShootDown().named("Result 2 " + second.get().getKickerServoName()).run())
-                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
-
-                        new LambdaCommand()
-                                .setStart(() -> third.get().basicShoot().named("Result 3 " + third.get().getKickerServoName()).run())
-                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
-
-                ),
-                new InstantCommand(shotTimer::reset)
-        ).setInterruptible(false).addRequirements(this);
-    }
 
 }

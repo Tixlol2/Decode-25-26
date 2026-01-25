@@ -6,6 +6,9 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.BackSlot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.LeftSlot;
+import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.RightSlot;
 import org.firstinspires.ftc.teamcode.Util.Subsystems.Slots.Slot;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -27,6 +30,18 @@ public class Robot extends SubsystemGroup {
 
     public static final Robot INSTANCE = new Robot();
 
+    private Robot() {
+        super(
+                SlotsSubsystem.INSTANCE,
+                MecDriveSubsystem.INSTANCE,
+                TurretSubsystem.INSTANCE,
+                IntakeSubsystem.INSTANCE,
+                VisionSubsystem.INSTANCE
+        );
+    }
+
+    public ArrayList<Slot> slots = new ArrayList<>(Arrays.asList(LeftSlot.INSTANCE, RightSlot.INSTANCE, BackSlot.INSTANCE));
+
     public static ArrayList<Slot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
     public static Supplier<ArrayList<Slot.SlotState>> patternSupplier;
     public static boolean patternFull = false;
@@ -44,15 +59,8 @@ public class Robot extends SubsystemGroup {
     private double distanceToGoal = 0;
     private JoinedTelemetry joinedTelemetry;
 
-    private Robot() {
-        super(
-                MecDriveSubsystem.INSTANCE,
-                TurretSubsystem.INSTANCE,
-                IntakeSubsystem.INSTANCE,
-                VisionSubsystem.INSTANCE,
-                SlotsSubsystem.INSTANCE
-        );
-    }
+
+
 
 
     @Override
@@ -136,7 +144,7 @@ public class Robot extends SubsystemGroup {
         IntakeSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
         VisionSubsystem.INSTANCE.setTelemetry(joinedTelemetry);
 
-        for (Slot slot : SlotsSubsystem.INSTANCE.slots) {
+        for (Slot slot : slots) {
             slot.setTelemetry(joinedTelemetry);
         }
     }
