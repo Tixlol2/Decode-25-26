@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.Util.Subsystems.Slots;
+package org.firstinspires.ftc.teamcode.Subsystems.Slots;
 
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
-public class BackSlot extends Slot {
+public class BackSlot extends MainSlot {
 
     public static final BackSlot INSTANCE = new BackSlot();
 

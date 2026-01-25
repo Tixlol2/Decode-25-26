@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.Util.Subsystems.Slots;
+package org.firstinspires.ftc.teamcode.Subsystems.Slots;
 
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
-public class LeftSlot extends Slot {
+public class LeftSlot extends MainSlot {
 
     public static final LeftSlot INSTANCE = new LeftSlot();
 

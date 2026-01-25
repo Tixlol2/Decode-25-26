@@ -1,9 +1,7 @@
-package org.firstinspires.ftc.teamcode.Util.Subsystems.Slots;
+package org.firstinspires.ftc.teamcode.Subsystems.Slots;
 
-import com.bylazar.telemetry.JoinedTelemetry;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
-import org.firstinspires.ftc.teamcode.Util.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
@@ -15,7 +13,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.ServoEx;
 
-public class Slot implements Subsystem {
+public class MainSlot implements Subsystem {
 
     private final Timer shotTimer = new Timer();
     private ServoEx light;
@@ -28,15 +26,16 @@ public class Slot implements Subsystem {
     private double down = 0;
     private SlotState colorState = SlotState.EMPTY;
     private ServoState servoState = ServoState.DOWN;
-    private JoinedTelemetry telemetry;
 
-    public Slot(String lightName, String colorSensorName, String kickerName, double up, double down) {
-        this.up = up;
-        this.down = down;
+    public MainSlot(String lightName, String colorSensorName, String kickerName, double up, double down) {
         this.lightName = lightName;
         this.colorSensorName = colorSensorName;
         this.kickerName = kickerName;
+        this.up = up;
+        this.down = down;
     }
+
+
 
     @Override
     public void initialize() {
@@ -60,25 +59,8 @@ public class Slot implements Subsystem {
         return kickerName;
     }
 
-    public Timer getShotTimer() {
-        return shotTimer;
-    }
-
-    public boolean finishedShot() {
-        return shotTimer.getTimeSeconds() < 2;
-    }
-
     public SlotState getColorState() {
         return colorState;
-    }
-
-    public ServoState getTargetPosition() {
-        return servoState;
-    }
-
-
-    public boolean isFull() {
-        return (colorState == SlotState.PURPLE) || (colorState == SlotState.GREEN);
     }
 
 
@@ -86,8 +68,8 @@ public class Slot implements Subsystem {
         return new SequentialGroup(
                 setServoState(ServoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
-                setServoState(ServoState.DOWN),
-                new InstantCommand(shotTimer::reset)
+                setServoState(ServoState.DOWN)
+
         ).requires("Shooting");
     }
 
@@ -96,8 +78,7 @@ public class Slot implements Subsystem {
                 setServoState(ServoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
                 setServoState(ServoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN),
-                new InstantCommand(shotTimer::reset)
+                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)
         ).requires("Shooting");
     }
 
@@ -105,38 +86,12 @@ public class Slot implements Subsystem {
         return new InstantCommand(() -> servoState = state);
     }
 
-    public void sendTelemetry(Robot.loggingState state) {
-        switch (state) {
-            case DISABLED:
-                break;
-            case ENABLED:
-                telemetry.addData("Name ", kickerName);
-                telemetry.addData("Color State ", colorState);
-                telemetry.addLine();
-                break;
-            case EXTREME:
-                telemetry.addLine("START OF SLOT LOG");
-                telemetry.addData("Name ", kickerName);
-                telemetry.addData("Color State ", colorState);
-                telemetry.addData("Red ", colorSensor.red());
-                telemetry.addData("Green ", colorSensor.green());
-                telemetry.addData("Blue ", colorSensor.blue());
-                telemetry.addLine();
-                telemetry.addData("Is Full ", isFull());
-                telemetry.addLine("END OF SLOT LOG");
-                telemetry.addLine();
-                break;
 
-        }
-
-
+    public  boolean isFull() {
+        return (colorState == SlotState.PURPLE) || (colorState == SlotState.GREEN);
     }
 
-    public void setTelemetry(JoinedTelemetry telemetry) {
-        this.telemetry = telemetry;
-    }
-
-    private void readSlot() {
+    public void readSlot() {
         double red = colorSensor.red();
         double green = colorSensor.green();
         double blue = colorSensor.blue();
@@ -152,6 +107,7 @@ public class Slot implements Subsystem {
         }
     }
 
+
     public enum SlotState {
         PURPLE,
         GREEN,
@@ -162,5 +118,4 @@ public class Slot implements Subsystem {
         DOWN,
         UP
     }
-
 }
