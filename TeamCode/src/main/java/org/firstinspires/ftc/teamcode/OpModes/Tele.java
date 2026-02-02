@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
@@ -17,7 +19,8 @@ import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-public class TeleOp extends NextFTCOpMode {
+@TeleOp(name = "Tele", group = "Main")
+public class Tele extends NextFTCOpMode {
 
     {
         addComponents(
@@ -85,10 +88,6 @@ public class TeleOp extends NextFTCOpMode {
                 -gamepad1.right_stick_x * (isSlowed ? .25 : 1),
                 true
         );
-
-
-
-
     }
 
     private void createBindings() {

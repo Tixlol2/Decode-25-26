@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
+
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import dev.nextftc.core.commands.Command;
@@ -8,6 +10,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.hardware.impl.MotorEx;
 
+@Configurable
 public class IntakeSubsystem implements Subsystem {
 
     public static final IntakeSubsystem INSTANCE = new IntakeSubsystem();

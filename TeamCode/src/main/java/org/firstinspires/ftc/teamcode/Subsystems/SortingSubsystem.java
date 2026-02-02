@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import androidx.annotation.NonNull;
 
+import com.bylazar.configurables.annotations.Configurable;
+
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.BackSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.LeftSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
@@ -15,11 +17,13 @@ import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
 
+@Configurable
 public class SortingSubsystem extends SubsystemGroup {
     
     public static final SortingSubsystem INSTANCE = new SortingSubsystem();
@@ -90,21 +94,10 @@ public class SortingSubsystem extends SubsystemGroup {
 
 
         return new SequentialGroup(
-                new ParallelGroup(
-                        new LambdaCommand()
-                                .setStart(() -> first.get().basicShootDown().named("Result 1 " + first.get().getKickerServoName()).run())
-                                .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
-                new LambdaCommand()
-                        .setStart(() -> second.get().basicShootDown().named("Result 2 " + second.get().getKickerServoName()).run())
-                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
-
-                new LambdaCommand()
-                        .setStart(() -> third.get().basicShoot().named("Result 3 " + third.get().getKickerServoName()).run())
-                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
-
-
-                //new InstantCommand(shotTimer::reset)
-        ).setInterruptible(false).addRequirements(this));
+                first.get().basicShootDown().named("Result 1 " + first.get().getKickerServoName()),
+                second.get().basicShootDown().named("Result 2 " + second.get().getKickerServoName()),
+                third.get().basicShoot().named("Result 3 " + third.get().getKickerServoName())
+        .setInterruptible(false).addRequirements(this));
     }
     
     

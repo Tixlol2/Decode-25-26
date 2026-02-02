@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import android.util.Size;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.sun.tools.javac.util.List;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
+@Configurable
 public class VisionSubsystem implements Subsystem {
     public static final VisionSubsystem INSTANCE = new VisionSubsystem();
     private AprilTagProcessor aprilTagProcessor;

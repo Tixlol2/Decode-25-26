@@ -71,16 +71,18 @@ CONFIG
     public static final String LIGHT_RIGHT_STRING = "RIGHT";
     public static final String LIGHT_LEFT_STRING = "LEFT";
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
+    //Flickers
     public static final double FLICKER_BACK_UP = .93;
     public static final double FLICKER_BACK_DOWN = .55;
     public static final double FLICKER_RIGHT_DOWN = .52;
     public static final double FLICKER_RIGHT_UP = .15;
     public static final double FLICKER_LEFT_DOWN = .22;
     public static final double FLICKER_LEFT_UP = .62;
-    public static final double ANGLE_BLUE_GOAL_DEGREES = 137;
-    public static final double ANGLE_RED_GOAL_DEGREES = 44;
     public static double FAST_FLICKER_TIME_UP = .75;
     public static double FAST_FLICKER_TIME_DOWN = .125;
+    //Hood
+    public static final String HOOD_STRING = "HOOD";
+
 
 
 }

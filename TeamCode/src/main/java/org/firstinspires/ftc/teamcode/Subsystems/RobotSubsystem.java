@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,6 +15,7 @@ import dev.nextftc.core.subsystems.SubsystemGroup;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 
+@Configurable
 public class RobotSubsystem extends SubsystemGroup {
 
     public static final RobotSubsystem INSTANCE = new RobotSubsystem();
@@ -23,7 +25,8 @@ public class RobotSubsystem extends SubsystemGroup {
         super(
                 OuttakeSubsystem.INSTANCE,
                 VisionSubsystem.INSTANCE,
-                IntakeSubsystem.INSTANCE
+                IntakeSubsystem.INSTANCE,
+                SortingSubsystem.INSTANCE
         );
     }
 
