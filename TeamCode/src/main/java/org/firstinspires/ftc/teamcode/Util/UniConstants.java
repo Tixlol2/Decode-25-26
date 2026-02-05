@@ -50,8 +50,8 @@ CONFIG
     public static final DcMotorEx.Direction DRIVE_BACK_RIGHT_DIRECTION = DcMotorEx.Direction.REVERSE;
     public static final String PINPOINT_STRING = "pp";
     //Outtake Subsystem
-    public static final String LAUNCHER_TOP_STRING = "LAUNCHTOP";
-    public static final String LAUNCHER_BOTTOM_STRING = "LAUNCHBOT";
+    public static final String LAUNCHER_LEFT_STRING = "FLYL";
+    public static final String LAUNCHER_RIGHT_STRING = "FLYR";
     //Rotary Subsystem
     public static final String ACTIVE_INTAKE_STRING = "ACTIVE";
     //Flickers

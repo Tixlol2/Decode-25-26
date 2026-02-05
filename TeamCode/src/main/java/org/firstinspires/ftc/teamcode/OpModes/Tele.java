@@ -7,11 +7,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
+import org.firstinspires.ftc.teamcode.Subsystems.Slots.BackSlot;
+import org.firstinspires.ftc.teamcode.Subsystems.Slots.LeftSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
+import org.firstinspires.ftc.teamcode.Subsystems.Slots.RightSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.SortingSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -80,6 +85,8 @@ public class Tele extends NextFTCOpMode {
             follower().startTeleopDrive();
         }
 
+
+
         //Driver controlled
 
         follower().setTeleOpDrive(
@@ -88,6 +95,10 @@ public class Tele extends NextFTCOpMode {
                 -gamepad1.right_stick_x * (isSlowed ? .25 : 1),
                 true
         );
+
+        telemetry.addData("Turret RPM: ", OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM());
+        telemetry.addData("Hood Taqrget Pos:", OuttakeSubsystem.INSTANCE.getHoodTarget());
+
     }
 
     private void createBindings() {
@@ -106,9 +117,17 @@ public class Tele extends NextFTCOpMode {
 //        Gamepads.gamepad1().x().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR));
 
         //Shooting command
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(SortingSubsystem.INSTANCE.Shoot());
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(testShoot());
 
 
     }
-    
+
+    public Command testShoot(){
+        return new SequentialGroup(
+                BackSlot.INSTANCE.basicShootDown(),
+                LeftSlot.INSTANCE.basicShootDown(),
+                RightSlot.INSTANCE.basicShootDown()
+        );
+    }
+
 }

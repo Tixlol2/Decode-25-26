@@ -16,6 +16,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.MotorGroup;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
+import dev.nextftc.hardware.positionable.SetPosition;
 
 @Configurable
 public class OuttakeSubsystem implements Subsystem {
@@ -25,10 +26,11 @@ public class OuttakeSubsystem implements Subsystem {
     //Misc. Stuffs
     public static boolean debug = false;
     public static double debugPower = 0;
+    public static boolean turretEnabled = false;
 
     //Launcher Stuffs
-    private static final MotorEx leftLaunchMotor = new MotorEx(UniConstants.LAUNCHER_TOP_STRING).floatMode();
-    private static final MotorEx rightLaunchMotor = new MotorEx(UniConstants.LAUNCHER_BOTTOM_STRING).floatMode();
+    private static final MotorEx leftLaunchMotor = new MotorEx(UniConstants.LAUNCHER_LEFT_STRING).floatMode().reversed();
+    private static final MotorEx rightLaunchMotor = new MotorEx(UniConstants.LAUNCHER_RIGHT_STRING).floatMode();
     private static final MotorGroup launcherGroup = new MotorGroup(rightLaunchMotor, leftLaunchMotor); //Bottom has encoder, put first
     private static FlywheelState launcherState = FlywheelState.OFF;
     public static PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.00, 0, 0); //TODO: Tune
@@ -67,11 +69,12 @@ public class OuttakeSubsystem implements Subsystem {
         }
 
         //Turret control
-        turretTargetAngle = Math.max(-180, Math.min(35, turretTargetAngle)); //Negative is ccw
-        turretControl.setTarget(angleToTicks(turretTargetAngle));
-        turretControl.update(turret.getCurrentPosition());
-        turret.setPower(turretControl.runPDFL(angleToTicks(turretAngleTolerance)));
-
+        if(turretEnabled) {
+            turretTargetAngle = Math.max(-180, Math.min(35, turretTargetAngle)); //Negative is ccw
+            turretControl.setTarget(angleToTicks(turretTargetAngle));
+            turretControl.update(turret.getCurrentPosition());
+            turret.setPower(turretControl.runPDFL(angleToTicks(turretAngleTolerance)));
+        }
 
         hoodTargetPosition = debug ? (debugHoodTargetPosition) : (Math.max(0, Math.min(1, hoodLinreg * RobotSubsystem.INSTANCE.getDistanceToGoal())));
         hood.setPosition(hoodTargetPosition);
@@ -79,7 +82,9 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
 
-
+    public double getHoodTarget(){
+        return hoodTargetPosition;
+    }
 
     //Turret Commands
     public Command SetTurretState(TurretState state){
@@ -103,7 +108,7 @@ public class OuttakeSubsystem implements Subsystem {
 
     //Math helpers
     public double getCurrentVelocityRPM() {
-        return -(launcherGroup.getVelocity() * 60 / 28);
+        return (launcherGroup.getVelocity() * 60 / 28);
     }
     public static boolean turretFinished(){
         return Math.abs(ticksToAngle(turret.getCurrentPosition()) - turretTargetAngle) < turretAngleTolerance;
