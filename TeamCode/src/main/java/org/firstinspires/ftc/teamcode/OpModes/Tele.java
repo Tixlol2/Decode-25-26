@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slots.BackSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.LeftSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.RightSlot;
-import org.firstinspires.ftc.teamcode.Subsystems.SortingSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
@@ -81,11 +80,11 @@ public class Tele extends NextFTCOpMode {
         //Kill button
         if ((gamepad1.yWasPressed())) {
             CommandManager.INSTANCE.cancelAll();
-            SortingSubsystem.INSTANCE.SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
+            RobotSubsystem.INSTANCE.SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
             follower().startTeleopDrive();
         }
 
-
+        
 
         //Driver controlled
 
@@ -107,16 +106,17 @@ public class Tele extends NextFTCOpMode {
         //Toggle things based on dpad
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
-        //Gamepads.gamepad1().dpadRight().whenBecomesTrue(TurretSubsystem.INSTANCE::init);
+        //Gamepads.gamepad1().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE::init);
         //Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotsSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
 
 
         //Face buttons
-//        Gamepads.gamepad1().a().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.SHORT));
-//        Gamepads.gamepad1().b().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.OFF));
-//        Gamepads.gamepad1().x().whenBecomesTrue(TurretSubsystem.INSTANCE.SetFlywheelState(TurretSubsystem.FlywheelState.FAR));
+        Gamepads.gamepad1().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.MEDIUM));
+        Gamepads.gamepad1().b().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF));
+        Gamepads.gamepad1().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.FAR));
 
         //Shooting command
+        Gamepads.gamepad1().y().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(testShoot());
 
 

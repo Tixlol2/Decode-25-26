@@ -62,8 +62,17 @@ public class OuttakeSubsystem implements Subsystem {
     public void periodic() {
         //Flywheel control
         if(!debug) {
-            launcherControl.setGoal(new KineticState(0, targetVeloRPM));
-            launcherGroup.setPower(launcherControl.calculate(new KineticState(0, getCurrentVelocityRPM())));
+            switch(launcherState) {
+                case OFF:
+                    launcherGroup.setPower(0);
+                    break;
+                case MEDIUM:
+                    launcherGroup.setPower(.5);
+                    break;
+                case FAR:
+                    launcherGroup.setPower(1);
+                    break;
+            }
         } else {
             launcherGroup.setPower(debugPower);
         }
@@ -100,6 +109,13 @@ public class OuttakeSubsystem implements Subsystem {
                 new WaitUntil(RobotSubsystem.INSTANCE::getPatternFull),
                 SetTurretState(TurretState.GOAL)
         );
+    }
+
+    public Command SetFlywheelState(FlywheelState state){
+        return new LambdaCommand()
+                .setStart(() -> launcherState = state)
+                .setIsDone(() -> true)
+                .requires("Launcher");
     }
 
     public void setTurretTargetAngle(double angle){
@@ -139,10 +155,9 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
     public enum FlywheelState {
-        SHORT,
+        MEDIUM,
         FAR,
-        OFF,
-        CONSTANT
+        OFF
     }
 
 }
