@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.LambdaCommand;
@@ -30,9 +31,9 @@ import dev.nextftc.ftc.ActiveOpMode;
 public class RobotSubsystem extends SubsystemGroup {
 
     public static final RobotSubsystem INSTANCE = new RobotSubsystem();
-    
-    
-    private RobotSubsystem(){
+
+
+    private RobotSubsystem() {
         super(
                 OuttakeSubsystem.INSTANCE,
                 VisionSubsystem.INSTANCE,
@@ -99,14 +100,13 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().update();
 
 
-
     }
 
-    public double getDistanceToGoal(){
+    public double getDistanceToGoal() {
         return distanceToGoal;
     }
 
-    public boolean getPatternFull(){
+    public boolean getPatternFull() {
         return patternFull;
     }
 
@@ -163,51 +163,69 @@ public class RobotSubsystem extends SubsystemGroup {
         Set<MainSlot> used = new HashSet<>();
         for (MainSlot.SlotState wanted : pattern) {
             for (MainSlot slot : slots) {
-                if (slot.getColorState() == wanted && used.add(slot)) {
+                if (slot.getColorState().equals(wanted) && used.add(slot)) {
                     result1.add(slot);
                     break;
                 }
             }
         }
 
-        if (result1.size() >= 3) {
+        if (result1.size() == 3) {
             return result1;
         }
 
         // Not full - add slots that are full first, then empty ones
         ArrayList<MainSlot> orderedResult = new ArrayList<>();
-
+        used = new HashSet<>();
         // Add full slots first
         for (MainSlot slot : slots) {
-            if (slot.getColorState() != MainSlot.SlotState.EMPTY) {
+            if (slot.getColorState() != MainSlot.SlotState.EMPTY && used.add(slot)) {
                 orderedResult.add(slot);
             }
         }
 
         // Then add empty slots
         for (MainSlot slot : slots) {
-            if (slot.getColorState() == MainSlot.SlotState.EMPTY) {
+            if (slot.getColorState() == MainSlot.SlotState.EMPTY && used.add(slot)) {
                 orderedResult.add(slot);
             }
         }
+
 
         return orderedResult;
     }
 
     public Command Shoot() {
+        // Capture the order at command creation time
+        final ArrayList<MainSlot> shootOrder = new ArrayList<>();
 
-        Supplier<MainSlot> first = () -> result.get().get(0);
-        Supplier<MainSlot> second = () -> result.get().get(1);
-        Supplier<MainSlot> third = () -> result.get().get(2);
+        return new SequentialGroup(
+                new LambdaCommand()
+                        .setStart(() -> {
+                            BackSlot.INSTANCE.readSlot();
+                            RightSlot.INSTANCE.readSlot();
+                            LeftSlot.INSTANCE.readSlot();
 
-        return new LambdaCommand()
-                .setStart(
-                        new SequentialGroup(
-                                first.get().basicShootDown().named("Result 1 " + first.get().getKickerServoName()),
-                                second.get().basicShootDown().named("Result 2 " + second.get().getKickerServoName()),
-                                third.get().basicShoot().named("Result 3 " + third.get().getKickerServoName())
-                        ).setInterruptible(false).addRequirements(this));
-
+                            // Determine order after reading slots
+                            shootOrder.clear();
+                            shootOrder.addAll(determineOrder(pattern));
+                        }),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shootOrder.get(0).basicShootDown().named("Result 1 " + shootOrder.get(0).getKickerServoName()).run();
+                        })
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shootOrder.get(1).basicShootDown().named("Result 2 " + shootOrder.get(1).getKickerServoName()).run();
+                        })
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shootOrder.get(2).basicShoot().named("Result 3 " + shootOrder.get(2).getKickerServoName()).run();
+                        })
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
+        );
     }
 
 
@@ -218,7 +236,7 @@ public class RobotSubsystem extends SubsystemGroup {
                 BackSlot.INSTANCE.setServoState(state)
         );
     }
-    
+
 
     public enum AllianceColor {
         RED,

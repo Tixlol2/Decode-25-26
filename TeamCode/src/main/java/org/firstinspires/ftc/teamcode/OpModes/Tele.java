@@ -97,7 +97,8 @@ public class Tele extends NextFTCOpMode {
 
         telemetry.addData("Turret RPM: ", OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM());
         telemetry.addData("Hood Taqrget Pos:", OuttakeSubsystem.INSTANCE.getHoodTarget());
-
+        telemetry.addData("Pattern: ", RobotSubsystem.pattern);
+        telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
     }
 
     private void createBindings() {
@@ -116,8 +117,7 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad1().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.FAR));
 
         //Shooting command
-        Gamepads.gamepad1().y().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
-        Gamepads.gamepad1().rightBumper().whenBecomesTrue(testShoot());
+        Gamepads.gamepad1().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
 
 
     }
