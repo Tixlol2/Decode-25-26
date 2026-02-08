@@ -31,6 +31,8 @@ public class Tele extends NextFTCOpMode {
         );
     }
 
+    private boolean resetTurret = false;
+
 
     @Override
     public void onWaitForStart() {
@@ -40,7 +42,18 @@ public class Tele extends NextFTCOpMode {
             RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.BLUE);
         }
 
+        if(gamepad1.triangle){
+            resetTurret = true;
+        }
 
+        if(gamepad1.square){
+            resetTurret = false;
+        }
+
+        telemetry.addLine("Press Tri to Reset Turret on Start");
+        telemetry.addLine("Press Square to NOT Reset Turret on Start");
+        telemetry.addData("Resetting? ", resetTurret);
+        telemetry.addLine();
         telemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
         telemetry.addLine("Circle for Blue, X for Red ");
         telemetry.addData("Current Team Color ", RobotSubsystem.INSTANCE.getAllianceColor());
@@ -49,6 +62,12 @@ public class Tele extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
+
+        if(resetTurret){
+            OuttakeSubsystem.INSTANCE.resetTurret();
+            resetTurret = false;
+        }
+
         follower().setStartingPose(RobotSubsystem.INSTANCE.getPreviousPose());
         follower().startTeleopDrive();
         createBindings();
@@ -86,7 +105,7 @@ public class Tele extends NextFTCOpMode {
         );
 
         telemetry.addData("Turret RPM: ", OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM());
-        telemetry.addData("Hood Taqrget Pos:", OuttakeSubsystem.INSTANCE.getHoodTarget());
+        telemetry.addData("Hood Taqrget Pos: ", OuttakeSubsystem.INSTANCE.getHoodTarget());
         telemetry.addData("Pattern: ", RobotSubsystem.INSTANCE.getPattern());
         telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
     }

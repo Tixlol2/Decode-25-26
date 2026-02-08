@@ -59,8 +59,7 @@ public class RobotSubsystem extends SubsystemGroup {
     private static final ArrayList<MainSlot> slots = new ArrayList<>(Arrays.asList(BackSlot.INSTANCE, LeftSlot.INSTANCE, RightSlot.INSTANCE));
 
     @Override
-    public void initialize() {
-    }
+    public void initialize() {}
 
 
     @Override

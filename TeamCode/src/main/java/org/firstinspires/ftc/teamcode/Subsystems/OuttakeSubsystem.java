@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
@@ -145,6 +146,14 @@ public class OuttakeSubsystem implements Subsystem {
 
     public static double getHoodTargetPosition(){return hoodTargetPosition;}
 
+    public void resetTurret(){
+        turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turret.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public double getCurrentAngle(){
+        return ticksToAngle(turret.getCurrentPosition());
+    }
 
     public enum TurretState {
         FORWARD,
