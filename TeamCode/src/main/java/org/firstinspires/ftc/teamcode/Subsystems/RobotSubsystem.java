@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
@@ -58,6 +57,10 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private static final ArrayList<MainSlot> slots = new ArrayList<>(Arrays.asList(BackSlot.INSTANCE, LeftSlot.INSTANCE, RightSlot.INSTANCE));
 
+    public static int numLastShot = 0;
+
+
+
     @Override
     public void initialize() {}
 
@@ -67,21 +70,26 @@ public class RobotSubsystem extends SubsystemGroup {
 
         loopTimer.reset();
 
-        //Really consider updating this differently
-        updateDistanceAndAngle();
 
         //Handles turret aiming
-        switch (OuttakeSubsystem.getTurretState()) {
-            case FORWARD:
-                OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
-                break;
-            case GOAL:
-                OuttakeSubsystem.INSTANCE.setTurretTargetAngle(goalAngle);
-                break;
-            case OBELISK:
-                OuttakeSubsystem.INSTANCE.setTurretTargetAngle(obeliskAngle);
-                break;
+        if(allSlotsEmpty()){
+            OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
+        } else {
+            updateDistanceAndAngle();
+            switch (OuttakeSubsystem.getTurretState()) {
+                case FORWARD:
+                    OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
+                    break;
+                case GOAL:
+                    OuttakeSubsystem.INSTANCE.setTurretTargetAngle(goalAngle);
+                    break;
+                case OBELISK:
+                    OuttakeSubsystem.INSTANCE.setTurretTargetAngle(obeliskAngle);
+                    break;
+            }
         }
+
+
 
         //Handles pattern updating
         if (pattern.contains(null)) {
@@ -90,6 +98,8 @@ public class RobotSubsystem extends SubsystemGroup {
         }
 
         ActiveOpMode.telemetry().addData("Loop Times (ms) ", loopTimer.milliseconds());
+        ActiveOpMode.telemetry().addData("Last Shot: ", numLastShot);
+        ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, numLastShot));
         ActiveOpMode.telemetry().update();
 
     }
@@ -165,12 +175,22 @@ public class RobotSubsystem extends SubsystemGroup {
 
     public ArrayList<MainSlot> determineOrder(@NonNull ArrayList<MainSlot.SlotState> pattern) {
 
+        ArrayList<MainSlot.SlotState> usedPattern;
+
+        if(numLastShot != 0 && numLastShot != 3){
+            usedPattern = shift(pattern, numLastShot);
+        } else {
+            usedPattern = pattern;
+        }
+        numLastShot = 0;
+
         ArrayList<MainSlot> result1 = new ArrayList<>();
         Set<MainSlot> used = new HashSet<>();
-        for (MainSlot.SlotState wanted : pattern) {
+        for (MainSlot.SlotState wanted : usedPattern) {
             for (MainSlot slot : slots) {
                 if (slot.getColorState().equals(wanted) && used.add(slot)) {
                     result1.add(slot);
+                    numLastShot++;
                     break;
                 }
             }
@@ -183,10 +203,12 @@ public class RobotSubsystem extends SubsystemGroup {
         // Not full - add slots that are full first, then empty ones
         ArrayList<MainSlot> orderedResult = new ArrayList<>();
         used = new HashSet<>();
+        numLastShot = 0;
         // Add full slots first
         for (MainSlot slot : slots) {
             if (slot.getColorState() != MainSlot.SlotState.EMPTY && used.add(slot)) {
                 orderedResult.add(slot);
+                numLastShot++;
             }
         }
 
@@ -254,6 +276,25 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
+    public static ArrayList<MainSlot.SlotState> shift(ArrayList<MainSlot.SlotState> list, int shiftBy){
+
+        shiftBy = list.size() - shiftBy;
+
+        ArrayList<MainSlot.SlotState> shiftedList = new ArrayList<>(Arrays.asList(null, null, null)); //Not modularized
+
+        for(int i = 0; i < list.size(); i++){
+            shiftedList.set(i, list.get(((i + shiftBy) % list.size())));
+        }
+
+        return shiftedList;
+
+    }
+
+    public boolean allSlotsEmpty(){
+        return LeftSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
+                RightSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
+                BackSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY;
+    }
 
     public enum AllianceColor {
         RED,
