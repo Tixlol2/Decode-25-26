@@ -177,8 +177,8 @@ public class RobotSubsystem extends SubsystemGroup {
 
         ArrayList<MainSlot.SlotState> usedPattern;
 
-        if(numLastShot != 0 && numLastShot != 3){
-            usedPattern = shift(pattern, numLastShot);
+        if(numLastShot > 0 && numLastShot <= 2){
+            usedPattern = shift(pattern, 3 - numLastShot);
         } else {
             usedPattern = pattern;
         }
