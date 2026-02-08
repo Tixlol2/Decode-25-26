@@ -7,15 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.Slots.BackSlot;
-import org.firstinspires.ftc.teamcode.Subsystems.Slots.LeftSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
-import org.firstinspires.ftc.teamcode.Subsystems.Slots.RightSlot;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
-import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
-import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -40,21 +35,21 @@ public class Tele extends NextFTCOpMode {
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
-            RobotSubsystem.allianceColor = RobotSubsystem.AllianceColor.RED;
+            RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.RED);
         } else if (gamepad1.b) {
-            RobotSubsystem.allianceColor = RobotSubsystem.AllianceColor.BLUE;
+            RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.BLUE);
         }
 
 
         telemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
         telemetry.addLine("Circle for Blue, X for Red ");
-        telemetry.addData("Current Team Color ", RobotSubsystem.allianceColor);
+        telemetry.addData("Current Team Color ", RobotSubsystem.INSTANCE.getAllianceColor());
     }
 
 
     @Override
     public void onStartButtonPressed() {
-        follower().setStartingPose(RobotSubsystem.previousPose);
+        follower().setStartingPose(RobotSubsystem.INSTANCE.getPreviousPose());
         follower().startTeleopDrive();
         createBindings();
 
@@ -62,9 +57,10 @@ public class Tele extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
-        RobotSubsystem.previousPose = follower().getPose();
+        RobotSubsystem.INSTANCE.setPreviousPose(follower().getPose());
 
-        //    private final boolean botCentric = true;
+        //Intake control
+
         boolean isSlowed = gamepad1.left_bumper;
 
         //Spin active forward
@@ -77,12 +73,6 @@ public class Tele extends NextFTCOpMode {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
 
-        //Kill button
-        if ((gamepad1.yWasPressed())) {
-            CommandManager.INSTANCE.cancelAll();
-            RobotSubsystem.INSTANCE.SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
-            follower().startTeleopDrive();
-        }
 
         
 
@@ -97,7 +87,7 @@ public class Tele extends NextFTCOpMode {
 
         telemetry.addData("Turret RPM: ", OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM());
         telemetry.addData("Hood Taqrget Pos:", OuttakeSubsystem.INSTANCE.getHoodTarget());
-        telemetry.addData("Pattern: ", RobotSubsystem.pattern);
+        telemetry.addData("Pattern: ", RobotSubsystem.INSTANCE.getPattern());
         telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
     }
 
@@ -107,27 +97,23 @@ public class Tele extends NextFTCOpMode {
         //Toggle things based on dpad
         Gamepads.gamepad1().dpadUp().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
         Gamepads.gamepad1().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
-        //Gamepads.gamepad1().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE::init);
-        //Gamepads.gamepad1().dpadDown().whenBecomesTrue(SlotsSubsystem.INSTANCE.SetAllSlotState(Slot.ServoState.DOWN));
 
 
         //Face buttons
         Gamepads.gamepad1().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.MEDIUM));
         Gamepads.gamepad1().b().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF));
-        Gamepads.gamepad1().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.FAR));
+        Gamepads.gamepad1().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.FULL));
+        Gamepads.gamepad1().y().whenBecomesTrue(() -> {
+            RobotSubsystem.INSTANCE.resetPattern();
+            CommandManager.INSTANCE.cancelAll();
+            RobotSubsystem.INSTANCE.SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
+            follower().startTeleopDrive();
+        });
 
         //Shooting command
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
 
 
-    }
-
-    public Command testShoot(){
-        return new SequentialGroup(
-                BackSlot.INSTANCE.basicShootDown(),
-                LeftSlot.INSTANCE.basicShootDown(),
-                RightSlot.INSTANCE.basicShootDown()
-        );
     }
 
 }

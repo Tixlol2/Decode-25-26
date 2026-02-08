@@ -156,12 +156,13 @@ public class VisionSubsystem implements Subsystem {
 
         if (!RobotSubsystem.INSTANCE.getPatternFull()) {
             getDetections();
-        } else {
-            stop();
         }
 
     }
 
+    public void resetPattern(){
+        pattern = new ArrayList<>(List.of(null, null, null));
+    }
 
 
     public void obeliskTargetPattern(int ID) {

@@ -6,7 +6,6 @@ import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.WaitUntil;
@@ -16,7 +15,6 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.MotorGroup;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
-import dev.nextftc.hardware.positionable.SetPosition;
 
 @Configurable
 public class OuttakeSubsystem implements Subsystem {
@@ -69,7 +67,7 @@ public class OuttakeSubsystem implements Subsystem {
                 case MEDIUM:
                     launcherGroup.setPower(.5);
                     break;
-                case FAR:
+                case FULL:
                     launcherGroup.setPower(1);
                     break;
             }
@@ -85,7 +83,7 @@ public class OuttakeSubsystem implements Subsystem {
             turret.setPower(turretControl.runPDFL(angleToTicks(turretAngleTolerance)));
         }
 
-        hoodTargetPosition = debug ? (debugHoodTargetPosition) : (Math.max(0, Math.min(1, hoodLinreg * RobotSubsystem.INSTANCE.getDistanceToGoal())));
+        hoodTargetPosition = debug ? (debugHoodTargetPosition) : (Math.max(0, Math.min(1, hoodLinreg * RobotSubsystem.INSTANCE.getDistanceToGoalInches())));
         hood.setPosition(hoodTargetPosition);
 
     }
@@ -156,7 +154,7 @@ public class OuttakeSubsystem implements Subsystem {
 
     public enum FlywheelState {
         MEDIUM,
-        FAR,
+        FULL,
         OFF
     }
 

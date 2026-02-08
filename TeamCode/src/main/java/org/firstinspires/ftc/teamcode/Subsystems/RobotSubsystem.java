@@ -44,26 +44,22 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
-    public static Supplier<ArrayList<MainSlot.SlotState>> patternSupplier;
-    public static boolean patternFull = false;
+    private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
+    private static boolean patternFull = false;
 
-    public static Pose previousPose = new Pose();
+    private static Pose previousPose = new Pose();
     ElapsedTime loopTimer = new ElapsedTime();
-    public static AllianceColor allianceColor = AllianceColor.BLUE;
+    private static AllianceColor allianceColor = AllianceColor.BLUE;
 
 
-    private double distanceToGoal = 0;
+    private double distanceToGoalInches = 0;
     private double goalAngle = 0;
     private double obeliskAngle = 0;
 
-    private static Supplier<ArrayList<MainSlot>> result;
     private static final ArrayList<MainSlot> slots = new ArrayList<>(Arrays.asList(BackSlot.INSTANCE, LeftSlot.INSTANCE, RightSlot.INSTANCE));
 
     @Override
     public void initialize() {
-        patternSupplier = () -> pattern;
-        result = () -> determineOrder(patternSupplier.get());
     }
 
 
@@ -74,7 +70,6 @@ public class RobotSubsystem extends SubsystemGroup {
 
         //Really consider updating this differently
         updateDistanceAndAngle();
-
 
         //Handles turret aiming
         switch (OuttakeSubsystem.getTurretState()) {
@@ -89,7 +84,6 @@ public class RobotSubsystem extends SubsystemGroup {
                 break;
         }
 
-
         //Handles pattern updating
         if (pattern.contains(null)) {
             pattern = VisionSubsystem.INSTANCE.getPattern();
@@ -99,11 +93,24 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().addData("Loop Times (ms) ", loopTimer.milliseconds());
         ActiveOpMode.telemetry().update();
 
-
     }
 
-    public double getDistanceToGoal() {
-        return distanceToGoal;
+    public AllianceColor getAllianceColor() {
+        return allianceColor;
+    }
+
+    public void setAllianceColor(AllianceColor allianceColor) {
+        RobotSubsystem.allianceColor = allianceColor;
+    }
+
+    public void resetPattern(){
+        VisionSubsystem.INSTANCE.resetPattern();
+        pattern = new ArrayList<>(Arrays.asList(null, null, null));
+        patternFull = false;
+    }
+
+    public double getDistanceToGoalInches() {
+        return distanceToGoalInches;
     }
 
     public boolean getPatternFull() {
@@ -153,8 +160,8 @@ public class RobotSubsystem extends SubsystemGroup {
         goalAngle *= -1;
         obeliskAngle *= -1;
 
-        //distance in meters
-        distanceToGoal = Math.hypot(x, y) / 39.37;
+        //distance in INCHES
+        distanceToGoalInches = Math.hypot(x, y);
     }
 
     public ArrayList<MainSlot> determineOrder(@NonNull ArrayList<MainSlot.SlotState> pattern) {
@@ -228,6 +235,17 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
+    public ArrayList<MainSlot.SlotState> getPattern(){
+        return pattern;
+    }
+
+    public Pose getPreviousPose() {
+        return previousPose;
+    }
+
+    public void setPreviousPose(Pose previousPose) {
+        RobotSubsystem.previousPose = previousPose;
+    }
 
     public Command SetAllSlotState(MainSlot.ServoState state) {
         return new ParallelGroup(
