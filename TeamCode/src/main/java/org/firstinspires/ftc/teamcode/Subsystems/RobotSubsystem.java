@@ -21,6 +21,7 @@ import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -43,6 +44,7 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
+    private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
     private static boolean patternFull = false;
 
@@ -57,7 +59,8 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private static final ArrayList<MainSlot> slots = new ArrayList<>(Arrays.asList(BackSlot.INSTANCE, LeftSlot.INSTANCE, RightSlot.INSTANCE));
 
-    public static int numLastShot = 0;
+    private static int ballsShotLastSequence = 0;
+    private static boolean enablePatternShifting = true;
 
 
 
@@ -98,8 +101,9 @@ public class RobotSubsystem extends SubsystemGroup {
         }
 
         ActiveOpMode.telemetry().addData("Loop Times (ms) ", loopTimer.milliseconds());
-        ActiveOpMode.telemetry().addData("Last Shot: ", numLastShot);
-        ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, numLastShot));
+        ActiveOpMode.telemetry().addData("Last Shot Num: ", ballsShotLastSequence);
+        ActiveOpMode.telemetry().addData("Last Shot: ", lastShot);
+        ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
         ActiveOpMode.telemetry().update();
 
     }
@@ -177,12 +181,16 @@ public class RobotSubsystem extends SubsystemGroup {
 
         ArrayList<MainSlot.SlotState> usedPattern;
 
-        if(numLastShot > 0 && numLastShot <= 2){
-            usedPattern = shift(pattern, 3 - numLastShot);
+        // Shift pattern only if enabled and we had a partial sequence last time
+        if(enablePatternShifting && ballsShotLastSequence > 0 && ballsShotLastSequence <= 2){
+            usedPattern = shift(pattern, 3 - ballsShotLastSequence);
         } else {
+            // If shifting disabled or we shot 0 or 3 balls, pattern repeats - no shift needed
             usedPattern = pattern;
         }
-        numLastShot = 0;
+
+        // Reset counter for THIS sequence
+        int currentSequenceMatches = 0;
 
         ArrayList<MainSlot> result1 = new ArrayList<>();
         Set<MainSlot> used = new HashSet<>();
@@ -190,25 +198,28 @@ public class RobotSubsystem extends SubsystemGroup {
             for (MainSlot slot : slots) {
                 if (slot.getColorState().equals(wanted) && used.add(slot)) {
                     result1.add(slot);
-                    numLastShot++;
+                    currentSequenceMatches++;  // Use local counter
                     break;
                 }
             }
         }
 
         if (result1.size() == 3) {
+            ballsShotLastSequence = currentSequenceMatches;  // Update for next time
             return result1;
         }
 
         // Not full - add slots that are full first, then empty ones
         ArrayList<MainSlot> orderedResult = new ArrayList<>();
         used = new HashSet<>();
-        numLastShot = 0;
+
+        currentSequenceMatches = 0;
         // Add full slots first
         for (MainSlot slot : slots) {
             if (slot.getColorState() != MainSlot.SlotState.EMPTY && used.add(slot)) {
                 orderedResult.add(slot);
-                numLastShot++;
+                lastShot.add(slot.getColorState());
+                currentSequenceMatches++;
             }
         }
 
@@ -219,7 +230,7 @@ public class RobotSubsystem extends SubsystemGroup {
             }
         }
 
-
+        ballsShotLastSequence = currentSequenceMatches;  // Update for next time
         return orderedResult;
     }
 
@@ -252,8 +263,15 @@ public class RobotSubsystem extends SubsystemGroup {
                         .setStart(() -> {
                             shootOrder.get(2).basicShoot().named("Result 3 " + shootOrder.get(2).getKickerServoName()).run();
                         })
-                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+                new InstantCommand(() -> {
+                    lastShot.clear();
+                    lastShot.add(shootOrder.get(0).getColorState());
+                    lastShot.add(shootOrder.get(1).getColorState());
+                    lastShot.add(shootOrder.get(2).getColorState());
+                })
         );
+
     }
 
     public ArrayList<MainSlot.SlotState> getPattern(){
@@ -294,6 +312,14 @@ public class RobotSubsystem extends SubsystemGroup {
         return LeftSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
                 RightSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
                 BackSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY;
+    }
+
+    public boolean isPatternShiftingEnabled() {
+        return enablePatternShifting;
+    }
+
+    public void setPatternShiftingEnabled(boolean enabled) {
+        enablePatternShifting = enabled;
     }
 
     public enum AllianceColor {

@@ -81,6 +81,7 @@ public class Tele extends NextFTCOpMode {
         //Intake control
 
         boolean isSlowed = gamepad1.left_bumper;
+        RobotSubsystem.INSTANCE.setPatternShiftingEnabled(gamepad1.left_bumper);
 
         //Spin active forward
         if (gamepad1.right_trigger > 0) {
@@ -91,6 +92,7 @@ public class Tele extends NextFTCOpMode {
         } else {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
+
 
 
         
