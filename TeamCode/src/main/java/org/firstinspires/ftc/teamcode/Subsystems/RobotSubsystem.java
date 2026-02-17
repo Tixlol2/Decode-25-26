@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.lynx.LynxVoltageSensor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.BackSlot;
@@ -62,10 +64,13 @@ public class RobotSubsystem extends SubsystemGroup {
     private static int ballsShotLastSequence = 0;
     private static boolean enablePatternShifting = true;
 
-
+    private static VoltageSensor voltageSensor;
 
     @Override
-    public void initialize() {}
+    public void initialize() {
+        initSubsystems();
+        voltageSensor = ActiveOpMode.hardwareMap().get(VoltageSensor.class, "Control Hub");
+    }
 
 
     @Override
@@ -92,7 +97,7 @@ public class RobotSubsystem extends SubsystemGroup {
             }
         }
 
-
+        sendSlotTele();
 
         //Handles pattern updating
         if (pattern.contains(null)) {
@@ -106,6 +111,10 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
         ActiveOpMode.telemetry().update();
 
+    }
+
+    public double getVoltage(){
+        return voltageSensor.getVoltage();
     }
 
     public AllianceColor getAllianceColor() {
@@ -128,6 +137,13 @@ public class RobotSubsystem extends SubsystemGroup {
 
     public boolean getPatternFull() {
         return patternFull;
+    }
+
+    public void sendSlotTele(){
+        ActiveOpMode.telemetry().addData("Back Slot: ", BackSlot.INSTANCE.getColorState());
+        ActiveOpMode.telemetry().addData("Right Slot: ", RightSlot.INSTANCE.getColorState());
+        ActiveOpMode.telemetry().addData("Left Slot: ", LeftSlot.INSTANCE.getColorState());
+
     }
 
     public void updateDistanceAndAngle() {
@@ -325,6 +341,12 @@ public class RobotSubsystem extends SubsystemGroup {
     public enum AllianceColor {
         RED,
         BLUE
+    }
+
+    private void initSubsystems(){
+        OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD).schedule();
+        IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
+        SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
     }
 
 }

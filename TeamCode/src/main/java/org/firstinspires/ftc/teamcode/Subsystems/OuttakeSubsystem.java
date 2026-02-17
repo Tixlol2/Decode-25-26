@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.Util.PDFLController;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
 import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.WaitUntil;
@@ -16,6 +17,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.controllable.MotorGroup;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.impl.ServoEx;
+import dev.nextftc.hardware.positionable.SetPosition;
 
 @Configurable
 public class OuttakeSubsystem implements Subsystem {
@@ -25,7 +27,7 @@ public class OuttakeSubsystem implements Subsystem {
     //Misc. Stuffs
     public static boolean debug = false;
     public static double debugPower = 0;
-    public static boolean turretEnabled = false;
+    public static boolean turretEnabled = true;
 
     //Launcher Stuffs
     private static final MotorEx leftLaunchMotor = new MotorEx(UniConstants.LAUNCHER_LEFT_STRING).floatMode().reversed();
@@ -37,18 +39,20 @@ public class OuttakeSubsystem implements Subsystem {
     public static double targetVeloRPM = 0;
 
     //Hood Stuffs
-    private static final ServoEx hood = new ServoEx(UniConstants.HOOD_STRING);
+    ServoEx hood = new ServoEx("HOOD");
     private static double hoodTargetPosition = .5;
     public static double hoodLinreg = 0;
-    public static double debugHoodTargetPosition = .5;
+    public static double debugHoodTargetPosition = .75;
 
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
-    public static double pTurret = 0.000, dTurret = 0, lTurret = 0.0, fTurret = 0; //TODO: Tune
+    public static double pTurret = 0.00135, dTurret = 0, lTurret = 0.15, fTurret = 0;
     private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .5;
+
+    public static double debugTargetAngle = 0;
 
     @Override
     public void initialize() {
@@ -66,10 +70,10 @@ public class OuttakeSubsystem implements Subsystem {
                     launcherGroup.setPower(0);
                     break;
                 case MEDIUM:
-                    launcherGroup.setPower(.5);
+                    launcherGroup.setPower(.5 * 12.5 / RobotSubsystem.INSTANCE.getVoltage());
                     break;
                 case FULL:
-                    launcherGroup.setPower(1);
+                    launcherGroup.setPower(.8 * 12.5 / RobotSubsystem.INSTANCE.getVoltage());
                     break;
             }
         } else {
@@ -78,17 +82,29 @@ public class OuttakeSubsystem implements Subsystem {
 
         //Turret control
         if(turretEnabled) {
-            turretTargetAngle = Math.max(-180, Math.min(35, turretTargetAngle)); //Negative is ccw
+            if(debug){
+                turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
+                turretTargetAngle = debugTargetAngle;
+            }
+            turretTargetAngle = Math.max(-90, Math.min(215, turretTargetAngle)); //Negative is ccw
             turretControl.setTarget(angleToTicks(turretTargetAngle));
             turretControl.update(turret.getCurrentPosition());
             turret.setPower(turretControl.runPDFL(angleToTicks(turretAngleTolerance)));
         }
 
-        hoodTargetPosition = debug ? (debugHoodTargetPosition) : (Math.max(0, Math.min(1, hoodLinreg * RobotSubsystem.INSTANCE.getDistanceToGoalInches())));
+        hoodTargetPosition = hoodLinreg == 0 ? (debugHoodTargetPosition) : (Math.max(0, Math.min(.9, hoodLinreg * RobotSubsystem.INSTANCE.getDistanceToGoalInches())));
         hood.setPosition(hoodTargetPosition);
 
     }
 
+    public double getTurretTarget(){
+        return turretTargetAngle;
+    }
+
+    public void setHoodTarget(double angle){
+        angle = Math.max(22, Math.min(45, angle));
+        debugHoodTargetPosition = (angle - 20) / 25;
+    }
 
     public double getHoodTarget(){
         return hoodTargetPosition;
@@ -122,6 +138,11 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
     //Math helpers
+
+    public double toRPM(double velo){
+        return velo * 60 / 28;
+    }
+
     public double getCurrentVelocityRPM() {
         return (launcherGroup.getVelocity() * 60 / 28);
     }

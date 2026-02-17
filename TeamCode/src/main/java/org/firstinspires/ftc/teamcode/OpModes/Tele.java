@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
@@ -19,6 +20,7 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @TeleOp(name = "Tele", group = "Main")
+@Configurable
 public class Tele extends NextFTCOpMode {
 
     {
@@ -33,7 +35,7 @@ public class Tele extends NextFTCOpMode {
 
     private boolean resetTurret = false;
 
-
+    public static double hoodAngle = 20;
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
@@ -93,7 +95,12 @@ public class Tele extends NextFTCOpMode {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
 
-
+        if(gamepad1.dpad_down){
+            OuttakeSubsystem.INSTANCE.setHoodTarget(hoodAngle);
+        }
+        if(gamepad1.dpad_right){
+            OuttakeSubsystem.INSTANCE.setHoodTarget(45);
+        }
 
         
 
@@ -106,9 +113,7 @@ public class Tele extends NextFTCOpMode {
                 true
         );
 
-        telemetry.addData("Turret RPM: ", OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM());
-        telemetry.addData("Hood Taqrget Pos: ", OuttakeSubsystem.INSTANCE.getHoodTarget());
-        telemetry.addData("Pattern: ", RobotSubsystem.INSTANCE.getPattern());
+
         telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
     }
 

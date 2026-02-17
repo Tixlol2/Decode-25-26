@@ -78,8 +78,8 @@ CONFIG
     public static final double FLICKER_RIGHT_UP = .15;
     public static final double FLICKER_LEFT_DOWN = .22;
     public static final double FLICKER_LEFT_UP = .62;
-    public static double FAST_FLICKER_TIME_UP = .75;
-    public static double FAST_FLICKER_TIME_DOWN = .125;
+    public static double FAST_FLICKER_TIME_UP = .25;
+    public static double FAST_FLICKER_TIME_DOWN = 0;
     //Hood
     public static final String HOOD_STRING = "HOOD";
 

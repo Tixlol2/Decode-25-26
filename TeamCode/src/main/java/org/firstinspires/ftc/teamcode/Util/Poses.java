@@ -17,7 +17,11 @@ public class Poses {
     public static Pose redGoal = new Pose(128, 132);
     public static Pose blueGoal = mirrorCoordinates(redGoal, RobotSubsystem.AllianceColor.BLUE);
 
+    public static Pose blueClosePark = new Pose(24, 96);
+    public static Pose redClosePark = mirrorCoordinates(blueClosePark, RobotSubsystem.AllianceColor.RED);
 
+    public static Pose blueAutoShoot = new Pose(56, 84);
+    public static Pose redAutoShoot = mirrorCoordinates(blueAutoShoot, RobotSubsystem.AllianceColor.RED);
 
 
     public static Pose mirrorCoordinates(Pose pose, RobotSubsystem.AllianceColor targetColor) {
