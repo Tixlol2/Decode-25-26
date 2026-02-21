@@ -60,11 +60,14 @@ public class OuttakeSubsystem implements Subsystem {
     public static double midRPM = 2750;
     public static double maxRPM = 3750;
 
+    public static double kS, kV;
+
 
     @Override
     public void initialize() {
         launcherControl = ControlSystem.builder()
                 .velPid(launcherPIDCoefficients)
+                .basicFF(kV, 0, kS)
                 .build();
         turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
     }
@@ -74,6 +77,10 @@ public class OuttakeSubsystem implements Subsystem {
         if (ActiveOpMode.isStarted()) {
             //Flywheel control
             if (!debug) {
+                launcherControl = ControlSystem.builder()
+                        .velPid(launcherPIDCoefficients)
+                        .basicFF(kV, 0, kS)
+                        .build();
                 switch (launcherState) {
                     case OFF:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(0)));
