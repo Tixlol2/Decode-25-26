@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 public class Poses {
     public static Pose obelisk = new Pose(72, 148);
 
-    public static Pose redGoal = new Pose(128, 132);
+    public static Pose redGoal = new Pose(132, 136);
     public static Pose blueGoal = mirrorCoordinates(redGoal, RobotSubsystem.AllianceColor.BLUE);
 
     public static Pose blueClosePark = new Pose(24, 96);

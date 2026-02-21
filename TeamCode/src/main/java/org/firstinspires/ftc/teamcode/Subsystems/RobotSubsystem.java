@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.lynx.LynxVoltageSensor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -46,6 +47,8 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
+    public static double goalOffset = 5;
+
     private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
     private static boolean patternFull = false;
@@ -79,11 +82,12 @@ public class RobotSubsystem extends SubsystemGroup {
         loopTimer.reset();
 
 
+        updateDistanceAndAngle();
+
         //Handles turret aiming
         if(allSlotsEmpty()){
             OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
         } else {
-            updateDistanceAndAngle();
             switch (OuttakeSubsystem.getTurretState()) {
                 case FORWARD:
                     OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
@@ -110,6 +114,7 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().addData("Last Shot: ", lastShot);
         ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
         ActiveOpMode.telemetry().update();
+
 
     }
 
@@ -177,6 +182,8 @@ public class RobotSubsystem extends SubsystemGroup {
         // Calculate turret angle relative to robot
         goalAngle = (fieldAngleToTarget - robotHeading);
         obeliskAngle = (targetObelisk - robotHeading);
+
+        goalAngle += (allianceColor == AllianceColor.BLUE ? -goalOffset : goalOffset);
 
         // Clamp to -180 to 180
         while (goalAngle > 180) goalAngle -= 360;

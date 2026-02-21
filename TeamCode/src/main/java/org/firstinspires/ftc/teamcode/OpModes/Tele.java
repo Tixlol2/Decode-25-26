@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
@@ -68,9 +70,11 @@ public class Tele extends NextFTCOpMode {
         if(resetTurret){
             OuttakeSubsystem.INSTANCE.resetTurret();
             resetTurret = false;
+            follower().setStartingPose(new Pose(32.5, 135.5, Math.toRadians(90)));
+        } else {
+            follower().setStartingPose(RobotSubsystem.INSTANCE.getPreviousPose());
         }
 
-        follower().setStartingPose(RobotSubsystem.INSTANCE.getPreviousPose());
         follower().startTeleopDrive();
         createBindings();
 
@@ -87,10 +91,10 @@ public class Tele extends NextFTCOpMode {
 
         //Spin active forward
         if (gamepad1.right_trigger > 0) {
-            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.IN);
+            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OUT);
         } //Reverse Active and Spin
         else if (gamepad1.left_trigger > 0) {
-            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OUT);
+            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.IN);
         } else {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
@@ -113,8 +117,14 @@ public class Tele extends NextFTCOpMode {
                 true
         );
 
-
+        OuttakeSubsystem.INSTANCE.sendTelemetry();
         telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
+        telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
+        telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
+        telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
+
+        PanelsTelemetry.INSTANCE.getTelemetry().update();
+
     }
 
     private void createBindings() {
