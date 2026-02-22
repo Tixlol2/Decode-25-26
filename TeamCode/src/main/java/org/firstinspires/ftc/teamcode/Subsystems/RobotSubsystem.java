@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slots.LeftSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.RightSlot;
 import org.firstinspires.ftc.teamcode.Util.Poses;
+import org.firstinspires.ftc.teamcode.Util.Timer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,6 +70,8 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private static VoltageSensor voltageSensor;
 
+    private static Timer shotTimer = new Timer();
+
     @Override
     public void initialize() {
         initSubsystems();
@@ -85,7 +88,7 @@ public class RobotSubsystem extends SubsystemGroup {
         updateDistanceAndAngle();
 
         //Handles turret aiming
-        if(allSlotsEmpty()){
+        if(allSlotsEmpty() && shotTimer.getTimeSeconds() > 1){
             OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
         } else {
             switch (OuttakeSubsystem.getTurretState()) {
@@ -115,7 +118,7 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
         ActiveOpMode.telemetry().update();
 
-
+        PanelsTelemetry.INSTANCE.getTelemetry().update();
     }
 
     public double getVoltage(){
@@ -288,6 +291,7 @@ public class RobotSubsystem extends SubsystemGroup {
                         })
                         .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
                 new InstantCommand(() -> {
+                    shotTimer.reset();
                     lastShot.clear();
                     lastShot.add(shootOrder.get(0).getColorState());
                     lastShot.add(shootOrder.get(1).getColorState());

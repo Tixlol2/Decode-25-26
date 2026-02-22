@@ -123,7 +123,6 @@ public class Tele extends NextFTCOpMode {
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
         telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
 
-        PanelsTelemetry.INSTANCE.getTelemetry().update();
 
     }
 
