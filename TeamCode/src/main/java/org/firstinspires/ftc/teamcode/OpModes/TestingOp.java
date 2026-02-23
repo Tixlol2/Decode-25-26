@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
+import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.components.BindingsComponent;
@@ -49,6 +50,9 @@ public class TestingOp extends NextFTCOpMode {
     @Override
     public void onUpdate(){
 
+        boolean isSlowed = gamepad1.left_bumper;
+
+
         if(gamepad1.a){
             OuttakeSubsystem.maxRPM = flywheelTarget;
             OuttakeSubsystem.INSTANCE.setHood(hoodTarget);
@@ -68,7 +72,16 @@ public class TestingOp extends NextFTCOpMode {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
 
-        OuttakeSubsystem.INSTANCE.sendTelemetry();
+        follower().setTeleOpDrive(
+                -gamepad1.left_stick_y * (isSlowed ? .25 : 1),
+                -gamepad1.left_stick_x * (isSlowed ? .25 : 1),
+                -gamepad1.right_stick_x * (isSlowed ? .25 : 1),
+                true
+        );
+
+
+        telemetry.addData("Turret Target: ", OuttakeSubsystem.INSTANCE.getTurretTarget());
+        telemetry.addData("Turret Current: ", OuttakeSubsystem.INSTANCE.getCurrentAngle());
         telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
         telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());

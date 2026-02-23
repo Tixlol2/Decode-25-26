@@ -48,7 +48,7 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public static double goalOffset = 5;
+    public static double goalOffset = -5;
 
     private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
@@ -72,6 +72,8 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private static Timer shotTimer = new Timer();
 
+    private double shootDelay = 0;
+
     @Override
     public void initialize() {
         initSubsystems();
@@ -88,13 +90,10 @@ public class RobotSubsystem extends SubsystemGroup {
         updateDistanceAndAngle();
 
         //Handles turret aiming
-        if(allSlotsEmpty() && shotTimer.getTimeSeconds() > 1){
+        if(allSlotsEmpty() && shotTimer.getTimeSeconds() > 2.5 || OuttakeSubsystem.getTurretState() == OuttakeSubsystem.TurretState.FORWARD){
             OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
         } else {
-            switch (OuttakeSubsystem.getTurretState()) {
-                case FORWARD:
-                    OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
-                    break;
+            switch (OuttakeSubsystem.getTurretState()){
                 case GOAL:
                     OuttakeSubsystem.INSTANCE.setTurretTargetAngle(goalAngle);
                     break;
@@ -105,6 +104,12 @@ public class RobotSubsystem extends SubsystemGroup {
         }
 
         sendSlotTele();
+
+        if(PedroComponent.follower().getPose().getY() > 72){
+            shootDelay = 0;
+        } else {
+            shootDelay = .5;
+        }
 
         //Handles pattern updating
         if (pattern.contains(null)) {
@@ -152,6 +157,10 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().addData("Right Slot: ", RightSlot.INSTANCE.getColorState());
         ActiveOpMode.telemetry().addData("Left Slot: ", LeftSlot.INSTANCE.getColorState());
 
+    }
+
+    public double getShootDelay(){
+        return shootDelay;
     }
 
     public void updateDistanceAndAngle() {
@@ -267,6 +276,7 @@ public class RobotSubsystem extends SubsystemGroup {
         return new SequentialGroup(
                 new LambdaCommand()
                         .setStart(() -> {
+                            shotTimer.reset();
                             BackSlot.INSTANCE.readSlot();
                             RightSlot.INSTANCE.readSlot();
                             LeftSlot.INSTANCE.readSlot();
@@ -291,7 +301,6 @@ public class RobotSubsystem extends SubsystemGroup {
                         })
                         .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
                 new InstantCommand(() -> {
-                    shotTimer.reset();
                     lastShot.clear();
                     lastShot.add(shootOrder.get(0).getColorState());
                     lastShot.add(shootOrder.get(1).getColorState());

@@ -151,12 +151,24 @@ public class VisionSubsystem implements Subsystem {
         visionPortal.close();
     }
 
+    public double getGoalBearing(){
+        //If it can see the respected goal, return the bearing
+        //Else, run impossible number
+        if(isGoalVisible()){
+            return RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? detections.get(detectionIDs.indexOf(20)).ftcPose.bearing : detections.get(detectionIDs.indexOf(24)).ftcPose.bearing;
+        } else {
+            return -9999999;
+        }
+    }
+
+
+
     @Override
     public void periodic() {
 
-        if (!RobotSubsystem.INSTANCE.getPatternFull()) {
-            getDetections();
-        }
+
+        getDetections();
+
 
     }
 
@@ -164,6 +176,9 @@ public class VisionSubsystem implements Subsystem {
         pattern = new ArrayList<>(List.of(null, null, null));
     }
 
+    public boolean isGoalVisible(){
+        return (detectionIDs.contains(20) && RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE) || (detectionIDs.contains(24) && RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED);
+    }
 
     public void obeliskTargetPattern(int ID) {
         switch (ID) {

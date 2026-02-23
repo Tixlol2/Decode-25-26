@@ -37,20 +37,20 @@ public class OuttakeSubsystem implements Subsystem {
     private static final MotorEx rightLaunchMotor = new MotorEx(UniConstants.LAUNCHER_RIGHT_STRING).floatMode();
     private static final MotorGroup launcherGroup = new MotorGroup(rightLaunchMotor, leftLaunchMotor); //Right has encoder, put first
     private static FlywheelState launcherState = FlywheelState.OFF;
-    public static PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.0005, 0, 0); //TODO: Tune
+    public static final PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.0006, 0, 0); //TODO: Tune
     private static ControlSystem launcherControl;
     public static double targetVeloRPM = 0;
 
     //Hood Stuffs
-    ServoEx hood = new ServoEx("HOOD");
+    private static final ServoEx hood = new ServoEx("HOOD");
     private static double hoodTargetPosition = .5;
-    public static boolean hoodLinreg = false;
+    private boolean hoodLinreg = false;
     public static double debugHoodTargetPosition = .75;
 
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
-    public static double pTurret = .00145, dTurret = 0, lTurret = 0.15, fTurret = 0;
+    public static double pTurret = .005, dTurret = 0, lTurret = .08, fTurret = 0;
     private PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .5;
@@ -93,6 +93,7 @@ public class OuttakeSubsystem implements Subsystem {
                         break;
                     case INTERPOLATED:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(getInterpolatedVelo(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
+                        hoodLinreg = true;
                         break;
                 }
                 launcherGroup.setPower(Math.max(0, Math.min(1, launcherControl.calculate(
@@ -105,11 +106,11 @@ public class OuttakeSubsystem implements Subsystem {
 
             //Turret control
             if (turretEnabled) {
-                if (debug) {
+                if(debug) {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
-                turretTargetAngle = Math.max(-82.5, Math.min(277.5, turretTargetAngle)); //Negative is ccw
+                turretTargetAngle = Math.max(-30, Math.min(325, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(turret.getCurrentPosition());
                 turret.setPower(turretControl.runPDFL(angleToTicks(turretAngleTolerance)));
@@ -137,11 +138,11 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
     public double getInterpolatedVelo(double dist){
-        return 0.000802641 * Math.pow(dist, 4) - .160639 * Math.pow(dist, 3) + 11.3302 * Math.pow(dist, 2) - 310.82363 * dist + 4856.39588;
+        return -0.0000320595 * Math.pow(dist, 4) + .00949751 * Math.pow(dist, 3) - .929389 * Math.pow(dist, 2) + 48.06492 * dist + 998.73766;
     }
 
     public double getInterpolatedHood(double dist){
-        return -(1.256158 * Math.pow(10, -7)) * Math.pow(dist, 4) + .0000241509 * Math.pow(dist, 3) - .00184488 * Math.pow(dist, 2) + (.0840054 * dist) - 1.10741;
+        return (2.16544 * Math.pow(10, -8)) * Math.pow(dist, 4) - 0.00000623942 * Math.pow(dist, 3) + 0.000552377 * Math.pow(dist, 2) - (0.00954514 * dist) + 0.253994;
 
     }
 

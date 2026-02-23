@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems.Slots;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
+import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 
@@ -78,7 +79,7 @@ public class MainSlot implements Subsystem {
                 setServoState(ServoState.UP),
                 new Delay(UniConstants.FAST_FLICKER_TIME_UP),
                 setServoState(ServoState.DOWN),
-                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN)
+                new Delay(UniConstants.FAST_FLICKER_TIME_DOWN + RobotSubsystem.INSTANCE.getShootDelay())
         ).requires("Shooting");
     }
 

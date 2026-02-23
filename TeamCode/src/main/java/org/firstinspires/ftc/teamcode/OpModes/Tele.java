@@ -135,7 +135,7 @@ public class Tele extends NextFTCOpMode {
 
 
         //Face buttons
-        Gamepads.gamepad1().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.MEDIUM));
+        Gamepads.gamepad1().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.INTERPOLATED));
         Gamepads.gamepad1().b().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF));
         Gamepads.gamepad1().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.FULL));
         Gamepads.gamepad1().y().whenBecomesTrue(() -> {
