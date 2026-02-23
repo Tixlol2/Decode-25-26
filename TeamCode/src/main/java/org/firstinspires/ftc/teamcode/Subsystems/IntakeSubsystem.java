@@ -14,7 +14,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class IntakeSubsystem implements Subsystem {
 
     public static final IntakeSubsystem INSTANCE = new IntakeSubsystem();
-    private static final MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode().reversed();
+    private static final MotorEx active = new MotorEx(UniConstants.ACTIVE_INTAKE_STRING).floatMode();
     private IntakeState activeState = IntakeState.OFF;
 
     @Override

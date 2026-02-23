@@ -91,10 +91,10 @@ public class Tele extends NextFTCOpMode {
 
         //Spin active forward
         if (gamepad1.right_trigger > 0) {
-            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OUT);
+            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.IN);
         } //Reverse Active and Spin
         else if (gamepad1.left_trigger > 0) {
-            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.IN);
+            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OUT);
         } else {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }

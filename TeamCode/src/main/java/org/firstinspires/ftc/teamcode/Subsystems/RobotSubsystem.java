@@ -86,7 +86,6 @@ public class RobotSubsystem extends SubsystemGroup {
 
         loopTimer.reset();
 
-
         updateDistanceAndAngle();
 
         //Handles turret aiming
@@ -105,11 +104,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
         sendSlotTele();
 
-        if(PedroComponent.follower().getPose().getY() > 72){
-            shootDelay = 0;
-        } else {
-            shootDelay = .5;
-        }
+        shootDelay = PedroComponent.follower().getPose().getY() > 72 ? 0 : .5;
 
         //Handles pattern updating
         if (pattern.contains(null)) {
@@ -180,35 +175,33 @@ public class RobotSubsystem extends SubsystemGroup {
         obX = Poses.obelisk.getX() - PedroComponent.follower().getPose().getX();
         obY = Poses.obelisk.getY() - PedroComponent.follower().getPose().getY();
 
-        // In Pedro Pathing: +Y is forward (90), +X is right (0)
-        // atan2(y, x) measures angle from +X axis
-        // We want angle where +Y is 0 (forward for the robot)
-        // So: fieldAngle = atan2(y, x) gives us angle from +X
-        // To get angle from +Y: subtract 90 (or add 270, same thing)
         double fieldAngleToTarget = Math.toDegrees(Math.atan2(y, x)) - 90;
         double targetObelisk = Math.toDegrees(Math.atan2(obY, obX)) - 90;
 
-        // Get robot heading in degrees (0 = facing +X, 90 = facing +Y)
         double robotHeading = (Math.toDegrees(PedroComponent.follower().getPose().getHeading()) - 90);
 
-        // Calculate turret angle relative to robot
         goalAngle = (fieldAngleToTarget - robotHeading);
         obeliskAngle = (targetObelisk - robotHeading);
 
         goalAngle += (allianceColor == AllianceColor.BLUE ? -goalOffset : goalOffset);
 
-        // Clamp to -180 to 180
-        while (goalAngle > 180) goalAngle -= 360;
-        while (goalAngle < -180) goalAngle += 360;
+        // Normalize to 0–360 instead of -180–180 so CW angles beyond 180 are preserved
+        // for the turret clamp in OuttakeSubsystem
+        while (goalAngle >= 360) goalAngle -= 360;
+        while (goalAngle < 0) goalAngle += 360;
 
-        while (obeliskAngle > 180) obeliskAngle -= 360;
-        while (obeliskAngle < -180) obeliskAngle += 360;
+        while (obeliskAngle >= 360) obeliskAngle -= 360;
+        while (obeliskAngle < 0) obeliskAngle += 360;
 
-        //For some reason it works when they are negative????
+        // Convert 0-360 range to -30 to 330 equivalent:
+        // Angles > 330 that are near 360 represent small CCW moves, remap them to negative
+        if (goalAngle > 330) goalAngle -= 360;
+        if (obeliskAngle > 330) obeliskAngle -= 360;
+
+        // Sign flip (hardware requires inverted angle)
         goalAngle *= -1;
         obeliskAngle *= -1;
 
-        //distance in INCHES
         distanceToGoalInches = Math.hypot(x, y);
     }
 

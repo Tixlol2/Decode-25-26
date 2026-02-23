@@ -77,10 +77,6 @@ public class OuttakeSubsystem implements Subsystem {
         if (ActiveOpMode.isStarted()) {
             //Flywheel control
             if (!debug) {
-                launcherControl = ControlSystem.builder()
-                        .velPid(launcherPIDCoefficients)
-                        .basicFF(kV, 0, kS)
-                        .build();
                 switch (launcherState) {
                     case OFF:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(0)));
