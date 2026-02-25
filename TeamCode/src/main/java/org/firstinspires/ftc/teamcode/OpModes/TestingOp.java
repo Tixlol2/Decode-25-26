@@ -85,7 +85,7 @@ public class TestingOp extends NextFTCOpMode {
         telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
         telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
-
+        telemetry.addData("Current Velo: ", OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM());
 
     }
 }

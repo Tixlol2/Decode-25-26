@@ -82,10 +82,10 @@ public class Tele extends NextFTCOpMode {
 
     @Override
     public void onUpdate() {
+
         RobotSubsystem.INSTANCE.setPreviousPose(follower().getPose());
 
         //Intake control
-
         boolean isSlowed = gamepad1.left_bumper;
         RobotSubsystem.INSTANCE.setPatternShiftingEnabled(gamepad1.left_bumper);
 
@@ -99,17 +99,9 @@ public class Tele extends NextFTCOpMode {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
 
-        if(gamepad1.dpad_down){
-            OuttakeSubsystem.INSTANCE.setHoodTarget(hoodAngle);
-        }
-        if(gamepad1.dpad_right){
-            OuttakeSubsystem.INSTANCE.setHoodTarget(45);
-        }
-
         
 
         //Driver controlled
-
         follower().setTeleOpDrive(
                 -gamepad1.left_stick_y * (isSlowed ? .25 : 1),
                 -gamepad1.left_stick_x * (isSlowed ? .25 : 1),
@@ -122,8 +114,6 @@ public class Tele extends NextFTCOpMode {
         telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
         telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
-
-
     }
 
     private void createBindings() {

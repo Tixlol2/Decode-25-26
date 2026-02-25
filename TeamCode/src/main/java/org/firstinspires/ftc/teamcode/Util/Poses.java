@@ -20,8 +20,39 @@ public class Poses {
     public static Pose blueClosePark = new Pose(24, 96);
     public static Pose redClosePark = mirrorCoordinates(blueClosePark, RobotSubsystem.AllianceColor.RED);
 
-    public static Pose blueAutoShoot = new Pose(56, 84);
-    public static Pose redAutoShoot = mirrorCoordinates(blueAutoShoot, RobotSubsystem.AllianceColor.RED);
+    public static Pose blueCloseAutoShoot = new Pose(56, 84);
+    public static Pose redCloseAutoShoot = mirrorCoordinates(blueCloseAutoShoot, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose blueFarAutoShoot = new Pose(60, 18);
+    public static Pose redFarAutoShoot = mirrorCoordinates(blueFarAutoShoot, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose blueCloseStart = new Pose(32.5, 135.5, Math.toRadians(90));
+
+    public static Pose redCloseStart = Poses.mirrorCoordinates(blueCloseStart, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose farBlueIntakeControlPoint = new Pose(77.11392405063292, 38.65822784810126);
+    public static Pose farRedIntakeControlPoint = mirrorCoordinates(farBlueIntakeControlPoint, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose farIntakeBlue = new Pose(12, 36);
+    public static Pose farIntakeRed = mirrorCoordinates(farIntakeBlue, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose midBlueIntakeControlPoint = new Pose(79.13924050632912, 56.07594936708861);
+    public static Pose midRedIntakeControlPoint = mirrorCoordinates(midBlueIntakeControlPoint, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose midIntakeBlue = new Pose(12, 60);
+    public static Pose midIntakeRed = mirrorCoordinates(midIntakeBlue, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose closeBlueIntakeControlPoint = new Pose(78.32911392405065, 85.0379746835443);
+    public static Pose closeRedIntakeControlPoint = mirrorCoordinates(closeBlueIntakeControlPoint, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose closeIntakeBlue = new Pose(16, 84);
+    public static Pose closeIntakeRed = mirrorCoordinates(closeIntakeBlue, RobotSubsystem.AllianceColor.RED);
+
+    public static Pose blueLeverBump = new Pose(16, 70);
+    public static Pose blueLeverBumpControlPoint = new Pose(32.759493670886094, 70.45569620253166);
+    public static Pose redLeverBump = mirrorCoordinates(blueLeverBump, RobotSubsystem.AllianceColor.RED);
+    public static Pose redLeverBumpControlPoint = mirrorCoordinates(blueLeverBumpControlPoint, RobotSubsystem.AllianceColor.RED);
+
 
 
     public static Pose mirrorCoordinates(Pose pose, RobotSubsystem.AllianceColor targetColor) {

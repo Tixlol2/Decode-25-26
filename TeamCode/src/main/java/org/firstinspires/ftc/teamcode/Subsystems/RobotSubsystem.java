@@ -23,6 +23,7 @@ import java.util.Set;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
@@ -187,16 +188,13 @@ public class RobotSubsystem extends SubsystemGroup {
 
         // Normalize to 0–360 instead of -180–180 so CW angles beyond 180 are preserved
         // for the turret clamp in OuttakeSubsystem
-        while (goalAngle >= 360) goalAngle -= 360;
-        while (goalAngle < 0) goalAngle += 360;
+        while (goalAngle >= 90) goalAngle -= 180;
+        while (goalAngle < -270) goalAngle += 180;
 
-        while (obeliskAngle >= 360) obeliskAngle -= 360;
-        while (obeliskAngle < 0) obeliskAngle += 360;
+        while (obeliskAngle >= 90) obeliskAngle -= 180;
+        while (obeliskAngle < -270) obeliskAngle += 180;
 
-        // Convert 0-360 range to -30 to 330 equivalent:
-        // Angles > 330 that are near 360 represent small CCW moves, remap them to negative
-        if (goalAngle > 330) goalAngle -= 360;
-        if (obeliskAngle > 330) obeliskAngle -= 360;
+
 
         // Sign flip (hardware requires inverted angle)
         goalAngle *= -1;

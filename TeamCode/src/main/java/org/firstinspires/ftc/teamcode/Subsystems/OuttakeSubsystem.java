@@ -37,20 +37,20 @@ public class OuttakeSubsystem implements Subsystem {
     private static final MotorEx rightLaunchMotor = new MotorEx(UniConstants.LAUNCHER_RIGHT_STRING).floatMode();
     private static final MotorGroup launcherGroup = new MotorGroup(rightLaunchMotor, leftLaunchMotor); //Right has encoder, put first
     private static FlywheelState launcherState = FlywheelState.OFF;
-    public static final PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.0006, 0, 0); //TODO: Tune
+    public static  PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.0006, 0, 0); //TODO: Tune
     private static ControlSystem launcherControl;
     public static double targetVeloRPM = 0;
 
     //Hood Stuffs
     private static final ServoEx hood = new ServoEx("HOOD");
     private static double hoodTargetPosition = .5;
-    private boolean hoodLinreg = false;
+    public static boolean hoodLinreg = true;
     public static double debugHoodTargetPosition = .75;
 
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
-    public static double pTurret = .005, dTurret = 0, lTurret = .08, fTurret = 0;
+    public static double pTurret = 0.0002, dTurret = 0, lTurret = .085, fTurret = 0;
     private PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .5;
@@ -60,7 +60,7 @@ public class OuttakeSubsystem implements Subsystem {
     public static double midRPM = 2750;
     public static double maxRPM = 3750;
 
-    public static double kS = 0.09, kV = 0.000435;
+    public static double kS = 0.09, kV = 0.0005;
 
 
     @Override
@@ -107,8 +107,8 @@ public class OuttakeSubsystem implements Subsystem {
                     turretTargetAngle = debugTargetAngle;
                 }
                 turretTargetAngle = Math.max(-30, Math.min(325, turretTargetAngle)); //Negative is ccw
-                turretControl.setTarget(angleToTicks(turretTargetAngle));
-                turretControl.update(turret.getCurrentPosition());
+                turretControl.setTarget(-angleToTicks(turretTargetAngle));
+                turretControl.update(getTurretPosition());
                 turret.setPower(turretControl.runPDFL(angleToTicks(turretAngleTolerance)));
             }
 
@@ -129,16 +129,18 @@ public class OuttakeSubsystem implements Subsystem {
         ActiveOpMode.telemetry().addData("Turret Current: ", getCurrentAngle());
     }
 
+
+
     public double getTurretTarget(){
         return turretTargetAngle;
     }
 
     public double getInterpolatedVelo(double dist){
-        return -0.0000320595 * Math.pow(dist, 4) + .00949751 * Math.pow(dist, 3) - .929389 * Math.pow(dist, 2) + 48.06492 * dist + 998.73766;
+        return -0.000341598 * Math.pow(dist, 4) + 0.108761 * Math.pow(dist, 3) - 12.24723 * Math.pow(dist, 2) + 590.65924 * dist - 8407.8617;
     }
 
     public double getInterpolatedHood(double dist){
-        return (2.16544 * Math.pow(10, -8)) * Math.pow(dist, 4) - 0.00000623942 * Math.pow(dist, 3) + 0.000552377 * Math.pow(dist, 2) - (0.00954514 * dist) + 0.253994;
+        return -(2.74194 * Math.pow(10, -7)) * Math.pow(dist, 4) + 0.0000901357 * Math.pow(dist, 3) - 0.0106195 * Math.pow(dist, 2) + (0.535594 * dist) + 9.20171;
 
     }
 
@@ -156,7 +158,15 @@ public class OuttakeSubsystem implements Subsystem {
         return hoodTargetPosition;
     }
 
+    public boolean isFlywheelGood(){
+        return Math.abs(Math.abs(targetVeloRPM) - Math.abs(getCurrentVelocityRPM())) < 100;
+    }
+
     //Turret Commands
+    public double getTurretPosition(){
+        return IntakeSubsystem.INSTANCE.active.getCurrentPosition();
+    }
+
     public Command SetTurretState(TurretState state){
         return new LambdaCommand()
                 .setStart(() -> setTurretState(state))
@@ -208,22 +218,22 @@ public class OuttakeSubsystem implements Subsystem {
 
     //Uses degrees
     public static double angleToTicks(double angle) {
-        return angle * UniConstants.TURRET_TICKS_PER_DEGREE;
+        return angle * UniConstants.ENCODER_TICKS_PER_DEGREE;
     }
 
     public static double ticksToAngle(double ticks) {
-        return (ticks / UniConstants.TURRET_TICKS_PER_DEGREE) % 360;
+        return (ticks / UniConstants.ENCODER_TICKS_PER_DEGREE) % 360;
     }
 
     public static double getHoodTargetPosition(){return hoodTargetPosition;}
 
     public void resetTurret(){
-        turret.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turret.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        IntakeSubsystem.INSTANCE.active.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        IntakeSubsystem.INSTANCE.active.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public double getCurrentAngle(){
-        return ticksToAngle(turret.getCurrentPosition());
+        return ticksToAngle(getTurretPosition());
     }
 
     public enum TurretState {
