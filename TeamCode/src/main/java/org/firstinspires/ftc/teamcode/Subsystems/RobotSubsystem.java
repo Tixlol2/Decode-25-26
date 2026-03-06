@@ -49,13 +49,14 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public static double goalOffset = -5;
+    public static double goalOffset = -3;
 
     private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
     private static boolean patternFull = false;
 
     private static Pose previousPose = new Pose();
+    private static double prevHeading = 0;
     ElapsedTime loopTimer = new ElapsedTime();
     private static AllianceColor allianceColor = AllianceColor.BLUE;
 
@@ -74,6 +75,7 @@ public class RobotSubsystem extends SubsystemGroup {
     private static Timer shotTimer = new Timer();
 
     private double shootDelay = 0;
+    public static boolean inTele = false;
 
     @Override
     public void initialize() {
@@ -90,9 +92,10 @@ public class RobotSubsystem extends SubsystemGroup {
         updateDistanceAndAngle();
 
         //Handles turret aiming
-        if(allSlotsEmpty() && shotTimer.getTimeSeconds() > 2.5 || OuttakeSubsystem.getTurretState() == OuttakeSubsystem.TurretState.FORWARD){
-            OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
+        if(allSlotsEmpty() && shotTimer.getTimeSeconds() > 2.5 && inTele){
+            OuttakeSubsystem.INSTANCE.setTurretEnabled(false);
         } else {
+            OuttakeSubsystem.INSTANCE.setTurretEnabled(true);
             switch (OuttakeSubsystem.getTurretState()){
                 case GOAL:
                     OuttakeSubsystem.INSTANCE.setTurretTargetAngle(goalAngle);
@@ -100,12 +103,18 @@ public class RobotSubsystem extends SubsystemGroup {
                 case OBELISK:
                     OuttakeSubsystem.INSTANCE.setTurretTargetAngle(obeliskAngle);
                     break;
+                case FORWARD:
+                    OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
+                    break;
             }
         }
 
+
+
+
         sendSlotTele();
 
-        shootDelay = PedroComponent.follower().getPose().getY() > 72 ? 0 : .5;
+        shootDelay = PedroComponent.follower().getPose().getY() > 72 ? 0 : .65;
 
         //Handles pattern updating
         if (pattern.contains(null)) {
@@ -119,7 +128,6 @@ public class RobotSubsystem extends SubsystemGroup {
         ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
         ActiveOpMode.telemetry().update();
 
-        PanelsTelemetry.INSTANCE.getTelemetry().update();
     }
 
     public double getVoltage(){
@@ -144,7 +152,7 @@ public class RobotSubsystem extends SubsystemGroup {
         return distanceToGoalInches;
     }
 
-    public boolean getPatternFull() {
+    public static boolean getPatternFull() {
         return patternFull;
     }
 
@@ -188,11 +196,12 @@ public class RobotSubsystem extends SubsystemGroup {
 
         // Normalize to 0–360 instead of -180–180 so CW angles beyond 180 are preserved
         // for the turret clamp in OuttakeSubsystem
-        while (goalAngle >= 90) goalAngle -= 180;
-        while (goalAngle < -270) goalAngle += 180;
+        while (goalAngle >= 180) goalAngle -= 360;
+        while (goalAngle < -180) goalAngle += 360;
 
-        while (obeliskAngle >= 90) obeliskAngle -= 180;
-        while (obeliskAngle < -270) obeliskAngle += 180;
+
+        while (obeliskAngle >= 180) obeliskAngle -= 360;
+        while (obeliskAngle < -180) obeliskAngle += 360;
 
 
 
@@ -301,6 +310,13 @@ public class RobotSubsystem extends SubsystemGroup {
 
     }
 
+    public Command AutoShoot(){
+        return new SequentialGroup(
+                new WaitUntil(OuttakeSubsystem::turretFinished),
+                Shoot()
+        );
+    }
+
     public ArrayList<MainSlot.SlotState> getPattern(){
         return pattern;
     }
@@ -308,9 +324,11 @@ public class RobotSubsystem extends SubsystemGroup {
     public Pose getPreviousPose() {
         return previousPose;
     }
+    public double getPrevHeading(){return prevHeading;}
 
     public void setPreviousPose(Pose previousPose) {
         RobotSubsystem.previousPose = previousPose;
+        RobotSubsystem.prevHeading = previousPose.getHeading();
     }
 
     public Command SetAllSlotState(MainSlot.ServoState state) {
@@ -354,10 +372,22 @@ public class RobotSubsystem extends SubsystemGroup {
         BLUE
     }
 
+    public Command stopSubsystems(){
+        return new ParallelGroup(
+                OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD),
+                OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF),
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
+        );
+    }
+
     private void initSubsystems(){
         OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD).schedule();
         IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
     }
 
+    public enum AutoSelect{
+        CLOSE,
+        FAR
+    }
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Util;
 
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.ArrayList;
@@ -74,15 +75,17 @@ CONFIG
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
     //Flickers
     public static final double FLICKER_BACK_UP = .93;
-    public static final double FLICKER_BACK_DOWN = .55;
+    public static final double FLICKER_BACK_DOWN = .57;
     public static final double FLICKER_RIGHT_DOWN = .52;
     public static final double FLICKER_RIGHT_UP = .15;
-    public static final double FLICKER_LEFT_DOWN = .22;
+    public static final double FLICKER_LEFT_DOWN = .24;
     public static final double FLICKER_LEFT_UP = .62;
-    public static double FAST_FLICKER_TIME_UP = .25;
+    public static double FAST_FLICKER_TIME_UP = .3;
     public static double FAST_FLICKER_TIME_DOWN = 0;
     //Hood
     public static final String HOOD_STRING = "HOOD";
+
+//    public static Pose autoEnd/
 
 
 

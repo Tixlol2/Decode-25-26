@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
+import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.CommandManager;
@@ -31,13 +31,17 @@ public class Tele extends NextFTCOpMode {
                 BulkReadComponent.INSTANCE,
                 new SubsystemComponent(RobotSubsystem.INSTANCE),
                 BindingsComponent.INSTANCE
-                
         );
     }
 
     private boolean resetTurret = false;
 
     public static double hoodAngle = 20;
+
+    public static boolean farZone = false;
+
+    public static Pose autoPose = new Pose();
+
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
@@ -54,6 +58,12 @@ public class Tele extends NextFTCOpMode {
             resetTurret = false;
         }
 
+        if(gamepad1.dpad_up){
+            farZone = false;
+        } else if (gamepad1.dpad_down){
+            farZone = true;
+        }
+
         telemetry.addLine("Press Tri to Reset Turret on Start");
         telemetry.addLine("Press Square to NOT Reset Turret on Start");
         telemetry.addData("Resetting? ", resetTurret);
@@ -67,14 +77,19 @@ public class Tele extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
 
-        if(resetTurret){
+        if(resetTurret) {
             OuttakeSubsystem.INSTANCE.resetTurret();
             resetTurret = false;
-            follower().setStartingPose(new Pose(32.5, 135.5, Math.toRadians(90)));
+            if (!farZone) {
+                follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueCloseStart : Poses.redCloseStart);
+            } else {
+                follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueFarStart : Poses.redFarStart);
+            }
         } else {
-            follower().setStartingPose(RobotSubsystem.INSTANCE.getPreviousPose());
+            follower().setStartingPose(autoPose);
         }
 
+        RobotSubsystem.inTele = true;
         follower().startTeleopDrive();
         createBindings();
 
@@ -83,7 +98,7 @@ public class Tele extends NextFTCOpMode {
     @Override
     public void onUpdate() {
 
-        RobotSubsystem.INSTANCE.setPreviousPose(follower().getPose());
+        autoPose = PedroComponent.follower().getPose();
 
         //Intake control
         boolean isSlowed = gamepad1.left_bumper;
@@ -120,15 +135,17 @@ public class Tele extends NextFTCOpMode {
 
 
         //Toggle things based on dpad
-        Gamepads.gamepad1().dpadUp().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
-        Gamepads.gamepad1().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
+//        Gamepads.gamepad1().dpadUp().whenBecomesTrue(OuttakeSubsystem.addUserAdded());
+        Gamepads.gamepad2().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
+//        Gamepads.gamepad1().dpadDown().whenBecomesTrue(OuttakeSubsystem.subUserAdded());
+        Gamepads.gamepad2().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
 
 
         //Face buttons
-        Gamepads.gamepad1().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.INTERPOLATED));
-        Gamepads.gamepad1().b().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF));
-        Gamepads.gamepad1().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.FULL));
-        Gamepads.gamepad1().y().whenBecomesTrue(() -> {
+        Gamepads.gamepad2().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.INTERPOLATED));
+        Gamepads.gamepad2().b().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF));
+        Gamepads.gamepad2().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.LAZY));
+        Gamepads.gamepad2().y().whenBecomesTrue(() -> {
             RobotSubsystem.INSTANCE.resetPattern();
             CommandManager.INSTANCE.cancelAll();
             RobotSubsystem.INSTANCE.SetAllSlotState(MainSlot.ServoState.DOWN).schedule();

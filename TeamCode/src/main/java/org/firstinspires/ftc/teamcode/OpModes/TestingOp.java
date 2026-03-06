@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystem;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.components.BindingsComponent;
@@ -54,11 +53,11 @@ public class TestingOp extends NextFTCOpMode {
 
 
         if(gamepad1.a){
-            OuttakeSubsystem.maxRPM = flywheelTarget;
+            OuttakeSubsystem.lazyRPM = flywheelTarget;
             OuttakeSubsystem.INSTANCE.setHood(hoodTarget);
         }
         if(gamepad1.b){
-            OuttakeSubsystem.maxRPM = 0;
+            OuttakeSubsystem.lazyRPM = 0;
             OuttakeSubsystem.INSTANCE.setHood(.5);
         }
 
