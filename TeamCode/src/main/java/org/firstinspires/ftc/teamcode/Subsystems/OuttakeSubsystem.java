@@ -174,6 +174,13 @@ public class OuttakeSubsystem implements Subsystem {
 
     }
 
+    public double getVelInterpolatedHood(double dist, double vel) {
+        // TODO: Run new, better linregs to determine hood variance with velocity and such
+        // TODO: could also maybe provide target height or airtime or whatever for better sorting and aim
+        double normalAngle = -(2.74194 * Math.pow(10, -7)) * Math.pow(dist, 4) + 0.0000901357 * Math.pow(dist, 3) - 0.0106195 * Math.pow(dist, 2) + (0.535594 * dist) + 9.20171;
+        return normalAngle + (getInterpolatedVelo(dist) - vel) * 0.001;
+    }
+
     public void setHoodTarget(double angle){
         angle = Math.max(22, Math.min(45, angle));
         debugHoodTargetPosition = (angle - 20) / 25;
