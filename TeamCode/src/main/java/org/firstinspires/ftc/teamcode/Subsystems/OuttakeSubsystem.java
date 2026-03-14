@@ -51,7 +51,7 @@ public class OuttakeSubsystem implements Subsystem {
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
-    public static double pTurret = 0.00024, dTurret = 0, lTurret = 0.098, fTurret = 0.02;
+    public static double pTurret = 0.0004, dTurret = 0, lTurret = 0.12, fTurret = 0.0;
     private PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .75;
@@ -66,6 +66,26 @@ public class OuttakeSubsystem implements Subsystem {
     private static double oldTurret = 0;
 
     public static double userAdded = 0;
+
+    // ── Shooter Geometry ─────────────────────────────────────────────────────
+    // All distances in meters. Measure from floor to center of launch point / hoop.
+    public static double LAUNCHER_HEIGHT_M   = 0.3175;  // TODO: measure
+    public static double HOOP_HEIGHT_M       = 1.1;  // regulation hoop height
+    public static double WHEEL_RADIUS_M      = 0.092;  // TODO: measure
+
+    // Servo angle range: servoMinDeg → 0.0, servoMaxDeg → 1.0
+    public static double HOOD_SERVO_MIN_DEG  = 20.0;  // TODO: confirm
+    public static double HOOD_SERVO_MAX_DEG  = 45.0;  // TODO: confirm
+
+    // Single tunable correction (degrees) applied to physics-solved angle.
+    // Positive = aim higher, negative = aim lower. Tune empirically.
+    public static double hoodPhysicsCorrection = 0.0;
+
+    // Prefer high arc (true) or low arc (false) solution from physics solver.
+    public static boolean preferHighArc = false;
+
+    private static final double G             = 9.81;
+    private static final double INCHES_TO_M   = 0.0254;
 
     @Override
     public void initialize() {
@@ -96,9 +116,14 @@ public class OuttakeSubsystem implements Subsystem {
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(lazyRPM)));
                         break;
                     case INTERPOLATED:
-                        launcherControl.setGoal(new KineticState(0, toTicksPerSec(getInterpolatedVelo(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
+                        launcherControl.setGoal(new KineticState(0, toTicksPerSec(getTargetVelocityRPM(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
                         hoodLinreg = true;
                         break;
+                    case REACTIVE:
+                        launcherControl.setGoal(new KineticState(0, toTicksPerSec(getTargetVelocityRPM(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
+                        hoodLinreg = true;
+                        break;
+
                 }
                 launcherGroup.setPower(12/RobotSubsystem.INSTANCE.getVoltage() * Math.max(0, Math.min(1, launcherControl.calculate(
                                 new KineticState(launcherGroup.getCurrentPosition(), launcherGroup.getVelocity())
@@ -114,15 +139,25 @@ public class OuttakeSubsystem implements Subsystem {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
-                turretTargetAngle = Math.max(-50, Math.min(100, turretTargetAngle)); //Negative is ccw
+                turretTargetAngle = Math.max(-50, Math.min(180, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
-                turret.setPower((12/RobotSubsystem.INSTANCE.getVoltage() * turretControl.runPDFL(angleToTicks(turretAngleTolerance))));
+                turret.setPower(Math.min(.6,(12/RobotSubsystem.INSTANCE.getVoltage() * turretControl.runPDFL(angleToTicks(turretAngleTolerance)))));
             } else {
                 turret.setPower(0);
             }
 
-            hoodTargetPosition = !hoodLinreg ? (debugHoodTargetPosition) : (getInterpolatedHood(RobotSubsystem.INSTANCE.getDistanceToGoalInches()));
+            // Hood: use physics-coupled solver in INTERPOLATED state (reacts to actual flywheel vel),
+            // fall back to debug position otherwise.
+            if (!hoodLinreg) {
+                hoodTargetPosition = debugHoodTargetPosition;
+            } else if (launcherState == FlywheelState.INTERPOLATED) {
+                hoodTargetPosition = getInterpolatedHood(
+                        RobotSubsystem.INSTANCE.getDistanceToGoalInches()
+                );
+            } else if (launcherState == FlywheelState.REACTIVE){
+                hoodTargetPosition = getTargetHoodPosition(RobotSubsystem.INSTANCE.getDistanceToGoalInches(), getCurrentVelocityRPM());
+            }
             hood.setPosition(hoodTargetPosition);
 
             oldTurret = getTurretPosition();
@@ -157,28 +192,119 @@ public class OuttakeSubsystem implements Subsystem {
         return turretTargetAngle;
     }
 
-    public double getInterpolatedVelo(double dist){
+    /**
+     * Returns the target flywheel velocity in RPM for a given distance.
+     * Purely distance-driven — feed this into your ControlSystem goal.
+     * userAdded allows driver trim at runtime.
+     */
+    public double getTargetVelocityRPM(double distInches) {
         return Math.max(0, Math.min(3250,
-                -0.00208274 * Math.pow(dist, 3)
-                + 0.518879 * Math.pow(dist, 2)
-                - 24.00003 * dist
-                + 2100 + userAdded));
+                -0.00188274 * Math.pow(distInches, 3)
+                        + 0.568879   * Math.pow(distInches, 2)
+                        - 23.50003   * distInches
+                        + 2100 + userAdded));
     }
 
-    public double getInterpolatedHood(double dist){
-        return  Math.max(0, Math.min(1,
+    /**
+     * Returns the target hood servo position (0.0–1.0) for a given distance
+     * and the *actual* flywheel velocity at the moment of firing.
+     *
+     * Uses a physics solver (inverted projectile equations) so that velocity
+     * deviations — including per-shot flywheel bleed in a burst — automatically
+     * produce a corrected angle rather than being ignored.
+     *
+     * hoodPhysicsCorrection (degrees, @Configurable) absorbs real-world offsets
+     * like air resistance and launcher geometry. Tune until shot 1 lands on target,
+     * then verify shots 2 and 3 converge without further adjustment.
+     *
+     * Falls back to the distance-only regression if no physics solution exists
+     * (e.g. velocity too low to reach the target at this distance).
+     *
+     * @param distInches   distance to goal from follower, in inches
+     * @param actualVelRPM current flywheel RPM from encoder (getCurrentVelocityRPM())
+     */
+    public double getTargetHoodPosition(double distInches, double actualVelRPM) {
+        double distM   = distInches * INCHES_TO_M;
+        double muzzleV = rpmToMuzzleVelocity(actualVelRPM);
+        double dy      = HOOP_HEIGHT_M - LAUNCHER_HEIGHT_M;
+
+        double angleDeg = solveAngleDeg(muzzleV, distM, dy+.05);
+
+        if (Double.isNaN(angleDeg)) {
+            // Physics has no solution (vel too low) — fall back to distance-only regression
+            return getInterpolatedHood(distInches);
+        }
+
+        double corrected = angleDeg + hoodPhysicsCorrection;
+        return 1-angleDegToServo(corrected);
+    }
+
+    // ── Physics solver helpers ────────────────────────────────────────────────
+
+    /**
+     * Converts flywheel RPM to ball muzzle velocity in m/s.
+     * Assumes ball exits at wheel surface speed (no slip).
+     */
+    private double rpmToMuzzleVelocity(double rpm) {
+        return rpm * (2.0 * Math.PI * WHEEL_RADIUS_M) / 60.0;
+    }
+
+    /**
+     * Inverted projectile equation: given launch speed, horizontal distance,
+     * and vertical rise, returns the launch angle in degrees.
+     *
+     * Two solutions exist (low arc and high arc). preferHighArc selects which.
+     * Returns NaN if no real solution exists (velocity insufficient).
+     *
+     * Derivation:
+     *   y = x*tan(θ) - (g*x²)/(2v²cos²θ)
+     *   Substituting sec²θ = 1 + tan²θ gives a quadratic in tan(θ):
+     *   (gx²/2v²)*tan²θ - x*tanθ + (dy + gx²/2v²) = 0
+     */
+    private double solveAngleDeg(double v, double dx, double dy) {
+        if (v < 0.01 || dx < 0.01) return Double.NaN;
+        double v2 = v * v;
+        double a  = (G * dx * dx) / (2.0 * v2);
+        double b  = -dx;
+        double c  = dy + a;
+        double disc = b * b - 4.0 * a * c;
+        if (disc < 0) return Double.NaN;
+
+        double sqrtDisc = Math.sqrt(disc);
+        double tanLow   = (-b - sqrtDisc) / (2.0 * a);
+        double tanHigh  = (-b + sqrtDisc) / (2.0 * a);
+
+        double chosen = preferHighArc ? tanHigh : tanLow;
+        double angleRad = Math.atan(chosen);
+        if (angleRad <= 0 || angleRad >= Math.PI / 2.0) return Double.NaN;
+        return Math.toDegrees(angleRad);
+    }
+
+    /**
+     * Maps a launch angle in degrees to a normalized servo position [0.0, 1.0]
+     * using the configured hood servo range.
+     */
+    private double angleDegToServo(double angleDeg) {
+        double pos = (angleDeg - HOOD_SERVO_MIN_DEG) / (HOOD_SERVO_MAX_DEG - HOOD_SERVO_MIN_DEG);
+        return Math.max(0.0, Math.min(1.0, pos));
+    }
+
+    // ── Legacy regression (kept for fallback and backwards compat) ────────────
+
+    /** @deprecated Use getTargetVelocityRPM(dist) instead. */
+    @Deprecated
+    public double getInterpolatedVelo(double dist) {
+        return getTargetVelocityRPM(dist);
+    }
+
+    /** @deprecated Use getTargetHoodPosition(dist, actualVelRPM) instead. */
+    @Deprecated
+    public double getInterpolatedHood(double dist) {
+        return Math.max(0, Math.min(1,
                 0.00000116334 * Math.pow(dist, 3)
-                - 0.000372395 * Math.pow(dist, 2)
-                + 0.0422195 * dist
-                - 0.872815));
-
-    }
-
-    public double getVelInterpolatedHood(double dist, double vel) {
-        // TODO: Run new, better linregs to determine hood variance with velocity and such
-        // TODO: could also maybe provide target height or airtime or whatever for better sorting and aim
-        double normalAngle = -(2.74194 * Math.pow(10, -7)) * Math.pow(dist, 4) + 0.0000901357 * Math.pow(dist, 3) - 0.0106195 * Math.pow(dist, 2) + (0.535594 * dist) + 9.20171;
-        return normalAngle + (getInterpolatedVelo(dist) - vel) * 0.001;
+                        - 0.000372395  * Math.pow(dist, 2)
+                        + 0.0422195    * dist
+                        - 0.872815));
     }
 
     public void setHoodTarget(double angle){
@@ -285,7 +411,8 @@ public class OuttakeSubsystem implements Subsystem {
         MEDIUM,
         LAZY,
         OFF,
-        INTERPOLATED
+        INTERPOLATED,
+        REACTIVE
     }
 
 }

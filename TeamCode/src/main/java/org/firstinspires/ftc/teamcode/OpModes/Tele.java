@@ -128,6 +128,7 @@ public class Tele extends NextFTCOpMode {
         telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
         telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
+        telemetry.addData("Pose H: ", PedroComponent.follower().getPose().getHeading());
         telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
     }
 
@@ -143,6 +144,7 @@ public class Tele extends NextFTCOpMode {
 
         //Face buttons
         Gamepads.gamepad2().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.INTERPOLATED));
+        Gamepads.gamepad2().rightStickButton().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE));
         Gamepads.gamepad2().b().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF));
         Gamepads.gamepad2().x().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.LAZY));
         Gamepads.gamepad2().y().whenBecomesTrue(() -> {

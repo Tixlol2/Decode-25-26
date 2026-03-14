@@ -41,7 +41,7 @@ public class RobotSubsystem extends SubsystemGroup {
     private RobotSubsystem() {
         super(
                 OuttakeSubsystem.INSTANCE,
-                VisionSubsystem.INSTANCE,
+                VisionSubsystemLL.INSTANCE,
                 IntakeSubsystem.INSTANCE,
                 BackSlot.INSTANCE,
                 LeftSlot.INSTANCE,
@@ -118,7 +118,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
         //Handles pattern updating
         if (pattern.contains(null)) {
-            pattern = VisionSubsystem.INSTANCE.getPattern();
+            pattern = VisionSubsystemLL.INSTANCE.getPattern();
             patternFull = !pattern.contains(null);
         }
 
@@ -143,7 +143,7 @@ public class RobotSubsystem extends SubsystemGroup {
     }
 
     public void resetPattern(){
-        VisionSubsystem.INSTANCE.resetPattern();
+        VisionSubsystemLL.INSTANCE.resetPattern();
         pattern = new ArrayList<>(Arrays.asList(null, null, null));
         patternFull = false;
     }
