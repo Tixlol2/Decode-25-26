@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.components.BindingsComponent;
@@ -36,12 +37,25 @@ public class TestingOp extends NextFTCOpMode {
     public static double hoodTarget = 0;
     public static double flywheelTarget = 0;
 
+    @Override
+    public void onWaitForStart() {
+        if (gamepad1.a) {
+            RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.RED);
+        } else if (gamepad1.b) {
+            RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.BLUE);
+        }
+
+        telemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
+        telemetry.addLine("Circle for Blue, X for Red ");
+        telemetry.addData("Current Team Color ", RobotSubsystem.INSTANCE.getAllianceColor());
+    }
 
     @Override
     public void onStartButtonPressed(){
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
 
-        follower().setStartingPose(new Pose(32.5, 135.5, Math.toRadians(90)));
+        follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueCloseStart : Poses.redCloseStart);
+
         follower().startTeleOpDrive();
         follower().update();
     }

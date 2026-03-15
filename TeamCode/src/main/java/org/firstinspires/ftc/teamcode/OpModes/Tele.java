@@ -36,7 +36,7 @@ public class Tele extends NextFTCOpMode {
 
     private boolean resetTurret = false;
 
-    public static double hoodAngle = 20;
+
 
     public static boolean farZone = false;
 
@@ -128,7 +128,7 @@ public class Tele extends NextFTCOpMode {
         telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
         telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
-        telemetry.addData("Pose H: ", PedroComponent.follower().getPose().getHeading());
+        telemetry.addData("Pose H: ", Math.toDegrees(PedroComponent.follower().getPose().getHeading()));
         telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
     }
 
@@ -136,9 +136,9 @@ public class Tele extends NextFTCOpMode {
 
 
         //Toggle things based on dpad
-//        Gamepads.gamepad1().dpadUp().whenBecomesTrue(OuttakeSubsystem.addUserAdded());
+        Gamepads.gamepad2().dpadUp().whenBecomesTrue(OuttakeSubsystem.addUserAdded());
         Gamepads.gamepad2().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
-//        Gamepads.gamepad1().dpadDown().whenBecomesTrue(OuttakeSubsystem.subUserAdded());
+        Gamepads.gamepad2().dpadDown().whenBecomesTrue(OuttakeSubsystem.subUserAdded());
         Gamepads.gamepad2().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
 
 

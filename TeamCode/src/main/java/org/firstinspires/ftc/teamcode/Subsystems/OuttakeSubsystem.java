@@ -38,7 +38,7 @@ public class OuttakeSubsystem implements Subsystem {
     private static final MotorEx rightLaunchMotor = new MotorEx(UniConstants.LAUNCHER_RIGHT_STRING).floatMode();
     private static final MotorGroup launcherGroup = new MotorGroup(rightLaunchMotor, leftLaunchMotor); //Right has encoder, put first
     private static FlywheelState launcherState = FlywheelState.OFF;
-    public static  PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.0006566, 0, 0); //TODO: Tune
+    public static  PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.00045, 0, 0);
     private static ControlSystem launcherControl;
     public static double targetVeloRPM = 0;
 
@@ -74,8 +74,8 @@ public class OuttakeSubsystem implements Subsystem {
     public static double WHEEL_RADIUS_M      = 0.092;  // TODO: measure
 
     // Servo angle range: servoMinDeg → 0.0, servoMaxDeg → 1.0
-    public static double HOOD_SERVO_MIN_DEG  = 20.0;  // TODO: confirm
-    public static double HOOD_SERVO_MAX_DEG  = 45.0;  // TODO: confirm
+    public static double HOOD_SERVO_MIN_DEG  = 20.0;
+    public static double HOOD_SERVO_MAX_DEG  = 45.0;
 
     // Single tunable correction (degrees) applied to physics-solved angle.
     // Positive = aim higher, negative = aim lower. Tune empirically.
@@ -201,8 +201,8 @@ public class OuttakeSubsystem implements Subsystem {
         return Math.max(0, Math.min(3250,
                 -0.00188274 * Math.pow(distInches, 3)
                         + 0.568879   * Math.pow(distInches, 2)
-                        - 23.50003   * distInches
-                        + 2100 + userAdded));
+                        - 24   * distInches
+                        + 2175 + userAdded));
     }
 
     /**

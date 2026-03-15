@@ -49,7 +49,7 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public static double goalOffset = -3;
+    public static double goalOffset = -10;
 
     private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));

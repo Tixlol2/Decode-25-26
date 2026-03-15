@@ -31,7 +31,7 @@ public class VisionSubsystemLL implements Subsystem {
     public void initialize() {
         limelight = ActiveOpMode.hardwareMap().get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
-        limelight.pipelineSwitch(0); // AprilTag pipeline — configure in the Limelight web UI
+        limelight.pipelineSwitch(1); // AprilTag pipeline — configure in the Limelight web UI
         limelight.start();
     }
 
@@ -50,7 +50,6 @@ public class VisionSubsystemLL implements Subsystem {
             if (rawFiducials != null) {
                 for (LLResultTypes.FiducialResult fiducial : rawFiducials) {
                     fiducials.add(fiducial);
-
                     detectionIDs.add(fiducial.getFiducialId());
                 }
             }
@@ -149,5 +148,7 @@ public class VisionSubsystemLL implements Subsystem {
     @Override
     public void periodic() {
         getDetections();
+        ActiveOpMode.telemetry().addData("Detection IDs: ", detectionIDs);
+        ActiveOpMode.telemetry().addData("Fiducials: ", fiducials);
     }
 }
