@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
@@ -77,10 +76,10 @@ public class TestingOp extends NextFTCOpMode {
 
         //Spin active forward
         if (gamepad1.right_trigger > 0) {
-            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OUT);
+            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.IN);
         } //Reverse Active and Spin
         else if (gamepad1.left_trigger > 0) {
-            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.IN);
+            IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OUT);
         } else {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }

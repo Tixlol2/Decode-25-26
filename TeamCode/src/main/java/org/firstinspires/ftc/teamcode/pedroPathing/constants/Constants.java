@@ -20,8 +20,8 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10)
-            .forwardZeroPowerAcceleration(-44.27070972535246)
-            .lateralZeroPowerAcceleration(-66.75944463360159)
+            .forwardZeroPowerAcceleration(-37.7859232404534)
+            .lateralZeroPowerAcceleration(-63.68403135818951)
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
@@ -29,7 +29,7 @@ public class Constants {
             .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0, 0))
             .headingPIDFCoefficients(new PIDFCoefficients(.67, 0, 0, 0.0))
             .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(.006, 0, 0.000, 0.6, 0)
+                    new FilteredPIDFCoefficients(0.0075, 0, 0.000, 0.6, 0)
             );
 
     public static MecanumConstants driveConstants = new MecanumConstants()
@@ -41,8 +41,8 @@ public class Constants {
             .leftRearMotorDirection(UniConstants.DRIVE_BACK_LEFT_DIRECTION)
             .rightFrontMotorDirection(UniConstants.DRIVE_FRONT_RIGHT_DIRECTION)
             .rightRearMotorDirection(UniConstants.DRIVE_BACK_RIGHT_DIRECTION)
-            .xVelocity(61.17509496493602)
-            .yVelocity(50.46043047567052)
+            .xVelocity(78.390838382751)
+            .yVelocity(56.91285477285311)
             .maxPower(1);
 
 
@@ -58,8 +58,8 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,
             500,
-            1.25,
-            .75
+            1.5,
+            3
     );
 
     public static Follower createFollower(HardwareMap hardwareMap) {

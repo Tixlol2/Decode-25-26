@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
+import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystemLL;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
@@ -86,7 +87,7 @@ public class Tele extends NextFTCOpMode {
                 follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueFarStart : Poses.redFarStart);
             }
         } else {
-            follower().setStartingPose(autoPose);
+            follower().setStartingPose(NewAuto.prevPose);
         }
 
         RobotSubsystem.inTele = true;
@@ -125,11 +126,12 @@ public class Tele extends NextFTCOpMode {
         );
 
         OuttakeSubsystem.INSTANCE.sendTelemetry();
-        telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
+//        telemetry.addData("Command Manager: ", CommandManager.INSTANCE.snapshot());
         telemetry.addData("Pose X: ", PedroComponent.follower().getPose().getX());
         telemetry.addData("Pose Y: ", PedroComponent.follower().getPose().getY());
         telemetry.addData("Pose H: ", Math.toDegrees(PedroComponent.follower().getPose().getHeading()));
-        telemetry.addData("Distance to Goal: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
+        telemetry.addData("Distance to Goal Odo: ", RobotSubsystem.INSTANCE.getDistanceToGoalInches());
+        telemetry.addData("Distance to Goal LL: ", VisionSubsystemLL.INSTANCE.getDistanceToGoal());
     }
 
     private void createBindings() {
@@ -141,6 +143,7 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad2().dpadDown().whenBecomesTrue(OuttakeSubsystem.subUserAdded());
         Gamepads.gamepad2().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
 
+        Gamepads.gamepad2().leftStickButton().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME));
 
         //Face buttons
         Gamepads.gamepad2().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.INTERPOLATED));
@@ -156,6 +159,7 @@ public class Tele extends NextFTCOpMode {
 
         //Shooting command
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
+        Gamepads.gamepad2().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.AutoShoot());
 
 
     }

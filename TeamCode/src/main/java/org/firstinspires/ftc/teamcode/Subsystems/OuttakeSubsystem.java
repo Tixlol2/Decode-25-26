@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Util.PDFLController;
@@ -11,10 +10,6 @@ import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 import dev.nextftc.control.feedback.PIDCoefficients;
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
-import dev.nextftc.core.commands.delays.WaitUntil;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
-import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -46,7 +41,7 @@ public class OuttakeSubsystem implements Subsystem {
     private static final ServoEx hood = new ServoEx("HOOD");
     private static double hoodTargetPosition = .5;
     public static boolean hoodLinreg = true;
-    public static double debugHoodTargetPosition = .75;
+    public static double debugHoodTargetPosition = .45;
 
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
@@ -59,9 +54,10 @@ public class OuttakeSubsystem implements Subsystem {
     public static double debugTargetAngle = 0;
 
     public static double midRPM = 2750;
-    public static double lazyRPM = 500;
+    public static double lazyRPM = 2600;
 
-    public static double kS = 0.09, kVShort = 0.00042;
+
+    public static double kS = 0.09, kVShort = 0.00038;
 
     private static double oldTurret = 0;
 
@@ -142,7 +138,11 @@ public class OuttakeSubsystem implements Subsystem {
                 turretTargetAngle = Math.max(-50, Math.min(180, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
-                turret.setPower(Math.min(.6,(12/RobotSubsystem.INSTANCE.getVoltage() * turretControl.runPDFL(angleToTicks(turretAngleTolerance)))));
+                if(Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5){
+                    turret.setPower(Math.min(.6, (12 / RobotSubsystem.INSTANCE.getVoltage() * turretControl.runPDFL(angleToTicks(turretAngleTolerance)))));
+                } else {
+                    turret.setPower(0);
+                }
             } else {
                 turret.setPower(0);
             }
@@ -168,8 +168,8 @@ public class OuttakeSubsystem implements Subsystem {
     public void sendTelemetry(){
         ActiveOpMode.telemetry().addData("Hood Target: ", hoodTargetPosition);
         ActiveOpMode.telemetry().addData("Current Velo: ", getCurrentVelocityRPM());
-        ActiveOpMode.telemetry().addData("Current Velo L: ", toRPM(leftLaunchMotor.getVelocity()));
-        ActiveOpMode.telemetry().addData("Current Velo R: ", toRPM(rightLaunchMotor.getVelocity()));
+//        ActiveOpMode.telemetry().addData("Current Velo L: ", toRPM(leftLaunchMotor.getVelocity()));
+//        ActiveOpMode.telemetry().addData("Current Velo R: ", toRPM(rightLaunchMotor.getVelocity()));
         ActiveOpMode.telemetry().addData("Target Velo: ", toRPM(launcherControl.getGoal().getVelocity()));
         ActiveOpMode.telemetry().addData("Turret Target: ", turretTargetAngle);
         ActiveOpMode.telemetry().addData("Turret Current: ", getCurrentAngle());
@@ -192,17 +192,18 @@ public class OuttakeSubsystem implements Subsystem {
         return turretTargetAngle;
     }
 
+
     /**
      * Returns the target flywheel velocity in RPM for a given distance.
      * Purely distance-driven — feed this into your ControlSystem goal.
      * userAdded allows driver trim at runtime.
      */
     public double getTargetVelocityRPM(double distInches) {
-        return Math.max(0, Math.min(3250,
-                -0.00188274 * Math.pow(distInches, 3)
-                        + 0.568879   * Math.pow(distInches, 2)
-                        - 24   * distInches
-                        + 2175 + userAdded));
+        return Math.max(0, Math.min(4000,
+                -0 * Math.pow(distInches, 3)
+                        + 0.0433854   * Math.pow(distInches, 2)
+                        + 8.46955   * distInches
+                        + 1816.65579 + userAdded));
     }
 
     /**
@@ -301,10 +302,10 @@ public class OuttakeSubsystem implements Subsystem {
     @Deprecated
     public double getInterpolatedHood(double dist) {
         return Math.max(0, Math.min(1,
-                0.00000116334 * Math.pow(dist, 3)
-                        - 0.000372395  * Math.pow(dist, 2)
-                        + 0.0422195    * dist
-                        - 0.872815));
+                -0.00000226928 * Math.pow(dist, 3)
+                        + 0.000562956  * Math.pow(dist, 2)
+                        - 0.0301239    * dist
+                        + 0.470351));
     }
 
     public void setHoodTarget(double angle){
@@ -404,7 +405,8 @@ public class OuttakeSubsystem implements Subsystem {
     public enum TurretState {
         FORWARD,
         OBELISK,
-        GOAL
+        GOAL,
+        LIME
     }
 
     public enum FlywheelState {
@@ -412,7 +414,7 @@ public class OuttakeSubsystem implements Subsystem {
         LAZY,
         OFF,
         INTERPOLATED,
-        REACTIVE
+        REACTIVE,
     }
 
 }

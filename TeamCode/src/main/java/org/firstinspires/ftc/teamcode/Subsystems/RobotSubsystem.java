@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import static org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem.TurretState.FORWARD;
+import static org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem.TurretState.LIME;
+
 import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.hardware.lynx.LynxVoltageSensor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -55,10 +56,10 @@ public class RobotSubsystem extends SubsystemGroup {
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
     private static boolean patternFull = false;
 
-    private static Pose previousPose = new Pose();
+    public static Pose previousPose;
     private static double prevHeading = 0;
     ElapsedTime loopTimer = new ElapsedTime();
-    private static AllianceColor allianceColor = AllianceColor.BLUE;
+    private static AllianceColor allianceColor = AllianceColor.RED;
 
 
     private double distanceToGoalInches = 0;
@@ -106,11 +107,31 @@ public class RobotSubsystem extends SubsystemGroup {
                 case FORWARD:
                     OuttakeSubsystem.INSTANCE.setTurretTargetAngle(0);
                     break;
+                case LIME:
+                    // CORRECT formula: turretTarget = odometry_estimate + filtered_visual_residual
+                    //
+                    // The odometry estimate (goalAngle) is already computed this cycle by
+                    // updateDistanceAndAngle(). The Limelight tx (getFilteredGoalBearing())
+                    // represents the residual error still visible between the crosshair and
+                    // the tag — i.e., how far the turret needs to move from its odometry
+                    // setpoint to be truly on-target.
+                    //
+                    // When the tag is stale (not seen for > STALE_THRESHOLD_MS),
+                    // getFilteredGoalBearing() returns 0.0, so we seamlessly fall back to
+                    // pure odometry with no discontinuity.
+                    //
+                    OuttakeSubsystem.INSTANCE.setTurretTargetAngle(
+                            goalAngle + VisionSubsystemLL.INSTANCE.getFilteredGoalBearing()
+                    );
+                    break;
             }
         }
 
+        if(VisionSubsystemLL.isGoalVisible()){
+            distanceToGoalInches = VisionSubsystemLL.INSTANCE.getDistanceToGoal() + 10;
+        }
 
-
+//        distanceToGoalInches = VisionSubsystemLL.INSTANCE.getDistanceToGoal();
 
         sendSlotTele();
 
@@ -122,6 +143,7 @@ public class RobotSubsystem extends SubsystemGroup {
             patternFull = !pattern.contains(null);
         }
 
+        ActiveOpMode.telemetry().addData("LimeLight TX: ", VisionSubsystemLL.INSTANCE.getGoalBearing());
         ActiveOpMode.telemetry().addData("Loop Times (ms) ", loopTimer.milliseconds());
         ActiveOpMode.telemetry().addData("Last Shot Num: ", ballsShotLastSequence);
         ActiveOpMode.telemetry().addData("Last Shot: ", lastShot);
@@ -209,7 +231,7 @@ public class RobotSubsystem extends SubsystemGroup {
         goalAngle *= -1;
         obeliskAngle *= -1;
 
-        distanceToGoalInches = Math.hypot(x, y);
+        distanceToGoalInches = Math.hypot(y, x);
     }
 
     public ArrayList<MainSlot> determineOrder(@NonNull ArrayList<MainSlot.SlotState> pattern) {
@@ -312,7 +334,13 @@ public class RobotSubsystem extends SubsystemGroup {
 
     public Command AutoShoot(){
         return new SequentialGroup(
-                new WaitUntil(OuttakeSubsystem::turretFinished),
+                // Switch to LIME mode so the turret starts chasing the tag immediately.
+//                OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME),
+                // Wait until the Limelight has a fresh, filtered reading AND the turret
+                // has settled onto that target.  isGoalFresh() guards against shooting on
+                // stale data; turretFinished() ensures the mechanism has physically moved.
+                new WaitUntil(() -> VisionSubsystemLL.INSTANCE.isGoalFresh()
+                                 && OuttakeSubsystem.turretFinished()),
                 Shoot()
         );
     }
