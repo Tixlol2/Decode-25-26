@@ -77,8 +77,8 @@ CONFIG
     public static final double FLICKER_BACK_DOWN = .57;
     public static  double FLICKER_RIGHT_DOWN = .545;
     public static  double FLICKER_RIGHT_UP = .15;
-    public static double FLICKER_LEFT_DOWN = .52;
-    public static double FLICKER_LEFT_UP = .93;
+    public static double FLICKER_LEFT_DOWN = .48;
+    public static double FLICKER_LEFT_UP = .89;
     public static double FAST_FLICKER_TIME_UP = .3;
     public static double FAST_FLICKER_TIME_DOWN = 0;
     //Hood

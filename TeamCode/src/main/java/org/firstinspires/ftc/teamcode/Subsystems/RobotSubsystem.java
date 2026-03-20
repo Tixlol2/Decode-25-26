@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slots.BackSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.LeftSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.RightSlot;
+import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 
@@ -22,10 +24,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.delays.WaitUntil;
+import dev.nextftc.core.commands.groups.ParallelDeadlineGroup;
 import dev.nextftc.core.commands.groups.ParallelGroup;
+import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
@@ -50,7 +56,10 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public static double goalOffset = -10;
+    public static double goalOffset = 0;
+
+    public static boolean velOffset = true;
+    public static double velOffsetK = -0.1;
 
     private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
@@ -205,8 +214,14 @@ public class RobotSubsystem extends SubsystemGroup {
 
         obX = Poses.obelisk.getX() - PedroComponent.follower().getPose().getX();
         obY = Poses.obelisk.getY() - PedroComponent.follower().getPose().getY();
-
         double fieldAngleToTarget = Math.toDegrees(Math.atan2(y, x)) - 90;
+        if (velOffset) {
+//            Vector targetVector = new Vector(x,y).plus(PedroComponent.follower().getVelocity().times(distanceToGoalInches*velOffsetK));
+            fieldAngleToTarget = Math.toDegrees(Math.atan2(
+                            y+ PedroComponent.follower().getVelocity().getYComponent()*velOffsetK*distanceToGoalInches,
+                            x + PedroComponent.follower().getVelocity().getXComponent()*velOffsetK*distanceToGoalInches))
+                    - 90;
+        }
         double targetObelisk = Math.toDegrees(Math.atan2(obY, obX)) - 90;
 
         double robotHeading = (Math.toDegrees(PedroComponent.follower().getPose().getHeading()) - 90);
@@ -321,27 +336,70 @@ public class RobotSubsystem extends SubsystemGroup {
                         .setStart(() -> {
                             shootOrder.get(2).basicShoot().named("Result 3 " + shootOrder.get(2).getKickerServoName()).run();
                         })
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
+                );
+
+    }
+
+    public Command ShootWithFlywheelComp() {
+        // Capture the order at command creation time
+        final ArrayList<MainSlot> shootOrder = new ArrayList<>();
+
+        return new SequentialGroup(
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shotTimer.reset();
+                            BackSlot.INSTANCE.readSlot();
+                            RightSlot.INSTANCE.readSlot();
+                            LeftSlot.INSTANCE.readSlot();
+
+                            // Determine order after reading slots
+                            shootOrder.clear();
+                            shootOrder.addAll(determineOrder(pattern));
+                        }),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shootOrder.get(0).basicShootDown().named("Result 1 " + shootOrder.get(0).getKickerServoName()).run();
+                        })
                         .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
-                new InstantCommand(() -> {
-                    lastShot.clear();
-                    lastShot.add(shootOrder.get(0).getColorState());
-                    lastShot.add(shootOrder.get(1).getColorState());
-                    lastShot.add(shootOrder.get(2).getColorState());
-                })
-        );
+                new IfElseCommand(() -> shootOrder.get(1).isFull(),
+                        new WaitUntil(() ->
+                                OuttakeSubsystem.INSTANCE.isFlwheelGood(250)
+                        )
+                ),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shootOrder.get(1).basicShootDown().named("Result 2 " + shootOrder.get(1).getKickerServoName()).run();
+                        })
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting")),
+                new IfElseCommand(() -> shootOrder.get(2).isFull(),
+                        new WaitUntil(() ->
+                                OuttakeSubsystem.INSTANCE.isFlwheelGood(250)
+                        )
+                ),
+                new LambdaCommand()
+                        .setStart(() -> {
+                            shootOrder.get(2).basicShoot().named("Result 3 " + shootOrder.get(2).getKickerServoName()).run();
+                        })
+                        .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
+                );
 
     }
 
     public Command AutoShoot(){
+        Timer time = new Timer();
         return new SequentialGroup(
                 // Switch to LIME mode so the turret starts chasing the tag immediately.
 //                OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME),
                 // Wait until the Limelight has a fresh, filtered reading AND the turret
                 // has settled onto that target.  isGoalFresh() guards against shooting on
                 // stale data; turretFinished() ensures the mechanism has physically moved.
-                new WaitUntil(() -> VisionSubsystemLL.INSTANCE.isGoalFresh()
-                                 && OuttakeSubsystem.turretFinished()),
-                Shoot()
+                new WaitUntil(() -> time.getTimeSeconds() > 2 || (VisionSubsystemLL.INSTANCE.isGoalFresh() && OuttakeSubsystem.turretFinished())),
+                Shoot(),
+                new Delay(.125),
+                new IfElseCommand(
+                        () -> !RobotSubsystem.INSTANCE.allSlotsEmpty(),
+                        Shoot())
         );
     }
 

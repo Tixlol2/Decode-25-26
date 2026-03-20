@@ -46,7 +46,7 @@ public class OuttakeSubsystem implements Subsystem {
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
-    public static double pTurret = 0.0004, dTurret = 0, lTurret = 0.12, fTurret = 0.0;
+    public static double pTurret = 0.00045, dTurret = 0, lTurret = .14, fTurret = 0.0;
     private PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .75;
@@ -66,7 +66,7 @@ public class OuttakeSubsystem implements Subsystem {
     // ── Shooter Geometry ─────────────────────────────────────────────────────
     // All distances in meters. Measure from floor to center of launch point / hoop.
     public static double LAUNCHER_HEIGHT_M   = 0.3175;  // TODO: measure
-    public static double HOOP_HEIGHT_M       = 1.1;  // regulation hoop height
+    public static double HOOP_HEIGHT_M       = 1.075;  // regulation hoop height
     public static double WHEEL_RADIUS_M      = 0.092;  // TODO: measure
 
     // Servo angle range: servoMinDeg → 0.0, servoMaxDeg → 1.0
@@ -110,11 +110,10 @@ public class OuttakeSubsystem implements Subsystem {
                         break;
                     case LAZY:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(lazyRPM)));
+                        hoodLinreg = false;
+                        debugHoodTargetPosition = .45;
                         break;
                     case INTERPOLATED:
-                        launcherControl.setGoal(new KineticState(0, toTicksPerSec(getTargetVelocityRPM(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
-                        hoodLinreg = true;
-                        break;
                     case REACTIVE:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(getTargetVelocityRPM(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
                         hoodLinreg = true;
@@ -174,6 +173,10 @@ public class OuttakeSubsystem implements Subsystem {
         ActiveOpMode.telemetry().addData("Turret Target: ", turretTargetAngle);
         ActiveOpMode.telemetry().addData("Turret Current: ", getCurrentAngle());
         ActiveOpMode.telemetry().addData("Turret Finished?: ", turretFinished());
+    }
+
+    public boolean isFlwheelGood(int tolerance){
+        return Math.abs(targetVeloRPM - getCurrentVelocityRPM()) < tolerance;
     }
 
     public static Command addUserAdded(){
