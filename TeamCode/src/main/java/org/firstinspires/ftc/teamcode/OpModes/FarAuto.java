@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
+import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
@@ -65,8 +66,6 @@ public class FarAuto extends NextFTCOpMode {
 
     public static Pose prevPose = new Pose();
 
-    public static double intakeHeadingRad = 0;
-
     boolean passed = false;
 
     private int oldState = -1;
@@ -93,12 +92,6 @@ public class FarAuto extends NextFTCOpMode {
         PedroComponent.follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
         RobotSubsystem.inTele = false;
         createPaths();
-
-        if(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED){
-            intakeHeadingRad = 0;
-        } else {
-            intakeHeadingRad = Math.toRadians(180);
-        }
 
         autoState = 1;
     }
@@ -172,48 +165,60 @@ public class FarAuto extends NextFTCOpMode {
         startToShoot = PedroComponent.follower().pathBuilder()
                 .addPath(
                         new BezierLine(
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose,
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redShootingPose : blueShootingPose
+                                Poses.mirrorCoordinates(redStartingPose, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor())
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
+                .setConstantHeadingInterpolation(
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                )
                 .build();
         shootToFar = PedroComponent.follower().pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redShootingPose : blueShootingPose,
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redIntakeFarCP : new Pose(),
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redIntakeFarFinal : new Pose()
+                                Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redIntakeFarCP, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redIntakeFarFinal, RobotSubsystem.INSTANCE.getAllianceColor())
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
+                .setConstantHeadingInterpolation(
+                        Poses.mirrorCoordinates(redIntakeFarFinal, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                )
                 .build();
         farToShootLine = PedroComponent.follower().pathBuilder()
                 .addPath(
                         new BezierLine(
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redIntakeFarFinal : new Pose(),
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redShootingPose : blueShootingPose
+                                Poses.mirrorCoordinates(redIntakeFarFinal, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor())
                         )
                 )
-                .setConstantHeadingInterpolation(Math.toRadians(90))
+                .setConstantHeadingInterpolation(
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                )
                 .build();
         shootToCycle = PedroComponent.follower().pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redShootingPose : blueShootingPose,
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redIntakeCycleCP : new Pose(),
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redIntakeCycleFinal : new Pose()
+                                Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redIntakeCycleCP, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redIntakeCycleFinal, RobotSubsystem.INSTANCE.getAllianceColor())
                         )
                 )
-                .setConstantHeadingInterpolation(intakeHeadingRad)
+                .setConstantHeadingInterpolation(
+                        Poses.mirrorCoordinates(redIntakeCycleFinal, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                )
                 .build();
         cycleToShoot = PedroComponent.follower().pathBuilder()
                 .addPath(
                         new BezierLine(
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redIntakeCycleFinal : new Pose(),
-                                RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redShootingPose : blueShootingPose
-                        ))
-                .setLinearHeadingInterpolation(intakeHeadingRad, Math.toRadians(90))
+                                Poses.mirrorCoordinates(redIntakeCycleFinal, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor())
+                        )
+                )
+                .setLinearHeadingInterpolation(
+                        Poses.mirrorCoordinates(redIntakeCycleFinal, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading(),
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                )
                 .build();
 
 
