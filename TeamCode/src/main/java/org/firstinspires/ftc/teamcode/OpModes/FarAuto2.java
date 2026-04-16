@@ -10,33 +10,26 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystemLL;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
-import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup;
 import dev.nextftc.core.commands.groups.ParallelGroup;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
-import dev.nextftc.extensions.pedro.TurnBy;
-import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class NewAuto extends NextFTCOpMode {
+public class FarAuto2 extends NextFTCOpMode {
 
     {
         addComponents(
@@ -47,10 +40,11 @@ public class NewAuto extends NextFTCOpMode {
         );
     }
 
-    private final Pose redStartingPose = new Pose(127, 120, Math.toRadians(36));
-    private final Pose blueStartingPose = new Pose(17, 120, Math.toRadians(144));
+    private final Pose redStartingPose = new Pose(88, 8, Math.toRadians(90));
+//    private final Pose blueStartingPose = new Pose(17, 120, Math.toRadians(144));
 
-    private final Pose redShootingPose = new Pose(92, 84, Math.toRadians(45));
+    private final Pose redShootingPose = new Pose(82, 82, Math.toRadians(45));
+
     private final Pose blueShootingPose = new Pose(54, 84, Math.toRadians(150));
 
     private final Pose redIntakeCloseFinal = new Pose(124, 83, 0);
@@ -59,7 +53,7 @@ public class NewAuto extends NextFTCOpMode {
     private final Pose redIntakeMidCP = new Pose(78.63924050632912, 59.78481012658228);
 
     private final Pose redIntakeFarFinal = new Pose(128, 34, 0);
-    private final Pose redIntakeFarCP = new Pose(74.30379746835442, 30);
+    private final Pose redIntakeFarCP = new Pose(74.30379746835442, 28.56962025316455);
 
     private final Pose redLeverPark = new Pose(120, 70);
 
@@ -96,7 +90,7 @@ public class NewAuto extends NextFTCOpMode {
         OuttakeSubsystem.INSTANCE.resetTurret();
         RobotSubsystem.INSTANCE.resetPattern();
         UniConstants.FAST_FLICKER_TIME_UP = .35;
-        PedroComponent.follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
+        PedroComponent.follower().setStartingPose( Poses.mirrorCoordinates(redStartingPose,RobotSubsystem.INSTANCE.getAllianceColor()));//RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
         RobotSubsystem.inTele = false;
         RobotSubsystem.autoEnd = RobotSubsystem.AutoEnd.CLOSE;
         RobotSubsystem.INSTANCE.updatingDist = true;
@@ -155,24 +149,11 @@ public class NewAuto extends NextFTCOpMode {
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
-                                    new Delay(2.25),
-                                    new FollowPath(shootToMid)
+                                    new Delay(3.5),
+                                    new FollowPath(shootToFar)
                             ),
 //                            new TurnBy(Angle.fromDeg(-5)),
-                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF),
-                            new ParallelDeadlineGroup(
-                                    new Delay(.25),
-                                    new FollowPath(backFromMid)
-                            ),
-                            new ParallelDeadlineGroup(
-                                    new Delay(1.5),
-                                    new FollowPath(hitLeverFromMid)
-                            ),
-                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
-                            new ParallelDeadlineGroup(
-                                    new Delay(.125),
-                                    new FollowPath(backFromLever)
-                            ),
+//                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF),
                             SetAutoState(3)
                     ).schedule();
                     oldState = autoState;
@@ -208,8 +189,8 @@ public class NewAuto extends NextFTCOpMode {
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
-                                    new Delay(1.25),
-                                    new FollowPath(shootToClose)
+                                    new Delay(1.25)
+
                             ),
                             SetAutoState(5)
                     ).schedule();
@@ -232,7 +213,7 @@ public class NewAuto extends NextFTCOpMode {
 //                                    new TurnTo(Angle.fromDeg(43))
 //                            ),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
-                            new Delay(.5),
+                            new Delay(.3),
                             RobotSubsystem.INSTANCE.AutoShoot(),
                             SetAutoState(6)
                     ).schedule();

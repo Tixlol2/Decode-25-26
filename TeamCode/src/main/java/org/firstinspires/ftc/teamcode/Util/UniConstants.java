@@ -74,7 +74,7 @@ CONFIG
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
     //Flickers
     public static final double FLICKER_BACK_UP = .93;
-    public static final double FLICKER_BACK_DOWN = .57;
+    public static final double FLICKER_BACK_DOWN = .53;
     public static  double FLICKER_RIGHT_DOWN = .545;
     public static  double FLICKER_RIGHT_UP = .15;
     public static double FLICKER_LEFT_DOWN = .48;

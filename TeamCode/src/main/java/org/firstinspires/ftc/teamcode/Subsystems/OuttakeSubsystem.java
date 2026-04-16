@@ -202,9 +202,9 @@ public class OuttakeSubsystem implements Subsystem {
      * userAdded allows driver trim at runtime.
      */
     public double getTargetVelocityRPM(double distInches) {
-        return Math.max(0, Math.min(4000,
+        return Math.max(0, Math.min(4500,
                 -0 * Math.pow(distInches, 3)
-                        + 0.0433854   * Math.pow(distInches, 2)
+                        + 0.0633854   * Math.pow(distInches, 2)
                         + 8.46955   * distInches
                         + 1816.65579 + userAdded));
     }

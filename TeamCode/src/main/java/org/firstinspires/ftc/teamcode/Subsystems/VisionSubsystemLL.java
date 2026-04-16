@@ -59,7 +59,7 @@ public class VisionSubsystemLL implements Subsystem {
     //                        fall back to pure odometry.
 
     /** EMA smoothing coefficient for tx.  Range [0, 1].  @Configurable. */
-    public static double TX_FILTER_ALPHA       = 0.35;
+    public static double TX_FILTER_ALPHA       = 0.1;
 
     /** Ignore tx corrections smaller than this magnitude (degrees). */
     public static double TX_DEADBAND_DEG       = 0.2;

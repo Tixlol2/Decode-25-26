@@ -87,7 +87,16 @@ public class Tele extends NextFTCOpMode {
                 follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueFarStart : Poses.redFarStart);
             }
         } else {
-            follower().setStartingPose(NewAuto.prevPose);
+            if(RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.CLOSE){
+                follower().setStartingPose(NewAuto.prevPose);
+            } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FAR) {
+                follower().setStartingPose(FarAuto.prevPose);
+            } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.NINE) {
+                follower().setStartingPose(Nein.prevPose);
+            } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FARTOCLOSE){
+                follower().setStartingPose(FarAuto2.prevPose);
+            }
+
         }
 
         RobotSubsystem.inTele = true;
@@ -142,6 +151,9 @@ public class Tele extends NextFTCOpMode {
         Gamepads.gamepad2().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
         Gamepads.gamepad2().dpadDown().whenBecomesTrue(OuttakeSubsystem.subUserAdded());
         Gamepads.gamepad2().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
+
+        Gamepads.gamepad2().leftBumper().whenBecomesTrue(() -> RobotSubsystem.INSTANCE.updatingDist = true)
+                .whenBecomesFalse(() -> RobotSubsystem.INSTANCE.updatingDist = false);
 
         Gamepads.gamepad2().leftStickButton().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME));
 

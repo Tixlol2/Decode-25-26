@@ -10,33 +10,26 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystemLL;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
-import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup;
 import dev.nextftc.core.commands.groups.ParallelGroup;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
-import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
-import dev.nextftc.extensions.pedro.TurnBy;
-import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 @Autonomous
-public class NewAuto extends NextFTCOpMode {
+public class Nein extends NextFTCOpMode {
 
     {
         addComponents(
@@ -98,7 +91,7 @@ public class NewAuto extends NextFTCOpMode {
         UniConstants.FAST_FLICKER_TIME_UP = .35;
         PedroComponent.follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
         RobotSubsystem.inTele = false;
-        RobotSubsystem.autoEnd = RobotSubsystem.AutoEnd.CLOSE;
+        RobotSubsystem.autoEnd = RobotSubsystem.AutoEnd.NINE;
         RobotSubsystem.INSTANCE.updatingDist = true;
         createPaths();
 
@@ -155,7 +148,7 @@ public class NewAuto extends NextFTCOpMode {
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
-                                    new Delay(2.25),
+                                    new Delay(2.75),
                                     new FollowPath(shootToMid)
                             ),
 //                            new TurnBy(Angle.fromDeg(-5)),
@@ -221,7 +214,7 @@ public class NewAuto extends NextFTCOpMode {
                     new SequentialGroup(
 //                            new Delay(5),
                             new ParallelDeadlineGroup(
-                                    new Delay(1.25),
+                                    new Delay(2.5),
                                     new ParallelGroup(
                                             new FollowPath(closeToShoot),
                                             OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL)
@@ -232,43 +225,9 @@ public class NewAuto extends NextFTCOpMode {
 //                                    new TurnTo(Angle.fromDeg(43))
 //                            ),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
-                            new Delay(.5),
-                            RobotSubsystem.INSTANCE.AutoShoot(),
-                            SetAutoState(6)
-                    ).schedule();
-                    oldState = autoState;
-                }
-                break;
-            case 6:
-                if(oldState != autoState){
-                    new SequentialGroup(
-//                            new Delay(5),
-                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
-                            new ParallelDeadlineGroup(
-                                    new Delay(3.5),
-                                    new FollowPath(shootToFar)
-                            ),
-                            SetAutoState(7)
-                    ).schedule();
-                    oldState = autoState;
-                }
-                break;
-            case 7:
-                if(oldState != autoState){
-                    new SequentialGroup(
-//                            new Delay(5),
-                            new ParallelDeadlineGroup(
-                                    new Delay(3),
-                                    new FollowPath(farToShootLine)
-                            ),
-//                            new ParallelDeadlineGroup(
-//                                    new Delay(.125),
-//                                    new TurnTo(Angle.fromDeg(35))
-//                            ),
-                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
                             new Delay(.3),
                             RobotSubsystem.INSTANCE.AutoShoot(),
-                            SetAutoState(8)
+                            SetAutoState(6)
                     ).schedule();
                     oldState = autoState;
                 }
@@ -343,10 +302,10 @@ public class NewAuto extends NextFTCOpMode {
         closeToShoot = PedroComponent.follower().pathBuilder()
                 .addPath(new BezierLine(
                         Poses.mirrorCoordinates(redIntakeCloseFinal, RobotSubsystem.INSTANCE.getAllianceColor()),
-                        Poses.mirrorCoordinates(redShootingPose.plus(new Pose(5, 5)), RobotSubsystem.INSTANCE.getAllianceColor())
+                        Poses.mirrorCoordinates(redShootingPose.plus(new Pose(6.7, 30)), RobotSubsystem.INSTANCE.getAllianceColor())
                 ))
                 .setConstantHeadingInterpolation(
-                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(45)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                 )
                 .build();
         shootToFar = PedroComponent.follower().pathBuilder()

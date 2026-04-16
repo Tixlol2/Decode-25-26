@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.math.Vector;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 
 import dev.nextftc.core.commands.Command;
@@ -58,8 +58,8 @@ public class RobotSubsystem extends SubsystemGroup {
 
     public static double goalOffset = 0;
 
-    public static boolean velOffset = true;
-    public static double velOffsetK = -0.1;
+    public static boolean velOffset = false;
+    public static double velOffsetK = -0.001;
 
     private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
@@ -69,6 +69,7 @@ public class RobotSubsystem extends SubsystemGroup {
     private static double prevHeading = 0;
     ElapsedTime loopTimer = new ElapsedTime();
     private static AllianceColor allianceColor = AllianceColor.RED;
+    public static AutoEnd autoEnd = AutoEnd.CLOSE;
 
 
     private double distanceToGoalInches = 0;
@@ -86,6 +87,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private double shootDelay = 0;
     public static boolean inTele = false;
+    public boolean updatingDist = false;
 
     @Override
     public void initialize() {
@@ -198,6 +200,8 @@ public class RobotSubsystem extends SubsystemGroup {
         return shootDelay;
     }
 
+
+
     public void updateDistanceAndAngle() {
         double x = 0, y = 0, obX = 0, obY = 0;
 
@@ -245,8 +249,9 @@ public class RobotSubsystem extends SubsystemGroup {
         // Sign flip (hardware requires inverted angle)
         goalAngle *= -1;
         obeliskAngle *= -1;
-
-        distanceToGoalInches = Math.hypot(y, x);
+        if (updatingDist) {
+            distanceToGoalInches = Math.hypot(y, x);
+        }
     }
 
     public ArrayList<MainSlot> determineOrder(@NonNull ArrayList<MainSlot.SlotState> pattern) {
@@ -458,6 +463,13 @@ public class RobotSubsystem extends SubsystemGroup {
         BLUE
     }
 
+    public enum AutoEnd {
+        CLOSE,
+        FAR,
+        NINE,
+        FARTOCLOSE
+    }
+
     public Command stopSubsystems(){
         return new ParallelGroup(
                 OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD),
@@ -472,8 +484,4 @@ public class RobotSubsystem extends SubsystemGroup {
         SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
     }
 
-    public enum AutoSelect{
-        CLOSE,
-        FAR
-    }
 }

@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 public class Poses {
     public static Pose obelisk = new Pose(72, 148);
 
-    public static Pose redGoal = new Pose(134, 131);
+    public static Pose redGoal = new Pose(134, 134);
     public static Pose blueGoal = mirrorCoordinates(redGoal, RobotSubsystem.AllianceColor.BLUE);
 
     public static Pose blueClosePark = new Pose(56, 132);
@@ -56,11 +56,12 @@ public class Poses {
 
     public static Pose mirrorCoordinates(Pose pose, RobotSubsystem.AllianceColor targetColor) {
         double deltaX = Math.abs(72 - pose.getX());
-        double angle = Math.toRadians((Math.toDegrees(pose.getHeading()) + 180) % 360);
+        double deltaTheta = 180 - Math.toDegrees(pose.getHeading());
+
         if (targetColor == RobotSubsystem.AllianceColor.BLUE) {
-            return new Pose(72 - deltaX, pose.getY(), angle);
+            return new Pose(72 - deltaX, pose.getY(), Math.toRadians(deltaTheta));
         } else {
-            return new Pose(72 + deltaX, pose.getY(), angle);
+            return new Pose(72 + deltaX, pose.getY(), pose.getHeading());
         }
     }
 

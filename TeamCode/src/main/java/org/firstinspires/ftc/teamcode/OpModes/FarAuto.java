@@ -89,8 +89,10 @@ public class FarAuto extends NextFTCOpMode {
         OuttakeSubsystem.INSTANCE.resetTurret();
         RobotSubsystem.INSTANCE.resetPattern();
         UniConstants.FAST_FLICKER_TIME_UP = .325;
-        PedroComponent.follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
+        PedroComponent.follower().setStartingPose( Poses.mirrorCoordinates(redStartingPose,RobotSubsystem.INSTANCE.getAllianceColor()));//RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
         RobotSubsystem.inTele = false;
+        RobotSubsystem.autoEnd = RobotSubsystem.AutoEnd.FAR;
+        RobotSubsystem.INSTANCE.updatingDist = true;
         createPaths();
 
         autoState = 1;
@@ -121,16 +123,19 @@ public class FarAuto extends NextFTCOpMode {
 
     private void autoPathUpdate(){
         switch (autoState){
-
             case 1:
                 if(oldState != autoState){
                     new SequentialGroup(
                             new ParallelGroup(
-                                    OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL),
+                                    OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME),
                                     OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE),
 
                                     //new InstantCommand(() -> OuttakeSubsystem.hoodLinreg = false),
-                                    new FollowPath(startToShoot)
+                                    new ParallelDeadlineGroup(
+                                            new Delay(1.25),
+                                            new FollowPath(startToShoot)
+
+                                    )
                             ),
                             SetPassed(true),
                             new Delay(.25),
@@ -140,7 +145,69 @@ public class FarAuto extends NextFTCOpMode {
                 }
                 oldState = autoState;
                 break;
+            case 2:
+                if(oldState != autoState){
+                    new SequentialGroup(
+                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
+                            new ParallelDeadlineGroup(
+                                    new Delay(2),
+                                    new FollowPath(shootToFar)
+                            ),
+                            SetAutoState(3)
+                    ).schedule();
+                    oldState = autoState;
+                }
+                break;
+            case 3:
+                if(oldState != autoState){
+                    new SequentialGroup(
+                            new ParallelDeadlineGroup(
+                                    new Delay(3),
+                                    new FollowPath(farToShootLine)
+                            ),
+//                            new ParallelDeadlineGroup(
+//                                    new Delay(.125),
+//                                    new TurnTo(Angle.fromDeg(35))
+//                            ),
+                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
+                            new Delay(.3),
+                            RobotSubsystem.INSTANCE.AutoShoot(),
+                            SetAutoState(4)
 
+                    ).schedule();
+                }
+                break;
+            case 4:
+                if(oldState != autoState){
+                    new SequentialGroup(
+                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
+                            new ParallelDeadlineGroup(
+                                    new Delay(5),
+                                    new FollowPath(shootToCycle)
+                            ),
+                            SetAutoState(5)
+                    ).schedule();
+                    oldState = autoState;
+                }
+                break;
+            case 5:
+                if(oldState != autoState){
+                    new SequentialGroup(
+                            new ParallelDeadlineGroup(
+                                    new Delay(3),
+                                    new FollowPath(cycleToShoot)
+                            ),
+//                            new ParallelDeadlineGroup(
+//                                    new Delay(.125),
+//                                    new TurnTo(Angle.fromDeg(35))
+//                            ),
+                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
+                            new Delay(.3),
+                            RobotSubsystem.INSTANCE.AutoShoot(),
+                            SetAutoState(-1)
+                    ).schedule();
+                }
+                break;
         }
     }
 
