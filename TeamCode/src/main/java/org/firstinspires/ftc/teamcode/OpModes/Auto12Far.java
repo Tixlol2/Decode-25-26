@@ -28,8 +28,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
+//12 Ball Far
 @Autonomous
-public class FarAuto2 extends NextFTCOpMode {
+public class Auto12Far extends NextFTCOpMode {
 
     {
         addComponents(

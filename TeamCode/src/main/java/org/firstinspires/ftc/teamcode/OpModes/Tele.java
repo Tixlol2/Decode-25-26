@@ -88,13 +88,13 @@ public class Tele extends NextFTCOpMode {
             }
         } else {
             if(RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.CLOSE){
-                follower().setStartingPose(NewAuto.prevPose);
+                follower().setStartingPose(Auto12Close.prevPose);
             } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FAR) {
-                follower().setStartingPose(FarAuto.prevPose);
+                follower().setStartingPose(Auto9Far.prevPose);
             } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.NINE) {
-                follower().setStartingPose(Nein.prevPose);
+                follower().setStartingPose(Auto9Close.prevPose);
             } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FARTOCLOSE){
-                follower().setStartingPose(FarAuto2.prevPose);
+                follower().setStartingPose(Auto12Far.prevPose);
             }
 
         }

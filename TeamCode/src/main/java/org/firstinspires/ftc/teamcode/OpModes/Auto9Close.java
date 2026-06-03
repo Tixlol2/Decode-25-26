@@ -28,8 +28,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
+//9 Ball Close
 @Autonomous
-public class Nein extends NextFTCOpMode {
+public class Auto9Close extends NextFTCOpMode {
 
     {
         addComponents(
