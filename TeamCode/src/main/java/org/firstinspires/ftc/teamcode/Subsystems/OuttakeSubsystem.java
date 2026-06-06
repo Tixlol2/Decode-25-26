@@ -134,7 +134,7 @@ public class OuttakeSubsystem implements Subsystem {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
-                turretTargetAngle = Math.max(-50, Math.min(180, turretTargetAngle)); //Negative is ccw
+                turretTargetAngle = Math.max(-179, Math.min(180, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
                 if(Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5){

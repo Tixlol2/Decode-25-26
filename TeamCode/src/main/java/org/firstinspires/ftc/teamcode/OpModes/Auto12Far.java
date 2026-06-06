@@ -28,7 +28,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-//12 Ball Far
+//12 Ball (Far -> Close)
 @Autonomous
 public class Auto12Far extends NextFTCOpMode {
 
@@ -73,6 +73,7 @@ public class Auto12Far extends NextFTCOpMode {
     private int oldState = -1;
     private int autoState = 0;
 
+
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
@@ -99,6 +100,7 @@ public class Auto12Far extends NextFTCOpMode {
 
 
         autoState = 1;
+
     }
 
     @Override

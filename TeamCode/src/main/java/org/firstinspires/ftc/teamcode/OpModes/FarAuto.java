@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.ParallelDeadlineGroup;
 import dev.nextftc.core.commands.groups.ParallelGroup;
@@ -29,8 +30,8 @@ import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
 //9 Ball Far
-@Autonomous
-public class Auto9Far extends NextFTCOpMode {
+@Autonomous(name = "Cycling Far + Spike", group = "Auto")
+public class FarAuto extends NextFTCOpMode {
 
     {
         addComponents(
@@ -41,25 +42,18 @@ public class Auto9Far extends NextFTCOpMode {
         );
     }
 
-    private final Pose redStartingPose = new Pose(88, 8, Math.toRadians(90));
-    private final Pose blueStartingPose = new Pose(16, 120, Math.toRadians(144));
-
-    private final Pose redShootingPose = new Pose(87, 18, Math.toRadians(90));
-    private final Pose blueShootingPose = new Pose(54, 84, Math.toRadians(150));
+    private final Pose redStartingPose = new Pose(88, 8, Math.toRadians(0));
+    private final Pose redShootingPose = new Pose(96, 11, Math.toRadians(0));
 
 
+    private final Pose redIntakeCycleFinal = new Pose(127, 40, 0);
+    private final Pose redIntakeCycleCP = new Pose(131.0506329113924, 5.037974683544299);
 
-    private final Pose redIntakeCycleFinal = new Pose(136, 24, 0);
-    private final Pose redIntakeCycleCP = new Pose(143.71518987341773, 2.0632911392404942);
+    private final Pose redIntakeFarFinal = new Pose(127, 35.01265822784809, 0);
+    private final Pose redIntakeFarCP = new Pose(91.41772151898732, 40.126582278481);
 
-    private final Pose redIntakeFarFinal = new Pose(128, 34, 0);
-    private final Pose redIntakeFarCP = new Pose(74.30379746835442, 28.56962025316455);
+    private final Pose redPark = new Pose(120, 15);
 
-    private final Pose redLeverPark = new Pose(120, 70);
-
-    private final Pose redClosePark = new Pose(84, 134);
-
-    private final Pose redLeverStrafeGoal = new Pose(160, 70);
 
     private PathChain startToShoot, shootToCycle, cycleToShoot, shootToClose, closeToShoot, shootToParkLever, shootToParkClose, shootToFar, farToShootCurved, farToShootLine, hitLeverFromMid, backFromLever, backFromMid;
 
@@ -72,6 +66,10 @@ public class Auto9Far extends NextFTCOpMode {
     private int oldState = -1;
     private int autoState = 0;
 
+    private Timer autoTimer = new Timer();
+    private boolean cycle = true;
+    private boolean killCycling = false;
+
     @Override
     public void onWaitForStart() {
         if (gamepad1.a) {
@@ -80,74 +78,135 @@ public class Auto9Far extends NextFTCOpMode {
             RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.BLUE);
         }
 
+        if (gamepad1.x) {
+            cycle = true;
+        } else if (gamepad1.y) {
+            cycle = false;
+
+        }
+
         telemetry.addLine("CHANGE THIS IF NEED BE!!!! ");
         telemetry.addLine("Circle for Blue, X for Red ");
         telemetry.addData("Current Team Color ", RobotSubsystem.INSTANCE.getAllianceColor());
+        telemetry.addLine("X for yes, Y for no");
+        telemetry.addData("Cycling? ", cycle);
     }
 
     @Override
-    public void onStartButtonPressed(){
+    public void onStartButtonPressed() {
         OuttakeSubsystem.INSTANCE.resetTurret();
         RobotSubsystem.INSTANCE.resetPattern();
-        UniConstants.FAST_FLICKER_TIME_UP = .325;
-        PedroComponent.follower().setStartingPose( Poses.mirrorCoordinates(redStartingPose,RobotSubsystem.INSTANCE.getAllianceColor()));//RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
+        UniConstants.FAST_FLICKER_TIME_UP = .225;
+        PedroComponent.follower().setStartingPose(Poses.mirrorCoordinates(redStartingPose, RobotSubsystem.INSTANCE.getAllianceColor()));//RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
         RobotSubsystem.inTele = false;
         RobotSubsystem.autoEnd = RobotSubsystem.AutoEnd.FAR;
         RobotSubsystem.INSTANCE.updatingDist = true;
         createPaths();
 
         autoState = 1;
+        autoTimer.reset();
     }
 
     @Override
-    public void onUpdate(){
+    public void onUpdate() {
 
         Pose currentPose = PedroComponent.follower().getPose();
-        if(!currentPose.roughlyEquals(new Pose(0, 0), 10)){
+        if (!currentPose.roughlyEquals(new Pose(0, 0), 10)) {
             prevPose = PedroComponent.follower().getPose();
-
         }
 
-        autoPathUpdate();
+        if (!RobotSubsystem.INSTANCE.allSlotsEmpty() && autoTimer.getTimeSeconds() > 25 && !killCycling) {
+            CommandManager.INSTANCE.cancelAll();
+            new SequentialGroup(
+                    new ParallelDeadlineGroup(
+                            new Delay(3),
+                            new FollowPath(
+                                    PedroComponent.follower().pathBuilder().addPath(
+                                                    new BezierLine(
+                                                            PedroComponent.follower().getPose(),
+                                                            Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor())
+                                                    )
+                                            )
+                                            .setConstantHeadingInterpolation(
+                                                    Poses.mirrorCoordinates(redShootingPose, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
+                                            .build()
+                            )
+                    ),
+                    RobotSubsystem.INSTANCE.Shoot(),
+                    new FollowPath(
+                            PedroComponent.follower().pathBuilder().addPath(
+                                    new BezierLine(
+                                            PedroComponent.follower().getPose(),
+                                            Poses.mirrorCoordinates(redPark, RobotSubsystem.INSTANCE.getAllianceColor())
+                                    )
+                            ).build()
+                    )
+            ).schedule();
+            killCycling = true;
+        }
+
+        if (autoTimer.getTimeSeconds() > 28.5 && !killCycling) {
+            CommandManager.INSTANCE.cancelAll();
+            new FollowPath(
+                    PedroComponent.follower().pathBuilder().addPath(
+                            new BezierLine(
+                                    PedroComponent.follower().getPose(),
+                                    Poses.mirrorCoordinates(redPark, RobotSubsystem.INSTANCE.getAllianceColor())
+                            )
+                    ).build()
+            ).schedule();
+            killCycling = true;
+        }
+
+        if (!killCycling) {
+            autoPathUpdate();
+        }
+        telemetry.addData("Shooting delay: ", UniConstants.FAST_FLICKER_TIME_UP);
         telemetry.addData("Passed: ", passed);
-        telemetry.addData("Auto State: ", autoState);
-        telemetry.addData("Follower X: ", PedroComponent.follower().getPose().getX());
-        telemetry.addData("Follower Y: ", PedroComponent.follower().getPose().getY());
-        telemetry.addData("Follower H: ", Math.toDegrees(PedroComponent.follower().getPose().getHeading()));
-        OuttakeSubsystem.INSTANCE.sendTelemetry();
+//        telemetry.addData("Auto State: ", autoState);
+        telemetry.addData("Cycling?: ", cycle);
+        telemetry.addData("Stop cycling?: ", killCycling);
+//        telemetry.addData("Follower X: ", PedroComponent.follower().getPose().getX());
+//        telemetry.addData("Follower Y: ", PedroComponent.follower().getPose().getY());
+//        telemetry.addData("Follower H: ", Math.toDegrees(PedroComponent.follower().getPose().getHeading()));
+//        OuttakeSubsystem.INSTANCE.sendTelemetry();
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         UniConstants.FAST_FLICKER_TIME_UP = .3;
     }
 
-    private void autoPathUpdate(){
-        switch (autoState){
+    private void autoPathUpdate() {
+        switch (autoState) {
+            case -1:
+                if (cycle) {
+                    setAutoState(4);
+                }
+                break;
             case 1:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             new ParallelGroup(
                                     OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME),
-                                    OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE),
-
+                                    OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE)
                                     //new InstantCommand(() -> OuttakeSubsystem.hoodLinreg = false),
-                                    new ParallelDeadlineGroup(
-                                            new Delay(1.25),
-                                            new FollowPath(startToShoot)
-
-                                    )
+//                                    new ParallelDeadlineGroup(
+//                                            new Delay(1.25),
+//                                            new FollowPath(startToShoot)
+//
+//                                    )
                             ),
                             SetPassed(true),
                             new Delay(.25),
-                            RobotSubsystem.INSTANCE.AutoShoot(),
+                            RobotSubsystem.INSTANCE.Shoot(),
                             SetAutoState(2)
                     ).schedule();
                 }
                 oldState = autoState;
                 break;
             case 2:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
@@ -156,14 +215,14 @@ public class Auto9Far extends NextFTCOpMode {
                             ),
                             SetAutoState(3)
                     ).schedule();
-                    oldState = autoState;
                 }
+                oldState = autoState;
                 break;
             case 3:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             new ParallelDeadlineGroup(
-                                    new Delay(3),
+                                    new Delay(2.5),
                                     new FollowPath(farToShootLine)
                             ),
 //                            new ParallelDeadlineGroup(
@@ -171,31 +230,35 @@ public class Auto9Far extends NextFTCOpMode {
 //                                    new TurnTo(Angle.fromDeg(35))
 //                            ),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
-                            new Delay(.3),
-                            RobotSubsystem.INSTANCE.AutoShoot(),
+                            new Delay(.075),
+                            RobotSubsystem.INSTANCE.Shoot(),
                             SetAutoState(4)
 
                     ).schedule();
                 }
+                oldState = autoState;
                 break;
+
+            //Cycling
             case 4:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
-                                    new Delay(5),
+                                    new Delay(1.25),
                                     new FollowPath(shootToCycle)
                             ),
                             SetAutoState(5)
                     ).schedule();
-                    oldState = autoState;
                 }
+                oldState = autoState;
+
                 break;
             case 5:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             new ParallelDeadlineGroup(
-                                    new Delay(3),
+                                    new Delay(2.75),
                                     new FollowPath(cycleToShoot)
                             ),
 //                            new ParallelDeadlineGroup(
@@ -203,17 +266,19 @@ public class Auto9Far extends NextFTCOpMode {
 //                                    new TurnTo(Angle.fromDeg(35))
 //                            ),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
-                            new Delay(.3),
-                            RobotSubsystem.INSTANCE.AutoShoot(),
+                            new Delay(.075),
+                            RobotSubsystem.INSTANCE.Shoot(),
                             SetAutoState(-1)
                     ).schedule();
                 }
+                oldState = autoState;
                 break;
+
         }
     }
 
-    private void setAutoState(int state){
-        if(state >= 0) {
+    private void setAutoState(int state) {
+        if (state >= 0) {
             autoState = state;
         } else {
             autoState = -1;
@@ -221,15 +286,15 @@ public class Auto9Far extends NextFTCOpMode {
         pathTimer.reset();
     }
 
-    public Command SetAutoState(int state){
+    public Command SetAutoState(int state) {
         return new InstantCommand(() -> setAutoState(state));
     }
 
-    public Command SetPassed(boolean pass){
+    public Command SetPassed(boolean pass) {
         return new InstantCommand(() -> passed = pass);
     }
 
-    public void createPaths(){
+    public void createPaths() {
         startToShoot = PedroComponent.follower().pathBuilder()
                 .addPath(
                         new BezierLine(
@@ -240,6 +305,7 @@ public class Auto9Far extends NextFTCOpMode {
                 .setConstantHeadingInterpolation(
                         Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                 )
+                .setBrakingStrength(10)
                 .build();
         shootToFar = PedroComponent.follower().pathBuilder()
                 .addPath(
@@ -252,6 +318,7 @@ public class Auto9Far extends NextFTCOpMode {
                 .setConstantHeadingInterpolation(
                         Poses.mirrorCoordinates(redIntakeFarFinal, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                 )
+                .setBrakingStrength(10)
                 .build();
         farToShootLine = PedroComponent.follower().pathBuilder()
                 .addPath(
@@ -261,7 +328,7 @@ public class Auto9Far extends NextFTCOpMode {
                         )
                 )
                 .setConstantHeadingInterpolation(
-                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(0)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                 )
                 .build();
         shootToCycle = PedroComponent.follower().pathBuilder()
@@ -273,7 +340,7 @@ public class Auto9Far extends NextFTCOpMode {
                         )
                 )
                 .setConstantHeadingInterpolation(
-                        Poses.mirrorCoordinates(redIntakeCycleFinal, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(37.5)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                 )
                 .build();
         cycleToShoot = PedroComponent.follower().pathBuilder()
@@ -285,7 +352,7 @@ public class Auto9Far extends NextFTCOpMode {
                 )
                 .setLinearHeadingInterpolation(
                         Poses.mirrorCoordinates(redIntakeCycleFinal, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading(),
-                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(90)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                        Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(0)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                 )
                 .build();
 

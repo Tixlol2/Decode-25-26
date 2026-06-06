@@ -146,7 +146,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
         sendSlotTele();
 
-        shootDelay = PedroComponent.follower().getPose().getY() > 72 ? 0 : .65;
+//        shootDelay = PedroComponent.follower().getPose().getY() > 72 ? 0 : .65;
 
         //Handles pattern updating
         if (pattern.contains(null)) {
@@ -154,11 +154,11 @@ public class RobotSubsystem extends SubsystemGroup {
             patternFull = !pattern.contains(null);
         }
 
-        ActiveOpMode.telemetry().addData("LimeLight TX: ", VisionSubsystemLL.INSTANCE.getGoalBearing());
+//        ActiveOpMode.telemetry().addData("LimeLight TX: ", VisionSubsystemLL.INSTANCE.getGoalBearing());
         ActiveOpMode.telemetry().addData("Loop Times (ms) ", loopTimer.milliseconds());
-        ActiveOpMode.telemetry().addData("Last Shot Num: ", ballsShotLastSequence);
-        ActiveOpMode.telemetry().addData("Last Shot: ", lastShot);
-        ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
+//        ActiveOpMode.telemetry().addData("Last Shot Num: ", ballsShotLastSequence);
+//        ActiveOpMode.telemetry().addData("Last Shot: ", lastShot);
+//        ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
         ActiveOpMode.telemetry().update();
 
     }
@@ -401,7 +401,7 @@ public class RobotSubsystem extends SubsystemGroup {
                 // stale data; turretFinished() ensures the mechanism has physically moved.
                 new WaitUntil(() -> time.getTimeSeconds() > 2 || (VisionSubsystemLL.INSTANCE.isGoalFresh() && OuttakeSubsystem.turretFinished())),
                 Shoot(),
-                new Delay(.125),
+                new Delay(.05),
                 new IfElseCommand(
                         () -> !RobotSubsystem.INSTANCE.allSlotsEmpty(),
                         Shoot())

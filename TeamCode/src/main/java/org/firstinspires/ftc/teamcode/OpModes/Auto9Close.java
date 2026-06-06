@@ -47,9 +47,9 @@ public class Auto9Close extends NextFTCOpMode {
     private final Pose redShootingPose = new Pose(92, 84, Math.toRadians(45));
     private final Pose blueShootingPose = new Pose(54, 84, Math.toRadians(150));
 
-    private final Pose redIntakeCloseFinal = new Pose(124, 83, 0);
+    private final Pose redIntakeCloseFinal = new Pose(116, 83, 0);
 
-    private final Pose redIntakeMidFinal = new Pose(128, 58, 0);
+    private final Pose redIntakeMidFinal = new Pose(120, 58, 0);
     private final Pose redIntakeMidCP = new Pose(78.63924050632912, 59.78481012658228);
 
     private final Pose redIntakeFarFinal = new Pose(128, 34, 0);
@@ -177,7 +177,7 @@ public class Auto9Close extends NextFTCOpMode {
                     new SequentialGroup(
 //                            new Delay(5),
                             new ParallelGroup(
-                                    OuttakeSubsystem.INSTANCE.ScanPattern(),
+                                    //OuttakeSubsystem.INSTANCE.ScanPattern(),
                                     new FollowPath(midToShoot)
                             ),
                             new ParallelGroup(

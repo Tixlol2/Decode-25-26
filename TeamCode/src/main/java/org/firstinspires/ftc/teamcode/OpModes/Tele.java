@@ -90,7 +90,7 @@ public class Tele extends NextFTCOpMode {
             if(RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.CLOSE){
                 follower().setStartingPose(Auto12Close.prevPose);
             } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FAR) {
-                follower().setStartingPose(Auto9Far.prevPose);
+                follower().setStartingPose(FarAuto.prevPose);
             } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.NINE) {
                 follower().setStartingPose(Auto9Close.prevPose);
             } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FARTOCLOSE){
