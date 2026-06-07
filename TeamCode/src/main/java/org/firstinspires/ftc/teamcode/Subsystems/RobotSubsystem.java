@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
-import static org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem.TurretState.FORWARD;
-import static org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem.TurretState.LIME;
-
 import androidx.annotation.NonNull;
 
 import com.bylazar.configurables.annotations.Configurable;
@@ -22,18 +19,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Vector;
 
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.delays.WaitUntil;
-import dev.nextftc.core.commands.groups.ParallelDeadlineGroup;
 import dev.nextftc.core.commands.groups.ParallelGroup;
-import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
-import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.SubsystemGroup;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -467,7 +460,7 @@ public class RobotSubsystem extends SubsystemGroup {
         CLOSE,
         FAR,
         NINE,
-        FARTOCLOSE
+        CLOSE_COMMAND
     }
 
     public Command stopSubsystems(){

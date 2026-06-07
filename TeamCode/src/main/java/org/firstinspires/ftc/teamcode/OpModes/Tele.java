@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystemLL;
+import org.firstinspires.ftc.teamcode.Util.AutoCommands;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
 
@@ -87,16 +88,7 @@ public class Tele extends NextFTCOpMode {
                 follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueFarStart : Poses.redFarStart);
             }
         } else {
-            if(RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.CLOSE){
-                follower().setStartingPose(Auto12Close.prevPose);
-            } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FAR) {
-                follower().setStartingPose(FarAuto.prevPose);
-            } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.NINE) {
-                follower().setStartingPose(Auto9Close.prevPose);
-            } else if (RobotSubsystem.autoEnd == RobotSubsystem.AutoEnd.FARTOCLOSE){
-                follower().setStartingPose(Auto12Far.prevPose);
-            }
-
+            follower().setStartingPose(AutoCommands.prevPose);
         }
 
         RobotSubsystem.inTele = true;

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
@@ -18,8 +19,9 @@ import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-@TeleOp
+@TeleOp(name = "TestingOp", group = "Test")
 @Configurable
+@Disabled
 public class TestingOp extends NextFTCOpMode {
 
 

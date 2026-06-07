@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpModes;
+package org.firstinspires.ftc.teamcode.OpModes.Autos;
 
 
 import com.pedropathing.geometry.BezierCurve;
@@ -28,9 +28,9 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.NextFTCOpMode;
 import dev.nextftc.ftc.components.BulkReadComponent;
 
-//12 Ball (Far -> Close)
-@Autonomous
-public class Auto12Far extends NextFTCOpMode {
+//12 Ball Close
+@Autonomous(name = "Auto 12 Close No Command", group = "Main")
+public class Auto12Close extends NextFTCOpMode {
 
     {
         addComponents(
@@ -41,20 +41,19 @@ public class Auto12Far extends NextFTCOpMode {
         );
     }
 
-    private final Pose redStartingPose = new Pose(88, 8, Math.toRadians(90));
-//    private final Pose blueStartingPose = new Pose(17, 120, Math.toRadians(144));
+    private final Pose redStartingPose = new Pose(127, 120, Math.toRadians(36));
+    private final Pose blueStartingPose = new Pose(17, 120, Math.toRadians(144));
 
-    private final Pose redShootingPose = new Pose(82, 82, Math.toRadians(45));
-
+    private final Pose redShootingPose = new Pose(92, 84, Math.toRadians(45));
     private final Pose blueShootingPose = new Pose(54, 84, Math.toRadians(150));
 
-    private final Pose redIntakeCloseFinal = new Pose(124, 83, 0);
+    private final Pose redIntakeCloseFinal = new Pose(116, 83, 0);
 
-    private final Pose redIntakeMidFinal = new Pose(128, 58, 0);
+    private final Pose redIntakeMidFinal = new Pose(120, 58, 0);
     private final Pose redIntakeMidCP = new Pose(78.63924050632912, 59.78481012658228);
 
     private final Pose redIntakeFarFinal = new Pose(128, 34, 0);
-    private final Pose redIntakeFarCP = new Pose(74.30379746835442, 28.56962025316455);
+    private final Pose redIntakeFarCP = new Pose(74.30379746835442, 30);
 
     private final Pose redLeverPark = new Pose(120, 70);
 
@@ -72,7 +71,6 @@ public class Auto12Far extends NextFTCOpMode {
 
     private int oldState = -1;
     private int autoState = 0;
-
 
     @Override
     public void onWaitForStart() {
@@ -92,7 +90,7 @@ public class Auto12Far extends NextFTCOpMode {
         OuttakeSubsystem.INSTANCE.resetTurret();
         RobotSubsystem.INSTANCE.resetPattern();
         UniConstants.FAST_FLICKER_TIME_UP = .35;
-        PedroComponent.follower().setStartingPose( Poses.mirrorCoordinates(redStartingPose,RobotSubsystem.INSTANCE.getAllianceColor()));//RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
+        PedroComponent.follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose);
         RobotSubsystem.inTele = false;
         RobotSubsystem.autoEnd = RobotSubsystem.AutoEnd.CLOSE;
         RobotSubsystem.INSTANCE.updatingDist = true;
@@ -100,7 +98,6 @@ public class Auto12Far extends NextFTCOpMode {
 
 
         autoState = 1;
-
     }
 
     @Override
@@ -152,11 +149,24 @@ public class Auto12Far extends NextFTCOpMode {
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
-                                    new Delay(3.5),
-                                    new FollowPath(shootToFar)
+                                    new Delay(2.25),
+                                    new FollowPath(shootToMid)
                             ),
 //                            new TurnBy(Angle.fromDeg(-5)),
-//                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF),
+                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF),
+                            new ParallelDeadlineGroup(
+                                    new Delay(.25),
+                                    new FollowPath(backFromMid)
+                            ),
+                            new ParallelDeadlineGroup(
+                                    new Delay(1.5),
+                                    new FollowPath(hitLeverFromMid)
+                            ),
+                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
+                            new ParallelDeadlineGroup(
+                                    new Delay(.125),
+                                    new FollowPath(backFromLever)
+                            ),
                             SetAutoState(3)
                     ).schedule();
                     oldState = autoState;
@@ -167,7 +177,7 @@ public class Auto12Far extends NextFTCOpMode {
                     new SequentialGroup(
 //                            new Delay(5),
                             new ParallelGroup(
-                                    OuttakeSubsystem.INSTANCE.ScanPattern(),
+                                    //OuttakeSubsystem.INSTANCE.ScanPattern(),
                                     new FollowPath(midToShoot)
                             ),
                             new ParallelGroup(
@@ -192,8 +202,8 @@ public class Auto12Far extends NextFTCOpMode {
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
                             new ParallelDeadlineGroup(
-                                    new Delay(1.25)
-
+                                    new Delay(1.25),
+                                    new FollowPath(shootToClose)
                             ),
                             SetAutoState(5)
                     ).schedule();
@@ -216,7 +226,7 @@ public class Auto12Far extends NextFTCOpMode {
 //                                    new TurnTo(Angle.fromDeg(43))
 //                            ),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
-                            new Delay(.3),
+                            new Delay(.5),
                             RobotSubsystem.INSTANCE.AutoShoot(),
                             SetAutoState(6)
                     ).schedule();
