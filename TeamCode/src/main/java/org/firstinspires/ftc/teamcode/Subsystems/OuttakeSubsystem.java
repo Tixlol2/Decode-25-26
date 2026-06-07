@@ -111,7 +111,7 @@ public class OuttakeSubsystem implements Subsystem {
                     case LAZY:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(lazyRPM)));
                         hoodLinreg = false;
-                        debugHoodTargetPosition = .45;
+//                        debugHoodTargetPosition = .45;
                         break;
                     case INTERPOLATED:
                     case REACTIVE:
@@ -121,7 +121,7 @@ public class OuttakeSubsystem implements Subsystem {
 
                 }
                 launcherGroup.setPower(12/RobotSubsystem.INSTANCE.getVoltage() * Math.max(0, Math.min(1, launcherControl.calculate(
-                                new KineticState(launcherGroup.getCurrentPosition(), launcherGroup.getVelocity())
+                                new KineticState(launcherGroup.getCurrentPosition(), -launcherGroup.getVelocity())
                         )))
                 );
             } else {
@@ -372,7 +372,7 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
     public double getCurrentVelocityRPM() {
-        return toRPM(launcherGroup.getVelocity());
+        return toRPM(-launcherGroup.getVelocity());
     }
     public static boolean turretFinished(){
         return Math.abs(Math.abs(ticksToAngle(OuttakeSubsystem.INSTANCE.getTurretPosition())) - Math.abs(turretTargetAngle)) < turretAngleTolerance &&

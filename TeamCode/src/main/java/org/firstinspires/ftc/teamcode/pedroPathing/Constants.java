@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.constants;
+package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+//import com.pedropathing.control.PredictiveBrakingCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -19,18 +21,19 @@ import org.firstinspires.ftc.teamcode.Util.UniConstants;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(10)
-            .forwardZeroPowerAcceleration(-37.7859232404534)
-            .lateralZeroPowerAcceleration(-63.68403135818951)
-            .useSecondaryTranslationalPIDF(false)
-            .useSecondaryHeadingPIDF(false)
-            .useSecondaryDrivePIDF(false)
-            .centripetalScaling(0.0003)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0, 0))
-            .headingPIDFCoefficients(new PIDFCoefficients(.67, 0, 0, 0.0))
-            .drivePIDFCoefficients(
-                    new FilteredPIDFCoefficients(0.0075, 0, 0.000, 0.6, 0)
-            );
+            .mass(11)
+//            .forwardZeroPowerAcceleration(-37.7859232404534)
+//            .lateralZeroPowerAcceleration(-63.68403135818951)
+//            .useSecondaryTranslationalPIDF(false)
+//            .useSecondaryHeadingPIDF(false)
+//            .useSecondaryDrivePIDF(false)
+            .centripetalScaling(0.000)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0, 0, 0))
+            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0, 0.0))
+//            .drivePIDFCoefficients(
+//                    new FilteredPIDFCoefficients(0.0075, 0, 0.000, 0.6, 0)
+//            )
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.075, 0.07614212532152057, 0.0016333487522169475));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName(UniConstants.DRIVE_FRONT_LEFT_STRING)

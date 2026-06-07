@@ -242,7 +242,7 @@ public class AutoCommands {
                                 PedroComponent.follower().pathBuilder()
                                         .addPath(
                                                 new BezierLine(
-                                                        PedroComponent.follower().getPose(),
+                                                        Poses.mirrorCoordinates(Poses.blueCloseStart, RobotSubsystem.INSTANCE.getAllianceColor()),
                                                         Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor())
                                                 )
                                         )
@@ -320,9 +320,8 @@ public class AutoCommands {
 
     public static Command init =
             new ParallelGroup(
-                    OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD),
-                    IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF),
-                    RobotSubsystem.INSTANCE.SetAllSlotState(MainSlot.ServoState.DOWN)
+                    OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL),
+                    OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE)
             );
 
     public static Command startButton(shootLocation loc) {

@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slots.MainSlot;
 import org.firstinspires.ftc.teamcode.Subsystems.VisionSubsystemLL;
 import org.firstinspires.ftc.teamcode.Util.AutoCommands;
 import org.firstinspires.ftc.teamcode.Util.Poses;
-import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.components.BindingsComponent;
@@ -148,6 +148,8 @@ public class Tele extends NextFTCOpMode {
                 .whenBecomesFalse(() -> RobotSubsystem.INSTANCE.updatingDist = false);
 
         Gamepads.gamepad2().leftStickButton().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME));
+
+//        Gamepads.gamepad1().a().whenBecomesTrue(AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE));
 
         //Face buttons
         Gamepads.gamepad2().a().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE));

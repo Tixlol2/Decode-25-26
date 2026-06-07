@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Poses;
-import org.firstinspires.ftc.teamcode.pedroPathing.constants.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -21,7 +21,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 
 @TeleOp(name = "TestingOp", group = "Test")
 @Configurable
-@Disabled
+//@Disabled
 public class TestingOp extends NextFTCOpMode {
 
 

@@ -56,12 +56,12 @@ public class Poses {
 
     public static Pose mirrorCoordinates(Pose pose, RobotSubsystem.AllianceColor targetColor) {
         double deltaX = Math.abs(72 - pose.getX());
-        double deltaTheta = 180 - Math.toDegrees(pose.getHeading());
+        double deltaTheta = Math.abs(90 - Math.toDegrees(pose.getHeading()));
 
         if (targetColor == RobotSubsystem.AllianceColor.BLUE) {
-            return new Pose(72 - deltaX, pose.getY(), Math.toRadians(deltaTheta));
+            return new Pose(72 - deltaX, pose.getY(), 90 + Math.toRadians(deltaTheta));
         } else {
-            return new Pose(72 + deltaX, pose.getY(), pose.getHeading());
+            return new Pose(72 + deltaX, pose.getY(), 90 - deltaTheta);
         }
     }
 

@@ -78,7 +78,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private static Timer shotTimer = new Timer();
 
-    private double shootDelay = 0;
+    public static double shootDelay = 0;
     public static boolean inTele = false;
     public boolean updatingDist = false;
 
