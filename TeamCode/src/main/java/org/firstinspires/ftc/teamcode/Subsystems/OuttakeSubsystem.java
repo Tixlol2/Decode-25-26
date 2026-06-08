@@ -46,7 +46,7 @@ public class OuttakeSubsystem implements Subsystem {
     //Turret Stuffs
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
-    public static double pTurret = 0.00045, dTurret = 0, lTurret = .14, fTurret = 0.0;
+    public static double pTurret = 0.0003, dTurret = 0, lTurret = .14, fTurret = 0.0;
     private PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .75;
@@ -134,7 +134,7 @@ public class OuttakeSubsystem implements Subsystem {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
-                turretTargetAngle = Math.max(-179, Math.min(180, turretTargetAngle)); //Negative is ccw
+                turretTargetAngle = Math.max(-90, Math.min(270, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
                 if(Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5){

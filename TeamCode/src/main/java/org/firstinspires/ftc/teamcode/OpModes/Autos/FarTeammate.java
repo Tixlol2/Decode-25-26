@@ -61,6 +61,7 @@ public class FarTeammate extends NextFTCOpMode {
     public void onStartButtonPressed(){
         AutoCommands.startButton(AutoCommands.shootLocation.FAR).schedule();
         autoState = 1;
+        OuttakeSubsystem.INSTANCE.SetTurretState( OuttakeSubsystem.TurretState.LIME);
     }
 
     @Override

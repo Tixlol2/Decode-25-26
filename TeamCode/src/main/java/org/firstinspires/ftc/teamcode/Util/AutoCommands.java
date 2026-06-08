@@ -48,7 +48,7 @@ public class AutoCommands {
     public static Pose blueClosePark = new Pose(52.01444043321301, 132.59205776173278);
     public static Pose blueFarPark = new Pose(15.451263537906144, 11.465703971119035);
 
-    public static Pose blueGateBump = new Pose(15.797833935018032, 73.77617328519857);
+    public static Pose blueGateBump = new Pose(15.797833935018032, 73.77617328519857, Math.toRadians(180));
 
     public static Command farSpikeShoot(shootLocation loc) {
 

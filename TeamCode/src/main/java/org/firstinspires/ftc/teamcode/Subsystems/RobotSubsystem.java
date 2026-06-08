@@ -230,12 +230,12 @@ public class RobotSubsystem extends SubsystemGroup {
 
         // Normalize to 0–360 instead of -180–180 so CW angles beyond 180 are preserved
         // for the turret clamp in OuttakeSubsystem
-        while (goalAngle >= 180) goalAngle -= 360;
-        while (goalAngle < -180) goalAngle += 360;
+        while (goalAngle >= 90) goalAngle -= 360;
+        while (goalAngle < -270) goalAngle += 360;
 
 
-        while (obeliskAngle >= 180) obeliskAngle -= 360;
-        while (obeliskAngle < -180) obeliskAngle += 360;
+        while (obeliskAngle >= 90) obeliskAngle -= 360;
+        while (obeliskAngle < -270) obeliskAngle += 360;
 
 
 
