@@ -236,9 +236,11 @@ public class AutoCommands {
 
     }
 
-    public static Command shootPreload(shootLocation loc) {
+    public static Command shootPreload(shootLocation loc, double time) {
         return new SequentialGroup(
                 new IfElseCommand(() -> loc == shootLocation.CLOSE,
+                        new ParallelDeadlineGroup(
+                                    new Delay(time),
                         new FollowPath(
                                 PedroComponent.follower().pathBuilder()
                                         .addPath(
@@ -251,7 +253,8 @@ public class AutoCommands {
                                                 Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                                         ).build()
                         )
-                ),
+                )
+                        ),
                 RobotSubsystem.INSTANCE.AutoShoot()
         );
     }

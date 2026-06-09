@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.Util.Timer;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
+import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
@@ -91,13 +92,15 @@ public class CloseSolo extends NextFTCOpMode {
             case -1:
                 break;
             case 0:
-                AutoCommands.init.schedule();
                 setAutoState(1);
                 break;
             case 1:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE),
+                            new ParallelGroup(
+                                    AutoCommands.init,
+                                    AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE, 2.5)
+                            ),
                             SetAutoState(2)
                     ).schedule();
                 }
@@ -106,7 +109,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 2:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.gateBump(),
+//                            AutoCommands.gateBump(),
                             AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE),
                             SetAutoState(3)
                     ).schedule();

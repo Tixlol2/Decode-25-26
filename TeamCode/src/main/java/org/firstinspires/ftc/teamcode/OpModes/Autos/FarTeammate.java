@@ -107,7 +107,7 @@ public class FarTeammate extends NextFTCOpMode {
             case 1:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.shootPreload(AutoCommands.shootLocation.FAR),
+                            AutoCommands.shootPreload(AutoCommands.shootLocation.FAR, 0),
                             SetAutoState(2)
                     ).schedule();
                 }
