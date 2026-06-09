@@ -108,7 +108,7 @@ public class CloseTeammate extends NextFTCOpMode {
             case 1:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE),
+                            AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE, 2.5),
                             SetAutoState(2)
                     ).schedule();
                 }
