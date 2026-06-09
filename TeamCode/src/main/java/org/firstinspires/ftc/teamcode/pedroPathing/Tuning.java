@@ -34,6 +34,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.nextftc.extensions.pedro.PedroComponent;
+
 /**
  * This is the Tuning class. It contains a selection menu for various tuning OpModes.
  *
@@ -110,7 +112,7 @@ public class Tuning extends SelectableOpMode {
 
     public static void drawCurrent() {
         try {
-            Drawing.drawRobot(follower.getPose());
+            Drawing.drawRobot(PedroComponent.follower().getPose());
             Drawing.sendPacket();
         } catch (Exception e) {
             throw new RuntimeException("Drawing failed " + e);
@@ -118,7 +120,7 @@ public class Tuning extends SelectableOpMode {
     }
 
     public static void drawCurrentAndHistory() {
-        Drawing.drawPoseHistory(poseHistory);
+        Drawing.drawPoseHistory(PedroComponent.follower().getPoseHistory());
         drawCurrent();
     }
 

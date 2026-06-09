@@ -134,7 +134,7 @@ public class OuttakeSubsystem implements Subsystem {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
-                turretTargetAngle = Math.max(-90, Math.min(270, turretTargetAngle)); //Negative is ccw
+                turretTargetAngle = Math.max(-70, Math.min(200, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
                 if(Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5){
@@ -203,10 +203,10 @@ public class OuttakeSubsystem implements Subsystem {
      */
     public double getTargetVelocityRPM(double distInches) {
         return Math.max(0, Math.min(4500,
-                -0 * Math.pow(distInches, 3)
-                        + 0.0633854   * Math.pow(distInches, 2)
-                        + 8.46955   * distInches
-                        + 1816.65579 + userAdded));
+                0.00485984 * Math.pow(distInches, 3)
+                        - 0.754491   * Math.pow(distInches, 2)
+                        + 47.64242   * distInches
+                        + 1160.75151 + userAdded));
     }
 
     /**
@@ -234,7 +234,7 @@ public class OuttakeSubsystem implements Subsystem {
 
         double angleDeg = solveAngleDeg(muzzleV, distM, dy+.05);
 
-        if (Double.isNaN(angleDeg)) {
+        if (true) {
             // Physics has no solution (vel too low) — fall back to distance-only regression
             return getInterpolatedHood(distInches);
         }
@@ -304,11 +304,11 @@ public class OuttakeSubsystem implements Subsystem {
     /** @deprecated Use getTargetHoodPosition(dist, actualVelRPM) instead. */
     @Deprecated
     public double getInterpolatedHood(double dist) {
-        return Math.max(0, Math.min(1,
-                -0.00000226928 * Math.pow(dist, 3)
-                        + 0.000562956  * Math.pow(dist, 2)
-                        - 0.0301239    * dist
-                        + 0.470351));
+        return Math.max(.3, Math.min(1,
+                0 * Math.pow(dist, 3)
+                        + 0.0000179625  * Math.pow(dist, 2)
+                        - 0.00483804    * dist
+                        + 0.593283));
     }
 
     public void setHoodTarget(double angle){

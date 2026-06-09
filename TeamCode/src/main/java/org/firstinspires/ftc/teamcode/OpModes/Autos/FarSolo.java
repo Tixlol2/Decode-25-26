@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.OpModes.Autos;
 
 
+import static dev.nextftc.extensions.pedro.PedroComponent.follower;
+
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Util.AutoCommands;
+import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
@@ -56,8 +59,16 @@ public class FarSolo extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        AutoCommands.startButton(AutoCommands.shootLocation.FAR).schedule();
-        autoState = 1;
+        OuttakeSubsystem.INSTANCE.resetTurret();
+        RobotSubsystem.INSTANCE.resetPattern();
+//        PedroComponent.follower().setStartingPose(Poses.mirrorCoordinates(Poses.blueFarStart, RobotSubsystem.INSTANCE.getAllianceColor()));
+
+        follower().setStartingPose((RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueFarStart : Poses.redFarStart).withHeading(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Math.toRadians(180) : Math.toRadians(0)));
+
+        RobotSubsystem.inTele = false;
+        RobotSubsystem.INSTANCE.updatingDist = true;
+        AutoCommands.constructPaths();
+        autoState = 0;
     }
 
     @Override
@@ -80,9 +91,6 @@ public class FarSolo extends NextFTCOpMode {
         telemetry.addData("Cycling: ", cycling);
         telemetry.addData("Cycling Test: ", !CommandManager.INSTANCE.hasCommandsUsing("CYCLING"));
         telemetry.addData("Auto State: ", autoState);
-        telemetry.addData("Follower X: ", PedroComponent.follower().getPose().getX());
-        telemetry.addData("Follower Y: ", PedroComponent.follower().getPose().getY());
-        telemetry.addData("Follower H: ", Math.toDegrees(PedroComponent.follower().getPose().getHeading()));
         OuttakeSubsystem.INSTANCE.sendTelemetry();
     }
 
@@ -112,7 +120,7 @@ public class FarSolo extends NextFTCOpMode {
             case 2:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.FAR),
+                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.FAR, Poses.blueFarStart),
                             SetAutoState(3)
                     ).schedule();
                 }

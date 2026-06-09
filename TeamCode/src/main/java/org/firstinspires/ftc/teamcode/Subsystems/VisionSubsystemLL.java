@@ -235,9 +235,9 @@ public class VisionSubsystemLL implements Subsystem {
         // 10 deg camera pitch, 13.25" lens height, 29.5" goal height
         LLResultTypes.FiducialResult goalAT = getGoalAT();
         if (goalAT == null) return -99999;
-        double angleToGoalDegrees = 10 + goalAT.getTargetYDegrees();
+        double angleToGoalDegrees = 20 + goalAT.getTargetYDegrees();
         double angleRad = angleToGoalDegrees * (Math.PI / 180.0);
-        return (29.5 - 13.5) / Math.tan(angleRad);
+        return (29.5 - 16.25) / Math.tan(angleRad);
     }
 
     /**

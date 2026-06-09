@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.Slots.RightSlot;
 import org.firstinspires.ftc.teamcode.Util.IfElseCommand;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.Util.Timer;
+import org.firstinspires.ftc.teamcode.pedroPathing.Tuning;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -147,8 +148,14 @@ public class RobotSubsystem extends SubsystemGroup {
             patternFull = !pattern.contains(null);
         }
 
+
+        Tuning.drawCurrentAndHistory();
+
 //        ActiveOpMode.telemetry().addData("LimeLight TX: ", VisionSubsystemLL.INSTANCE.getGoalBearing());
         ActiveOpMode.telemetry().addData("Loop Times (ms) ", loopTimer.milliseconds());
+        ActiveOpMode.telemetry().addData("Follower X: ", PedroComponent.follower().getPose().getX());
+        ActiveOpMode.telemetry().addData("Follower Y: ", PedroComponent.follower().getPose().getY());
+        ActiveOpMode.telemetry().addData("Follower H: ", Math.toDegrees(PedroComponent.follower().getPose().getHeading()));
 //        ActiveOpMode.telemetry().addData("Last Shot Num: ", ballsShotLastSequence);
 //        ActiveOpMode.telemetry().addData("Last Shot: ", lastShot);
 //        ActiveOpMode.telemetry().addData("Used Pattern: ", shift(pattern, ballsShotLastSequence > 0 && ballsShotLastSequence <= 2 ? 3 - ballsShotLastSequence : 0));
@@ -441,6 +448,14 @@ public class RobotSubsystem extends SubsystemGroup {
         return LeftSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
                 RightSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
                 BackSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY;
+    }
+
+    public Command jiggle(){
+        return new SequentialGroup(
+          BackSlot.INSTANCE.jiggle(),
+          RightSlot.INSTANCE.jiggle(),
+          LeftSlot.INSTANCE.jiggle()
+        );
     }
 
     public boolean isPatternShiftingEnabled() {

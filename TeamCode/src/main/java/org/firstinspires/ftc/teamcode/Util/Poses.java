@@ -59,9 +59,9 @@ public class Poses {
         double deltaTheta = Math.abs(90 - Math.toDegrees(pose.getHeading()));
 
         if (targetColor == RobotSubsystem.AllianceColor.BLUE) {
-            return new Pose(72 - deltaX, pose.getY(), 90 + Math.toRadians(deltaTheta));
+            return new Pose(72 - deltaX, pose.getY(),  Math.toRadians(deltaTheta + 90));
         } else {
-            return new Pose(72 + deltaX, pose.getY(), 90 - deltaTheta);
+            return new Pose(72 + deltaX, pose.getY(), Math.toRadians(90 - deltaTheta));
         }
     }
 

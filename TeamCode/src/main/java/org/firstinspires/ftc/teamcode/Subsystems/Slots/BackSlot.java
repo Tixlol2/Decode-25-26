@@ -7,8 +7,10 @@ public class BackSlot extends MainSlot {
     public static final BackSlot INSTANCE = new BackSlot();
 
     public BackSlot() {
-        super(UniConstants.LIGHT_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, UniConstants.FLICKER_BACK_STRING, UniConstants.FLICKER_BACK_UP, UniConstants.FLICKER_BACK_DOWN);
+        super(UniConstants.LIGHT_BACK_STRING, UniConstants.COLOR_SENSOR_SLOT_BACK_STRING, UniConstants.FLICKER_BACK_STRING, UniConstants.FLICKER_BACK_UP, UniConstants.FLICKER_BACK_DOWN, .6);
     }
+
+
 
 
 }

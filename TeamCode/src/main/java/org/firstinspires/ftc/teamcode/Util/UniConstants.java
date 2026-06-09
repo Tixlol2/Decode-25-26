@@ -73,10 +73,10 @@ CONFIG
     public static final String LIGHT_LEFT_STRING = "LEFT";
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
     //Flickers
-    public static final double FLICKER_BACK_UP = .93;
-    public static final double FLICKER_BACK_DOWN = .53;
-    public static  double FLICKER_RIGHT_DOWN = .545;
-    public static  double FLICKER_RIGHT_UP = .15;
+    public static  double FLICKER_BACK_UP = .93;
+    public static double FLICKER_BACK_DOWN = .53;
+    public static double FLICKER_RIGHT_DOWN = .545;
+    public static double FLICKER_RIGHT_UP = .15;
     public static double FLICKER_LEFT_DOWN = .48;
     public static double FLICKER_LEFT_UP = .89;
     public static double FAST_FLICKER_TIME_UP = .3;

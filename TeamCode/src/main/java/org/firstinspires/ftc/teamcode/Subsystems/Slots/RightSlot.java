@@ -7,7 +7,7 @@ public class RightSlot extends MainSlot {
     public static final RightSlot INSTANCE = new RightSlot();
 
     public RightSlot() {
-        super(UniConstants.LIGHT_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, UniConstants.FLICKER_RIGHT_STRING, UniConstants.FLICKER_RIGHT_UP, UniConstants.FLICKER_RIGHT_DOWN);
+        super(UniConstants.LIGHT_RIGHT_STRING, UniConstants.COLOR_SENSOR_SLOT_RIGHT_STRING, UniConstants.FLICKER_RIGHT_STRING, UniConstants.FLICKER_RIGHT_UP, UniConstants.FLICKER_RIGHT_DOWN, .48);
     }
 
 

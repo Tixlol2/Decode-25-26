@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.Util;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
@@ -18,6 +20,7 @@ import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 
+@Configurable
 public class AutoCommands {
 
     public static Pose blueFarSpike = new Pose(13.37184115523466, 35.653429602888075, Math.toRadians(180));
@@ -50,25 +53,15 @@ public class AutoCommands {
 
     public static Pose blueGateBump = new Pose(15.797833935018032, 73.77617328519857, Math.toRadians(180));
 
-    public static Command farSpikeShoot(shootLocation loc) {
+    public static PathChain path;
+
+    public static Command farSpikeShoot(shootLocation loc, Pose startPose) {
 
         return new SequentialGroup(
 
                 //From current pos, go to end of spike mark
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
-                new FollowPath(
-                        PedroComponent.follower().pathBuilder()
-                                .addPath(
-                                        new BezierCurve(
-                                                PedroComponent.follower().getPose(),
-                                                Poses.mirrorCoordinates(blueFarSpikeCP, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor())
-                                        )
-                                )
-                                .setConstantHeadingInterpolation(
-                                        Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                                ).build()
-                ),
+                new FollowPath(path),
 
                 //Go to shooting pos based on input
                 new FollowPath(
@@ -159,11 +152,9 @@ public class AutoCommands {
                 new FollowPath(
                         PedroComponent.follower().pathBuilder()
                                 .addPath(
-                                        new BezierCurve(
+                                        new BezierLine(
                                                 PedroComponent.follower().getPose(),
-                                                Poses.mirrorCoordinates(blueCloseSpikeCP1, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                Poses.mirrorCoordinates(blueCloseSpikeCP2, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                loc == shootLocation.CLOSE ?
+                                                 loc == shootLocation.CLOSE ?
                                                         Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
                                                         Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
                                 )
@@ -320,7 +311,7 @@ public class AutoCommands {
 
     public static Command init =
             new ParallelGroup(
-                    OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL),
+                    OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME),
                     OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.REACTIVE)
             );
 
@@ -332,6 +323,20 @@ public class AutoCommands {
             RobotSubsystem.inTele = false;
             RobotSubsystem.INSTANCE.updatingDist = true;
         });
+    }
+
+    public static void constructPaths(){
+        path = PedroComponent.follower().pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                Poses.mirrorCoordinates(Poses.blueFarStart, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(blueFarSpikeCP, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor())
+                        )
+                )
+                .setConstantHeadingInterpolation(
+                        Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                ).build();
     }
 
 

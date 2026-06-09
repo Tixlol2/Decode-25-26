@@ -25,15 +25,19 @@ public class MainSlot implements Subsystem {
     private final String kickerName;
     private double up = 0;
     private double down = 0;
+    private double jigglePos = 0;
     private SlotState colorState = SlotState.EMPTY;
     private ServoState servoState = ServoState.DOWN;
+    private double oldUp = 0;
+    private double oldDown = 0;
 
-    public MainSlot(String lightName, String colorSensorName, String kickerName, double up, double down) {
+    public MainSlot(String lightName, String colorSensorName, String kickerName, double up, double down, double jigglePos) {
         this.lightName = lightName;
         this.colorSensorName = colorSensorName;
         this.kickerName = kickerName;
         this.up = up;
         this.down = down;
+        this.jigglePos = jigglePos;
     }
 
 
@@ -51,8 +55,23 @@ public class MainSlot implements Subsystem {
         //Update Colors
         readSlot();
 
+        switch (kickerName) {
+
+            case UniConstants.FLICKER_LEFT_STRING:
+                setValues(UniConstants.FLICKER_LEFT_UP, UniConstants.FLICKER_LEFT_DOWN);
+                break;
+            case UniConstants.FLICKER_BACK_STRING:
+                setValues(UniConstants.FLICKER_BACK_UP, UniConstants.FLICKER_BACK_DOWN);
+                break;
+            case UniConstants.FLICKER_RIGHT_STRING:
+                setValues(UniConstants.FLICKER_RIGHT_UP, UniConstants.FLICKER_RIGHT_DOWN);
+                break;
+
+
+        }
+
         //Update Servo
-        kickerServo.setPosition((servoState == ServoState.UP) ? up : down);
+        kickerServo.setPosition((servoState == ServoState.UP) ? up : servoState == ServoState.DOWN ? down : jigglePos);
         light.setPosition(isFull() ? (colorState.equals(SlotState.GREEN) ? .5 : .722) : 0);
     }
 
@@ -108,6 +127,19 @@ public class MainSlot implements Subsystem {
         }
     }
 
+    public Command jiggle(){
+        return new SequentialGroup(
+                setServoState(ServoState.JIGGLE),
+                new Delay(.05),
+                setServoState(ServoState.DOWN)
+        );
+    }
+
+    public void setValues(double up, double down){
+        this.up = up;
+        this.down = down;
+    }
+
 
     public enum SlotState {
         PURPLE,
@@ -117,6 +149,7 @@ public class MainSlot implements Subsystem {
 
     public enum ServoState {
         DOWN,
-        UP
+        UP,
+        JIGGLE
     }
 }
