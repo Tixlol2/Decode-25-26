@@ -33,13 +33,12 @@ public class IntakeSubsystem implements Subsystem {
         return new InstantCommand(() -> setActiveState(state));
     }
 
-    public Command runActive(){
+    public Command runActive() {
         return new LambdaCommand()
                 .setStart(() -> setActiveState(IntakeState.IN))
                 .setStop((interrupted) -> setActiveState(IntakeState.OFF))
                 .setIsDone(() -> false);
     }
-
 
 
     public enum IntakeState {

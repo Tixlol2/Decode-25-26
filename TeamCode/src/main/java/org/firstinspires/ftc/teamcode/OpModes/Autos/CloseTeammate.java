@@ -34,11 +34,6 @@ public class CloseTeammate extends NextFTCOpMode {
     }
 
 
-
-
-
-
-
     public static Pose prevPose = new Pose();
 
     boolean cycling = false;
@@ -60,22 +55,22 @@ public class CloseTeammate extends NextFTCOpMode {
     }
 
     @Override
-    public void onStartButtonPressed(){
+    public void onStartButtonPressed() {
         AutoCommands.startButton(AutoCommands.shootLocation.CLOSE).schedule();
         autoState = 1;
     }
 
     @Override
-    public void onUpdate(){
+    public void onUpdate() {
 
         Pose currentPose = PedroComponent.follower().getPose();
-        if(!currentPose.roughlyEquals(new Pose(0, 0), 10)){
+        if (!currentPose.roughlyEquals(new Pose(0, 0), 10)) {
             prevPose = PedroComponent.follower().getPose();
         }
-        if(cycling && !CommandManager.INSTANCE.hasCommandsUsing("CYCLING")){
+        if (cycling && !CommandManager.INSTANCE.hasCommandsUsing("CYCLING")) {
             AutoCommands.cycle(AutoCommands.shootLocation.CLOSE, AutoCommands.cycleLocation.GATE, 5, 1).schedule();
         }
-        if(ActiveOpMode.getRuntime() > 29){
+        if (ActiveOpMode.getRuntime() > 29) {
             CommandManager.INSTANCE.cancelAll();
             AutoCommands.park(AutoCommands.shootLocation.CLOSE).schedule();
         }
@@ -91,14 +86,13 @@ public class CloseTeammate extends NextFTCOpMode {
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         AutoCommands.prevPose = prevPose;
     }
 
 
-
-    private void autoPathUpdate(){
-        switch (autoState){
+    private void autoPathUpdate() {
+        switch (autoState) {
             case -1:
                 break;
             case 0:
@@ -106,7 +100,7 @@ public class CloseTeammate extends NextFTCOpMode {
                 setAutoState(1);
                 break;
             case 1:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE, 2.5),
                             SetAutoState(2)
@@ -115,7 +109,7 @@ public class CloseTeammate extends NextFTCOpMode {
                 oldState = autoState;
                 break;
             case 2:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, false, 2.5, 1.5),
                             SetAutoState(3)
@@ -124,7 +118,7 @@ public class CloseTeammate extends NextFTCOpMode {
                 oldState = autoState;
                 break;
             case 3:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     cycling = true;
                     setAutoState(-1);
                 }
@@ -132,13 +126,11 @@ public class CloseTeammate extends NextFTCOpMode {
                 break;
 
 
-
-
         }
     }
 
-    private void setAutoState(int state){
-        if(state >= 0) {
+    private void setAutoState(int state) {
+        if (state >= 0) {
             autoState = state;
         } else {
             autoState = -1;
@@ -146,11 +138,9 @@ public class CloseTeammate extends NextFTCOpMode {
 
     }
 
-    public Command SetAutoState(int state){
+    public Command SetAutoState(int state) {
         return new InstantCommand(() -> setAutoState(state));
     }
-
-
 
 
 }

@@ -110,7 +110,7 @@ public class FarSolo extends NextFTCOpMode {
                 setAutoState(1);
                 break;
             case 1:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             new ParallelRaceGroup(
                                     new Delay(5),

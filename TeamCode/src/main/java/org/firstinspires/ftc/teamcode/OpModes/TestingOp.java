@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
@@ -53,7 +52,7 @@ public class TestingOp extends NextFTCOpMode {
     }
 
     @Override
-    public void onStartButtonPressed(){
+    public void onStartButtonPressed() {
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
 
         follower().setStartingPose(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueCloseStart : Poses.redCloseStart);
@@ -62,22 +61,22 @@ public class TestingOp extends NextFTCOpMode {
         follower().update();
 
         new ParallelGroup(
-            OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.LAZY),
-            OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME)
+                OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.LAZY),
+                OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME)
         ).schedule();
     }
 
     @Override
-    public void onUpdate(){
+    public void onUpdate() {
 
         boolean isSlowed = gamepad1.left_bumper;
 
 
-        if(gamepad1.a){
+        if (gamepad1.a) {
             OuttakeSubsystem.lazyRPM = flywheelTarget;
             OuttakeSubsystem.INSTANCE.setHood(hoodTarget);
         }
-        if(gamepad1.b){
+        if (gamepad1.b) {
             OuttakeSubsystem.lazyRPM = 0;
             OuttakeSubsystem.INSTANCE.setHood(.5);
         }

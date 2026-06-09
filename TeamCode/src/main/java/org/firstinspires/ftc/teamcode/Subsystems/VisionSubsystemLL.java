@@ -21,8 +21,8 @@ public class VisionSubsystemLL implements Subsystem {
     private LLResult latestResult;
 
     // Cached detection lists, refreshed each periodic()
-    private static ArrayList<Integer> detectionIDs = new ArrayList<>();
-    private ArrayList<LLResultTypes.FiducialResult> fiducials = new ArrayList<>();
+    private static final ArrayList<Integer> detectionIDs = new ArrayList<>();
+    private final ArrayList<LLResultTypes.FiducialResult> fiducials = new ArrayList<>();
     private ArrayList<MainSlot.SlotState> pattern = new ArrayList<>();
 
     private int goalID = 0;
@@ -58,28 +58,39 @@ public class VisionSubsystemLL implements Subsystem {
     //                        isGoalFresh() returns false so the caller can
     //                        fall back to pure odometry.
 
-    /** EMA smoothing coefficient for tx.  Range [0, 1].  @Configurable. */
-    public static double TX_FILTER_ALPHA       = 0.1;
+    /**
+     * EMA smoothing coefficient for tx.  Range [0, 1].  @Configurable.
+     */
+    public static double TX_FILTER_ALPHA = 0.1;
 
-    /** Ignore tx corrections smaller than this magnitude (degrees). */
-    public static double TX_DEADBAND_DEG       = 0.2;
+    /**
+     * Ignore tx corrections smaller than this magnitude (degrees).
+     */
+    public static double TX_DEADBAND_DEG = 0.2;
 
-    /** Max tx correction accepted in a single cycle (degrees). */
+    /**
+     * Max tx correction accepted in a single cycle (degrees).
+     */
     public static double TX_MAX_CORRECTION_DEG = 12.0;
 
-    /** How long (ms) before a goal detection is considered stale. */
-    public static long   STALE_THRESHOLD_MS    = 150;
+    /**
+     * How long (ms) before a goal detection is considered stale.
+     */
+    public static long STALE_THRESHOLD_MS = 150;
 
-    /** Sign applied to raw tx before filtering.  Flip to -1 if the correction
-     *  drives the turret the wrong way after first test. */
+    /**
+     * Sign applied to raw tx before filtering.  Flip to -1 if the correction
+     * drives the turret the wrong way after first test.
+     */
     public static double TX_SIGN = 1.0;
 
     // Filter state
-    private double filteredTx       = 0.0;
-    private long   lastGoalSeenMs   = 0;
-    private boolean goalWasVisible  = false;
+    private double filteredTx = 0.0;
+    private long lastGoalSeenMs = 0;
+    private boolean goalWasVisible = false;
 
-    public VisionSubsystemLL() {}
+    public VisionSubsystemLL() {
+    }
 
     @Override
     public void initialize() {
@@ -118,13 +129,13 @@ public class VisionSubsystemLL implements Subsystem {
             // Clamp the raw measurement before feeding the filter so a single
             // glitchy frame cannot yank the estimate far from reality.
             double clamped = Math.max(-TX_MAX_CORRECTION_DEG,
-                             Math.min( TX_MAX_CORRECTION_DEG, rawTx * TX_SIGN));
+                    Math.min(TX_MAX_CORRECTION_DEG, rawTx * TX_SIGN));
 
             // Exponential moving average
             filteredTx = TX_FILTER_ALPHA * clamped + (1.0 - TX_FILTER_ALPHA) * filteredTx;
 
-            lastGoalSeenMs  = System.currentTimeMillis();
-            goalWasVisible  = true;
+            lastGoalSeenMs = System.currentTimeMillis();
+            goalWasVisible = true;
         } else {
             goalWasVisible = false;
             // Do NOT zero filteredTx here — hold the last known correction so
@@ -164,7 +175,7 @@ public class VisionSubsystemLL implements Subsystem {
     /**
      * Raw (unfiltered) horizontal offset of the goal tag from the camera crosshair.
      * Returns -9999999 when the goal tag is not visible.
-     *
+     * <p>
      * Prefer getFilteredGoalBearing() for closed-loop turret control.
      */
     public double getRawGoalBearing() {
@@ -183,10 +194,10 @@ public class VisionSubsystemLL implements Subsystem {
 
     /**
      * EMA-filtered, deadbanded, clamped angular correction toward the goal tag.
-     *
+     * <p>
      * Use this as the vision residual in:
-     *     turretTarget = goalAngle_odometry + getFilteredGoalBearing()
-     *
+     * turretTarget = goalAngle_odometry + getFilteredGoalBearing()
+     * <p>
      * Returns 0.0 when the goal has been stale for longer than STALE_THRESHOLD_MS,
      * so the caller falls back cleanly to pure odometry.
      *

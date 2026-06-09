@@ -39,7 +39,6 @@ public class Tele extends NextFTCOpMode {
     private boolean resetTurret = false;
 
 
-
     public static boolean farZone = false;
 
     public static Pose autoPose = new Pose();
@@ -52,17 +51,17 @@ public class Tele extends NextFTCOpMode {
             RobotSubsystem.INSTANCE.setAllianceColor(RobotSubsystem.AllianceColor.BLUE);
         }
 
-        if(gamepad1.triangle){
+        if (gamepad1.triangle) {
             resetTurret = true;
         }
 
-        if(gamepad1.square){
+        if (gamepad1.square) {
             resetTurret = false;
         }
 
-        if(gamepad1.dpad_up){
+        if (gamepad1.dpad_up) {
             farZone = false;
-        } else if (gamepad1.dpad_down){
+        } else if (gamepad1.dpad_down) {
             farZone = true;
         }
 
@@ -79,7 +78,7 @@ public class Tele extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
 
-        if(resetTurret) {
+        if (resetTurret) {
             OuttakeSubsystem.INSTANCE.resetTurret();
             resetTurret = false;
             if (!farZone) {
@@ -98,7 +97,7 @@ public class Tele extends NextFTCOpMode {
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         AutoCommands.prevPose = autoPose;
     }
 
@@ -121,7 +120,6 @@ public class Tele extends NextFTCOpMode {
             IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         }
 
-        
 
         //Driver controlled
         follower().setTeleOpDrive(

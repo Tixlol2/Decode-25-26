@@ -151,16 +151,15 @@ public class VisionSubsystem implements Subsystem {
         visionPortal.close();
     }
 
-    public double getGoalBearing(){
+    public double getGoalBearing() {
         //If it can see the respected goal, return the bearing
         //Else, run impossible number
-        if(isGoalVisible()){
+        if (isGoalVisible()) {
             return RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? detections.get(detectionIDs.indexOf(20)).ftcPose.bearing : detections.get(detectionIDs.indexOf(24)).ftcPose.bearing;
         } else {
             return -9999999;
         }
     }
-
 
 
     @Override
@@ -172,11 +171,11 @@ public class VisionSubsystem implements Subsystem {
 
     }
 
-    public void resetPattern(){
+    public void resetPattern() {
         pattern = new ArrayList<>(List.of(null, null, null));
     }
 
-    public boolean isGoalVisible(){
+    public boolean isGoalVisible() {
         return (detectionIDs.contains(20) && RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE) || (detectionIDs.contains(24) && RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED);
     }
 
@@ -197,8 +196,6 @@ public class VisionSubsystem implements Subsystem {
         }
 
     }
-
-
 
 
 }

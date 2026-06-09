@@ -86,7 +86,7 @@ public class Auto12Close extends NextFTCOpMode {
     }
 
     @Override
-    public void onStartButtonPressed(){
+    public void onStartButtonPressed() {
         OuttakeSubsystem.INSTANCE.resetTurret();
         RobotSubsystem.INSTANCE.resetPattern();
         UniConstants.FAST_FLICKER_TIME_UP = .35;
@@ -101,10 +101,10 @@ public class Auto12Close extends NextFTCOpMode {
     }
 
     @Override
-    public void onUpdate(){
+    public void onUpdate() {
 
         Pose currentPose = PedroComponent.follower().getPose();
-        if(!currentPose.roughlyEquals(new Pose(0, 0), 10)){
+        if (!currentPose.roughlyEquals(new Pose(0, 0), 10)) {
             prevPose = PedroComponent.follower().getPose();
 
         }
@@ -119,14 +119,14 @@ public class Auto12Close extends NextFTCOpMode {
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         UniConstants.FAST_FLICKER_TIME_UP = .3;
     }
 
-    private void autoPathUpdate(){
-        switch (autoState){
+    private void autoPathUpdate() {
+        switch (autoState) {
             case 1:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             new ParallelGroup(
                                     OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL),
@@ -144,7 +144,7 @@ public class Auto12Close extends NextFTCOpMode {
                 oldState = autoState;
                 break;
             case 2:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
@@ -173,7 +173,7 @@ public class Auto12Close extends NextFTCOpMode {
                 }
                 break;
             case 3:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
 //                            new Delay(5),
                             new ParallelGroup(
@@ -197,7 +197,7 @@ public class Auto12Close extends NextFTCOpMode {
                 }
                 break;
             case 4:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
@@ -211,7 +211,7 @@ public class Auto12Close extends NextFTCOpMode {
                 }
                 break;
             case 5:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
 //                            new Delay(5),
                             new ParallelDeadlineGroup(
@@ -234,7 +234,7 @@ public class Auto12Close extends NextFTCOpMode {
                 }
                 break;
             case 6:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
 //                            new Delay(5),
                             IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
@@ -248,7 +248,7 @@ public class Auto12Close extends NextFTCOpMode {
                 }
                 break;
             case 7:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
 //                            new Delay(5),
                             new ParallelDeadlineGroup(
@@ -271,8 +271,8 @@ public class Auto12Close extends NextFTCOpMode {
         }
     }
 
-    private void setAutoState(int state){
-        if(state >= 0) {
+    private void setAutoState(int state) {
+        if (state >= 0) {
             autoState = state;
         } else {
             autoState = -1;
@@ -280,15 +280,15 @@ public class Auto12Close extends NextFTCOpMode {
         pathTimer.reset();
     }
 
-    public Command SetAutoState(int state){
+    public Command SetAutoState(int state) {
         return new InstantCommand(() -> setAutoState(state));
     }
 
-    public Command SetPassed(boolean pass){
+    public Command SetPassed(boolean pass) {
         return new InstantCommand(() -> passed = pass);
     }
 
-    public void createPaths(){
+    public void createPaths() {
         startToShoot = PedroComponent.follower().pathBuilder()
                 .addPath(new BezierLine(
                         Poses.mirrorCoordinates(redStartingPose, RobotSubsystem.INSTANCE.getAllianceColor()),
@@ -297,7 +297,7 @@ public class Auto12Close extends NextFTCOpMode {
 //                        RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redStartingPose : blueStartingPose,
 //                        RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.RED ? redShootingPose : blueShootingPose
                 ))
-                .setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0,0, Math.toRadians(37)),RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
+                .setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(37)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
                 .build();
         shootToMid = PedroComponent.follower().pathBuilder()
                 .addPath(new BezierCurve(

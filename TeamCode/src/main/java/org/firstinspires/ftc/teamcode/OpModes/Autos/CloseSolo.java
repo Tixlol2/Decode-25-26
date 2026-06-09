@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
-import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
@@ -34,7 +33,6 @@ public class CloseSolo extends NextFTCOpMode {
                 new PedroComponent(Constants::createFollower)
         );
     }
-
 
 
     private final Timer pathTimer = new Timer();
@@ -60,16 +58,16 @@ public class CloseSolo extends NextFTCOpMode {
     }
 
     @Override
-    public void onStartButtonPressed(){
+    public void onStartButtonPressed() {
         AutoCommands.startButton(AutoCommands.shootLocation.CLOSE).schedule();
         autoState = 1;
     }
 
     @Override
-    public void onUpdate(){
+    public void onUpdate() {
 
         Pose currentPose = PedroComponent.follower().getPose();
-        if(!currentPose.roughlyEquals(new Pose(0, 0), 10)){
+        if (!currentPose.roughlyEquals(new Pose(0, 0), 10)) {
             prevPose = PedroComponent.follower().getPose();
 
         }
@@ -84,20 +82,20 @@ public class CloseSolo extends NextFTCOpMode {
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         AutoCommands.prevPose = prevPose;
     }
 
 
-    private void autoPathUpdate(){
-        switch (autoState){
+    private void autoPathUpdate() {
+        switch (autoState) {
             case -1:
                 break;
             case 0:
                 setAutoState(1);
                 break;
             case 1:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             new ParallelRaceGroup(
                                     new Delay(5),
@@ -110,25 +108,25 @@ public class CloseSolo extends NextFTCOpMode {
                 oldState = autoState;
                 break;
             case 2:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, false,2.5, 1.5),
+                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, false, 2.5, 1.5),
                             SetAutoState(3)
                     ).schedule();
                 }
                 oldState = autoState;
                 break;
             case 3:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false,3, 1.5),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false, 3, 1.5),
                             SetAutoState(4)
                     ).schedule();
                 }
                 oldState = autoState;
                 break;
             case 4:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             AutoCommands.farSpikeShoot(AutoCommands.shootLocation.CLOSE, 4, 1.5),
                             SetAutoState(5)
@@ -137,7 +135,7 @@ public class CloseSolo extends NextFTCOpMode {
                 oldState = autoState;
                 break;
             case 5:
-                if(oldState != autoState){
+                if (oldState != autoState) {
                     new SequentialGroup(
                             AutoCommands.park(AutoCommands.shootLocation.CLOSE),
                             SetAutoState(-1)
@@ -147,13 +145,11 @@ public class CloseSolo extends NextFTCOpMode {
                 break;
 
 
-
-
         }
     }
 
-    private void setAutoState(int state){
-        if(state >= 0) {
+    private void setAutoState(int state) {
+        if (state >= 0) {
             autoState = state;
         } else {
             autoState = -1;
@@ -161,11 +157,9 @@ public class CloseSolo extends NextFTCOpMode {
         pathTimer.reset();
     }
 
-    public Command SetAutoState(int state){
+    public Command SetAutoState(int state) {
         return new InstantCommand(() -> setAutoState(state));
     }
-
-
 
 
 }

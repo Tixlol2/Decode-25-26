@@ -33,7 +33,7 @@ public class OuttakeSubsystem implements Subsystem {
     private static final MotorEx rightLaunchMotor = new MotorEx(UniConstants.LAUNCHER_RIGHT_STRING).floatMode();
     private static final MotorGroup launcherGroup = new MotorGroup(rightLaunchMotor, leftLaunchMotor); //Right has encoder, put first
     private static FlywheelState launcherState = FlywheelState.OFF;
-    public static  PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.00045, 0, 0);
+    public static PIDCoefficients launcherPIDCoefficients = new PIDCoefficients(0.00045, 0, 0);
     private static ControlSystem launcherControl;
     public static double targetVeloRPM = 0;
 
@@ -47,7 +47,7 @@ public class OuttakeSubsystem implements Subsystem {
     private static final MotorEx turret = new MotorEx(UniConstants.TURRET_STRING).zeroed().brakeMode();
     private static TurretState turretState = TurretState.FORWARD;
     public static double pTurret = 0.0003, dTurret = 0, lTurret = .14, fTurret = 0.0;
-    private PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
+    private final PDFLController turretControl = new PDFLController(pTurret, dTurret, fTurret, lTurret);
     private static double turretTargetAngle = 0;
     public static double turretAngleTolerance = .75;
 
@@ -65,13 +65,13 @@ public class OuttakeSubsystem implements Subsystem {
 
     // ── Shooter Geometry ─────────────────────────────────────────────────────
     // All distances in meters. Measure from floor to center of launch point / hoop.
-    public static double LAUNCHER_HEIGHT_M   = 0.3175;  // TODO: measure
-    public static double HOOP_HEIGHT_M       = 1.075;  // regulation hoop height
-    public static double WHEEL_RADIUS_M      = 0.092;  // TODO: measure
+    public static double LAUNCHER_HEIGHT_M = 0.3175;  // TODO: measure
+    public static double HOOP_HEIGHT_M = 1.075;  // regulation hoop height
+    public static double WHEEL_RADIUS_M = 0.092;  // TODO: measure
 
     // Servo angle range: servoMinDeg → 0.0, servoMaxDeg → 1.0
-    public static double HOOD_SERVO_MIN_DEG  = 20.0;
-    public static double HOOD_SERVO_MAX_DEG  = 45.0;
+    public static double HOOD_SERVO_MIN_DEG = 20.0;
+    public static double HOOD_SERVO_MAX_DEG = 45.0;
 
     // Single tunable correction (degrees) applied to physics-solved angle.
     // Positive = aim higher, negative = aim lower. Tune empirically.
@@ -80,8 +80,8 @@ public class OuttakeSubsystem implements Subsystem {
     // Prefer high arc (true) or low arc (false) solution from physics solver.
     public static boolean preferHighArc = false;
 
-    private static final double G             = 9.81;
-    private static final double INCHES_TO_M   = 0.0254;
+    private static final double G = 9.81;
+    private static final double INCHES_TO_M = 0.0254;
 
     public static double turretCubed = 0;
     public static double turretSquared = 0;
@@ -129,7 +129,7 @@ public class OuttakeSubsystem implements Subsystem {
                         break;
 
                 }
-                launcherGroup.setPower(12/RobotSubsystem.INSTANCE.getVoltage() * Math.max(0, Math.min(1, launcherControl.calculate(
+                launcherGroup.setPower(12 / RobotSubsystem.INSTANCE.getVoltage() * Math.max(0, Math.min(1, launcherControl.calculate(
                                 new KineticState(launcherGroup.getCurrentPosition(), -launcherGroup.getVelocity())
                         )))
                 );
@@ -139,14 +139,14 @@ public class OuttakeSubsystem implements Subsystem {
 
             //Turret control
             if (turretEnabled) {
-                if(debug) {
+                if (debug) {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
                 turretTargetAngle = Math.max(-60, Math.min(280, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
-                if(Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5){
+                if (Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5) {
                     turret.setPower(Math.min(.6, (12 / RobotSubsystem.INSTANCE.getVoltage() * turretControl.runPDFL(angleToTicks(turretAngleTolerance)))));
                 } else {
                     turret.setPower(0);
@@ -163,7 +163,7 @@ public class OuttakeSubsystem implements Subsystem {
                 hoodTargetPosition = getInterpolatedHood(
                         RobotSubsystem.INSTANCE.getDistanceToGoalInches()
                 );
-            } else if (launcherState == FlywheelState.REACTIVE){
+            } else if (launcherState == FlywheelState.REACTIVE) {
                 hoodTargetPosition = getTargetHoodPosition(RobotSubsystem.INSTANCE.getDistanceToGoalInches(), getCurrentVelocityRPM());
             }
             hood.setPosition(hoodTargetPosition);
@@ -173,7 +173,7 @@ public class OuttakeSubsystem implements Subsystem {
         }
     }
 
-    public void sendTelemetry(){
+    public void sendTelemetry() {
         ActiveOpMode.telemetry().addData("Hood Target: ", hoodTargetPosition);
         ActiveOpMode.telemetry().addData("Current Velo: ", getCurrentVelocityRPM());
 //        ActiveOpMode.telemetry().addData("Current Velo L: ", toRPM(leftLaunchMotor.getVelocity()));
@@ -184,23 +184,24 @@ public class OuttakeSubsystem implements Subsystem {
         ActiveOpMode.telemetry().addData("Turret Finished?: ", turretFinished());
     }
 
-    public boolean isFlwheelGood(int tolerance){
+    public boolean isFlwheelGood(int tolerance) {
         return Math.abs(targetVeloRPM - getCurrentVelocityRPM()) < tolerance;
     }
 
-    public static Command addUserAdded(){
+    public static Command addUserAdded() {
         return new InstantCommand(() -> userAdded += 100);
     }
 
-    public static Command subUserAdded(){
+    public static Command subUserAdded() {
         return new InstantCommand(() -> userAdded -= 100);
     }
-    public void setTurretEnabled(boolean enabled){
+
+    public void setTurretEnabled(boolean enabled) {
         turretEnabled = enabled;
     }
 
 
-    public double getTurretTarget(){
+    public double getTurretTarget() {
         return turretTargetAngle;
     }
 
@@ -213,23 +214,23 @@ public class OuttakeSubsystem implements Subsystem {
     public double getTargetVelocityRPM(double distInches) {
         return Math.max(0, Math.min(4500,
                 turretCubed * Math.pow(distInches, 3)
-                        - turretSquared   * Math.pow(distInches, 2)
-                        + turretLinear   * distInches
+                        - turretSquared * Math.pow(distInches, 2)
+                        + turretLinear * distInches
                         + turretIntercept + userAdded));
     }
 
     /**
      * Returns the target hood servo position (0.0–1.0) for a given distance
      * and the *actual* flywheel velocity at the moment of firing.
-     *
+     * <p>
      * Uses a physics solver (inverted projectile equations) so that velocity
      * deviations — including per-shot flywheel bleed in a burst — automatically
      * produce a corrected angle rather than being ignored.
-     *
+     * <p>
      * hoodPhysicsCorrection (degrees, @Configurable) absorbs real-world offsets
      * like air resistance and launcher geometry. Tune until shot 1 lands on target,
      * then verify shots 2 and 3 converge without further adjustment.
-     *
+     * <p>
      * Falls back to the distance-only regression if no physics solution exists
      * (e.g. velocity too low to reach the target at this distance).
      *
@@ -237,11 +238,11 @@ public class OuttakeSubsystem implements Subsystem {
      * @param actualVelRPM current flywheel RPM from encoder (getCurrentVelocityRPM())
      */
     public double getTargetHoodPosition(double distInches, double actualVelRPM) {
-        double distM   = distInches * INCHES_TO_M;
+        double distM = distInches * INCHES_TO_M;
         double muzzleV = rpmToMuzzleVelocity(actualVelRPM);
-        double dy      = HOOP_HEIGHT_M - LAUNCHER_HEIGHT_M;
+        double dy = HOOP_HEIGHT_M - LAUNCHER_HEIGHT_M;
 
-        double angleDeg = solveAngleDeg(muzzleV, distM, dy+.05);
+        double angleDeg = solveAngleDeg(muzzleV, distM, dy + .05);
 
         if (true) {
             // Physics has no solution (vel too low) — fall back to distance-only regression
@@ -249,7 +250,7 @@ public class OuttakeSubsystem implements Subsystem {
         }
 
         double corrected = angleDeg + hoodPhysicsCorrection;
-        return 1-angleDegToServo(corrected);
+        return 1 - angleDegToServo(corrected);
     }
 
     // ── Physics solver helpers ────────────────────────────────────────────────
@@ -265,27 +266,27 @@ public class OuttakeSubsystem implements Subsystem {
     /**
      * Inverted projectile equation: given launch speed, horizontal distance,
      * and vertical rise, returns the launch angle in degrees.
-     *
+     * <p>
      * Two solutions exist (low arc and high arc). preferHighArc selects which.
      * Returns NaN if no real solution exists (velocity insufficient).
-     *
+     * <p>
      * Derivation:
-     *   y = x*tan(θ) - (g*x²)/(2v²cos²θ)
-     *   Substituting sec²θ = 1 + tan²θ gives a quadratic in tan(θ):
-     *   (gx²/2v²)*tan²θ - x*tanθ + (dy + gx²/2v²) = 0
+     * y = x*tan(θ) - (g*x²)/(2v²cos²θ)
+     * Substituting sec²θ = 1 + tan²θ gives a quadratic in tan(θ):
+     * (gx²/2v²)*tan²θ - x*tanθ + (dy + gx²/2v²) = 0
      */
     private double solveAngleDeg(double v, double dx, double dy) {
         if (v < 0.01 || dx < 0.01) return Double.NaN;
         double v2 = v * v;
-        double a  = (G * dx * dx) / (2.0 * v2);
-        double b  = -dx;
-        double c  = dy + a;
+        double a = (G * dx * dx) / (2.0 * v2);
+        double b = -dx;
+        double c = dy + a;
         double disc = b * b - 4.0 * a * c;
         if (disc < 0) return Double.NaN;
 
         double sqrtDisc = Math.sqrt(disc);
-        double tanLow   = (-b - sqrtDisc) / (2.0 * a);
-        double tanHigh  = (-b + sqrtDisc) / (2.0 * a);
+        double tanLow = (-b - sqrtDisc) / (2.0 * a);
+        double tanHigh = (-b + sqrtDisc) / (2.0 * a);
 
         double chosen = preferHighArc ? tanHigh : tanLow;
         double angleRad = Math.atan(chosen);
@@ -304,42 +305,46 @@ public class OuttakeSubsystem implements Subsystem {
 
     // ── Legacy regression (kept for fallback and backwards compat) ────────────
 
-    /** @deprecated Use getTargetVelocityRPM(dist) instead. */
+    /**
+     * @deprecated Use getTargetVelocityRPM(dist) instead.
+     */
     @Deprecated
     public double getInterpolatedVelo(double dist) {
         return getTargetVelocityRPM(dist);
     }
 
-    /** @deprecated Use getTargetHoodPosition(dist, actualVelRPM) instead. */
+    /**
+     * @deprecated Use getTargetHoodPosition(dist, actualVelRPM) instead.
+     */
     @Deprecated
     public double getInterpolatedHood(double dist) {
         return Math.max(.3, Math.min(1,
                 hoodCubed * Math.pow(dist, 3)
-                        + hoodSquared  * Math.pow(dist, 2)
-                        - hoodLinear    * dist
+                        + hoodSquared * Math.pow(dist, 2)
+                        - hoodLinear * dist
                         + hoodIntercept));
     }
 
-    public void setHoodTarget(double angle){
+    public void setHoodTarget(double angle) {
         angle = Math.max(22, Math.min(45, angle));
         debugHoodTargetPosition = (angle - 20) / 25;
     }
 
-    public void setHood(double targ){
+    public void setHood(double targ) {
 
         debugHoodTargetPosition = targ;
     }
 
-    public double getHoodTarget(){
+    public double getHoodTarget() {
         return hoodTargetPosition;
     }
 
     //Turret Commands
-    public double getTurretPosition(){
+    public double getTurretPosition() {
         return IntakeSubsystem.INSTANCE.active.getCurrentPosition();
     }
 
-    public Command SetTurretState(TurretState state){
+    public Command SetTurretState(TurretState state) {
         return new LambdaCommand()
                 .setStart(() -> setTurretState(state))
                 .setIsDone(OuttakeSubsystem::turretFinished)
@@ -347,49 +352,51 @@ public class OuttakeSubsystem implements Subsystem {
     }
 
 
-
-    public Command ScanPattern(){
+    public Command ScanPattern() {
         return new LambdaCommand()
                 .setStart(SetTurretState(TurretState.OBELISK))
                 .setIsDone(RobotSubsystem::getPatternFull)
                 .setStop((inter) -> SetTurretState(TurretState.GOAL));
     }
 
-    public Command SetFlywheelState(FlywheelState state){
+    public Command SetFlywheelState(FlywheelState state) {
         return new LambdaCommand()
                 .setStart(() -> launcherState = state)
                 .setIsDone(OuttakeSubsystem::flywheelGood)
                 .requires("Launcher");
     }
 
-    public static boolean flywheelGood(){
+    public static boolean flywheelGood() {
         return Math.abs(Math.abs(OuttakeSubsystem.INSTANCE.getCurrentVelocityRPM()) - Math.abs(targetVeloRPM)) < 150;
     }
 
-    public void setTurretTargetAngle(double angle){
+    public void setTurretTargetAngle(double angle) {
         turretTargetAngle = angle;
     }
 
     //Math helpers
 
-    public double toRPM(double velo){
+    public double toRPM(double velo) {
         return velo * ((double) 60 / 28);
     }
 
-    public double toTicksPerSec(double velo){
+    public double toTicksPerSec(double velo) {
         return velo * ((double) 28 / 60);
     }
 
     public double getCurrentVelocityRPM() {
         return toRPM(-launcherGroup.getVelocity());
     }
-    public static boolean turretFinished(){
+
+    public static boolean turretFinished() {
         return Math.abs(Math.abs(ticksToAngle(OuttakeSubsystem.INSTANCE.getTurretPosition())) - Math.abs(turretTargetAngle)) < turretAngleTolerance &&
                 Math.abs(Math.abs(ticksToAngle(OuttakeSubsystem.INSTANCE.getTurretPosition())) - Math.abs(ticksToAngle(oldTurret))) < 5;
     }
-    public static void setTurretState(TurretState state){
+
+    public static void setTurretState(TurretState state) {
         turretState = state;
     }
+
     public static TurretState getTurretState() {
         return turretState;
     }
@@ -403,14 +410,16 @@ public class OuttakeSubsystem implements Subsystem {
         return (ticks / UniConstants.ENCODER_TICKS_PER_DEGREE) % 360;
     }
 
-    public static double getHoodTargetPosition(){return hoodTargetPosition;}
+    public static double getHoodTargetPosition() {
+        return hoodTargetPosition;
+    }
 
-    public void resetTurret(){
+    public void resetTurret() {
         IntakeSubsystem.INSTANCE.active.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         IntakeSubsystem.INSTANCE.active.getMotor().setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public double getCurrentAngle(){
+    public double getCurrentAngle() {
         return ticksToAngle(getTurretPosition());
     }
 

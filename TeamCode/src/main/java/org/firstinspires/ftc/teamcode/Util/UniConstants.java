@@ -62,7 +62,7 @@ CONFIG
     public static final String TURRET_STRING = "TURR";
     public static final double MOTOR_TURRET_RATIO = (double) 28 / 92;
     public static final double TURRET_TICKS_PER_DEGREE = (537.7 / MOTOR_TURRET_RATIO) / 360;
-    public static final double ENCODER_TICKS_PER_DEGREE = (8192 / MOTOR_TURRET_RATIO ) / 360;
+    public static final double ENCODER_TICKS_PER_DEGREE = (8192 / MOTOR_TURRET_RATIO) / 360;
     //Color sensors
     public static final String COLOR_SENSOR_SLOT_BACK_STRING = "CSB";
     public static final String COLOR_SENSOR_SLOT_RIGHT_STRING = "CSR";
@@ -73,7 +73,7 @@ CONFIG
     public static final String LIGHT_LEFT_STRING = "LEFT";
     public static final ArrayList<Integer> obeliskIDs = new ArrayList<>(List.of(21, 22, 23));
     //Flickers
-    public static  double FLICKER_BACK_UP = .93;
+    public static double FLICKER_BACK_UP = .93;
     public static double FLICKER_BACK_DOWN = .53;
     public static double FLICKER_RIGHT_DOWN = .545;
     public static double FLICKER_RIGHT_UP = .15;
@@ -85,7 +85,6 @@ CONFIG
     public static final String HOOD_STRING = "HOOD";
 
 //    public static Pose autoEnd/
-
 
 
 }

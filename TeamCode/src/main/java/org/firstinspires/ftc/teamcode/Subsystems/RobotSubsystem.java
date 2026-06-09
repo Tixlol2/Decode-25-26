@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
 import dev.nextftc.core.commands.delays.Delay;
@@ -55,7 +54,7 @@ public class RobotSubsystem extends SubsystemGroup {
     public static boolean velOffset = false;
     public static double velOffsetK = -0.001;
 
-    private static ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
+    private static final ArrayList<MainSlot.SlotState> lastShot = new ArrayList<>();
     private static ArrayList<MainSlot.SlotState> pattern = new ArrayList<>(Arrays.asList(null, null, null));
     private static boolean patternFull = false;
 
@@ -77,7 +76,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
     private static VoltageSensor voltageSensor;
 
-    private static Timer shotTimer = new Timer();
+    private static final Timer shotTimer = new Timer();
 
     public static double shootDelay = 0;
     public static boolean inTele = false;
@@ -98,11 +97,11 @@ public class RobotSubsystem extends SubsystemGroup {
         updateDistanceAndAngle();
 
         //Handles turret aiming
-        if(allSlotsEmpty() && shotTimer.getTimeSeconds() > 2.5 && inTele){
+        if (allSlotsEmpty() && shotTimer.getTimeSeconds() > 2.5 && inTele) {
             OuttakeSubsystem.INSTANCE.setTurretEnabled(false);
         } else {
             OuttakeSubsystem.INSTANCE.setTurretEnabled(true);
-            switch (OuttakeSubsystem.getTurretState()){
+            switch (OuttakeSubsystem.getTurretState()) {
                 case GOAL:
                     OuttakeSubsystem.INSTANCE.setTurretTargetAngle(goalAngle);
                     break;
@@ -163,7 +162,7 @@ public class RobotSubsystem extends SubsystemGroup {
 
     }
 
-    public double getVoltage(){
+    public double getVoltage() {
         return voltageSensor.getVoltage();
     }
 
@@ -175,7 +174,7 @@ public class RobotSubsystem extends SubsystemGroup {
         RobotSubsystem.allianceColor = allianceColor;
     }
 
-    public void resetPattern(){
+    public void resetPattern() {
         VisionSubsystemLL.INSTANCE.resetPattern();
         pattern = new ArrayList<>(Arrays.asList(null, null, null));
         patternFull = false;
@@ -189,17 +188,16 @@ public class RobotSubsystem extends SubsystemGroup {
         return patternFull;
     }
 
-    public void sendSlotTele(){
+    public void sendSlotTele() {
         ActiveOpMode.telemetry().addData("Back Slot: ", BackSlot.INSTANCE.getColorState());
         ActiveOpMode.telemetry().addData("Right Slot: ", RightSlot.INSTANCE.getColorState());
         ActiveOpMode.telemetry().addData("Left Slot: ", LeftSlot.INSTANCE.getColorState());
 
     }
 
-    public double getShootDelay(){
+    public double getShootDelay() {
         return shootDelay;
     }
-
 
 
     public void updateDistanceAndAngle() {
@@ -222,8 +220,8 @@ public class RobotSubsystem extends SubsystemGroup {
         if (velOffset) {
 //            Vector targetVector = new Vector(x,y).plus(PedroComponent.follower().getVelocity().times(distanceToGoalInches*velOffsetK));
             fieldAngleToTarget = Math.toDegrees(Math.atan2(
-                            y+ PedroComponent.follower().getVelocity().getYComponent()*velOffsetK*distanceToGoalInches,
-                            x + PedroComponent.follower().getVelocity().getXComponent()*velOffsetK*distanceToGoalInches))
+                    y + PedroComponent.follower().getVelocity().getYComponent() * velOffsetK * distanceToGoalInches,
+                    x + PedroComponent.follower().getVelocity().getXComponent() * velOffsetK * distanceToGoalInches))
                     - 90;
         }
         double targetObelisk = Math.toDegrees(Math.atan2(obY, obX)) - 90;
@@ -245,7 +243,6 @@ public class RobotSubsystem extends SubsystemGroup {
         while (obeliskAngle < -270) obeliskAngle += 360;
 
 
-
         // Sign flip (hardware requires inverted angle)
         goalAngle *= -1;
         obeliskAngle *= -1;
@@ -259,7 +256,7 @@ public class RobotSubsystem extends SubsystemGroup {
         ArrayList<MainSlot.SlotState> usedPattern;
 
         // Shift pattern only if enabled and we had a partial sequence last time
-        if(enablePatternShifting && ballsShotLastSequence > 0 && ballsShotLastSequence <= 2){
+        if (enablePatternShifting && ballsShotLastSequence > 0 && ballsShotLastSequence <= 2) {
             usedPattern = shift(pattern, 3 - ballsShotLastSequence);
         } else {
             // If shifting disabled or we shot 0 or 3 balls, pattern repeats - no shift needed
@@ -342,7 +339,7 @@ public class RobotSubsystem extends SubsystemGroup {
                             shootOrder.get(2).basicShoot().named("Result 3 " + shootOrder.get(2).getKickerServoName()).run();
                         })
                         .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
-                );
+        );
 
     }
 
@@ -387,11 +384,11 @@ public class RobotSubsystem extends SubsystemGroup {
                             shootOrder.get(2).basicShoot().named("Result 3 " + shootOrder.get(2).getKickerServoName()).run();
                         })
                         .setIsDone(() -> !CommandManager.INSTANCE.hasCommandsUsing("Shooting"))
-                );
+        );
 
     }
 
-    public Command AutoShoot(){
+    public Command AutoShoot() {
         Timer time = new Timer();
         return new SequentialGroup(
                 // Switch to LIME mode so the turret starts chasing the tag immediately.
@@ -408,14 +405,17 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public ArrayList<MainSlot.SlotState> getPattern(){
+    public ArrayList<MainSlot.SlotState> getPattern() {
         return pattern;
     }
 
     public Pose getPreviousPose() {
         return previousPose;
     }
-    public double getPrevHeading(){return prevHeading;}
+
+    public double getPrevHeading() {
+        return prevHeading;
+    }
 
     public void setPreviousPose(Pose previousPose) {
         RobotSubsystem.previousPose = previousPose;
@@ -430,13 +430,13 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    public static ArrayList<MainSlot.SlotState> shift(ArrayList<MainSlot.SlotState> list, int shiftBy){
+    public static ArrayList<MainSlot.SlotState> shift(ArrayList<MainSlot.SlotState> list, int shiftBy) {
 
         shiftBy = list.size() - shiftBy;
 
         ArrayList<MainSlot.SlotState> shiftedList = new ArrayList<>(Arrays.asList(null, null, null)); //Not modularized
 
-        for(int i = 0; i < list.size(); i++){
+        for (int i = 0; i < list.size(); i++) {
             shiftedList.set(i, list.get(((i + shiftBy) % list.size())));
         }
 
@@ -444,17 +444,17 @@ public class RobotSubsystem extends SubsystemGroup {
 
     }
 
-    public boolean allSlotsEmpty(){
+    public boolean allSlotsEmpty() {
         return LeftSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
                 RightSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY &&
                 BackSlot.INSTANCE.getColorState() == MainSlot.SlotState.EMPTY;
     }
 
-    public Command jiggle(){
+    public Command jiggle() {
         return new SequentialGroup(
-          BackSlot.INSTANCE.jiggle(),
-          RightSlot.INSTANCE.jiggle(),
-          LeftSlot.INSTANCE.jiggle()
+                BackSlot.INSTANCE.jiggle(),
+                RightSlot.INSTANCE.jiggle(),
+                LeftSlot.INSTANCE.jiggle()
         );
     }
 
@@ -478,7 +478,7 @@ public class RobotSubsystem extends SubsystemGroup {
         CLOSE_COMMAND
     }
 
-    public Command stopSubsystems(){
+    public Command stopSubsystems() {
         return new ParallelGroup(
                 OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD),
                 OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.OFF),
@@ -486,7 +486,7 @@ public class RobotSubsystem extends SubsystemGroup {
         );
     }
 
-    private void initSubsystems(){
+    private void initSubsystems() {
         OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD).schedule();
         IntakeSubsystem.INSTANCE.setActiveState(IntakeSubsystem.IntakeState.OFF);
         SetAllSlotState(MainSlot.ServoState.DOWN).schedule();

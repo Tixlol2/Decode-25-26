@@ -28,8 +28,8 @@ public class MainSlot implements Subsystem {
     private double jigglePos = 0;
     private SlotState colorState = SlotState.EMPTY;
     private ServoState servoState = ServoState.DOWN;
-    private double oldUp = 0;
-    private double oldDown = 0;
+    private final double oldUp = 0;
+    private final double oldDown = 0;
 
     public MainSlot(String lightName, String colorSensorName, String kickerName, double up, double down, double jigglePos) {
         this.lightName = lightName;
@@ -39,7 +39,6 @@ public class MainSlot implements Subsystem {
         this.down = down;
         this.jigglePos = jigglePos;
     }
-
 
 
     @Override
@@ -107,7 +106,7 @@ public class MainSlot implements Subsystem {
     }
 
 
-    public  boolean isFull() {
+    public boolean isFull() {
         return (colorState == SlotState.PURPLE) || (colorState == SlotState.GREEN);
     }
 
@@ -127,7 +126,7 @@ public class MainSlot implements Subsystem {
         }
     }
 
-    public Command jiggle(){
+    public Command jiggle() {
         return new SequentialGroup(
                 setServoState(ServoState.JIGGLE),
                 new Delay(.05),
@@ -135,7 +134,7 @@ public class MainSlot implements Subsystem {
         );
     }
 
-    public void setValues(double up, double down){
+    public void setValues(double up, double down) {
         this.up = up;
         this.down = down;
     }
