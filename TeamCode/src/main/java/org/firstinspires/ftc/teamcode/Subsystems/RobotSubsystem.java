@@ -132,11 +132,11 @@ public class RobotSubsystem extends SubsystemGroup {
             }
         }
 
-        if(VisionSubsystemLL.isGoalVisible()){
-            distanceToGoalInches = VisionSubsystemLL.INSTANCE.getDistanceToGoal() + 10;
-        }
+//        if(VisionSubsystemLL.INSTANCE.isGoalVisible()){
+//            distanceToGoalInches = VisionSubsystemLL.INSTANCE.getDistanceToGoal() + 10;
+//        }
 
-//        distanceToGoalInches = VisionSubsystemLL.INSTANCE.getDistanceToGoal();
+
 
         sendSlotTele();
 

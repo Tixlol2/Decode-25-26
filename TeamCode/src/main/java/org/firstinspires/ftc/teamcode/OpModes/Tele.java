@@ -98,6 +98,11 @@ public class Tele extends NextFTCOpMode {
     }
 
     @Override
+    public void onStop(){
+        AutoCommands.prevPose = autoPose;
+    }
+
+    @Override
     public void onUpdate() {
 
         autoPose = PedroComponent.follower().getPose();

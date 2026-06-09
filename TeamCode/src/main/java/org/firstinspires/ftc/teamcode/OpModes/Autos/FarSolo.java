@@ -129,7 +129,7 @@ public class FarSolo extends NextFTCOpMode {
             case 3:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.FAR),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.FAR, AutoCommands.pathType.LINE),
                             SetAutoState(4)
                     ).schedule();
                 }

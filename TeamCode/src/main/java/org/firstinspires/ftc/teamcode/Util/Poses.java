@@ -46,7 +46,7 @@ public class Poses {
 
 
     public static Pose blueFarStart = new Pose(56, 8.5, Math.toRadians(180));
-    public static Pose redFarStart = Poses.mirrorCoordinates(blueFarStart, RobotSubsystem.AllianceColor.RED).setHeading(Math.toRadians(90));
+    public static Pose redFarStart = Poses.mirrorCoordinates(blueFarStart, RobotSubsystem.AllianceColor.RED).setHeading(Math.toRadians(0));
 
     public static Pose blueLever = new Pose(16, 77);
     public static Pose redLever = mirrorCoordinates(blueLever, RobotSubsystem.AllianceColor.RED);

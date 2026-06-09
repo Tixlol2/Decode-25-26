@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Util.Poses;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -59,6 +60,11 @@ public class TestingOp extends NextFTCOpMode {
 
         follower().startTeleOpDrive();
         follower().update();
+
+        new ParallelGroup(
+            OuttakeSubsystem.INSTANCE.SetFlywheelState(OuttakeSubsystem.FlywheelState.LAZY),
+            OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME)
+        ).schedule();
     }
 
     @Override

@@ -243,10 +243,10 @@ public class VisionSubsystemLL implements Subsystem {
     /**
      * Returns true if the alliance-appropriate goal tag is currently visible.
      */
-    public static boolean isGoalVisible() {
+    public boolean isGoalVisible() {
         boolean isBlue = RobotSubsystem.INSTANCE.getAllianceColor()
                 == RobotSubsystem.AllianceColor.BLUE;
-        return isBlue ? detectionIDs.contains(20) : detectionIDs.contains(24);
+        return isBlue ? detectionIDs.contains(20) : detectionIDs.contains(24) && isGoalFresh();
     }
 
     /**

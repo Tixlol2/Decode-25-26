@@ -54,7 +54,7 @@ public class OuttakeSubsystem implements Subsystem {
     public static double debugTargetAngle = 0;
 
     public static double midRPM = 2750;
-    public static double lazyRPM = 2600;
+    public static double lazyRPM = 0;
 
 
     public static double kS = 0.09, kVShort = 0.00038;
@@ -82,6 +82,15 @@ public class OuttakeSubsystem implements Subsystem {
 
     private static final double G             = 9.81;
     private static final double INCHES_TO_M   = 0.0254;
+
+    public static double turretCubed = 0.0031;
+    public static double turretSquared = .65;
+    public static double turretLinear = 53;
+    public static double turretIntercept = 1160.75151;
+    public static double hoodCubed = 0;
+    public static double hoodSquared = 0.0000179625;
+    public static double hoodLinear = 0.00483804;
+    public static double hoodIntercept = 0;
 
     @Override
     public void initialize() {
@@ -203,10 +212,10 @@ public class OuttakeSubsystem implements Subsystem {
      */
     public double getTargetVelocityRPM(double distInches) {
         return Math.max(0, Math.min(4500,
-                0.00485984 * Math.pow(distInches, 3)
-                        - 0.754491   * Math.pow(distInches, 2)
-                        + 47.64242   * distInches
-                        + 1160.75151 + userAdded));
+                turretCubed * Math.pow(distInches, 3)
+                        - turretSquared   * Math.pow(distInches, 2)
+                        + turretLinear   * distInches
+                        + turretIntercept + userAdded));
     }
 
     /**
@@ -305,10 +314,10 @@ public class OuttakeSubsystem implements Subsystem {
     @Deprecated
     public double getInterpolatedHood(double dist) {
         return Math.max(.3, Math.min(1,
-                0 * Math.pow(dist, 3)
-                        + 0.0000179625  * Math.pow(dist, 2)
-                        - 0.00483804    * dist
-                        + 0.593283));
+                hoodCubed * Math.pow(dist, 3)
+                        + hoodSquared  * Math.pow(dist, 2)
+                        - hoodLinear    * dist
+                        + hoodIntercept));
     }
 
     public void setHoodTarget(double angle){

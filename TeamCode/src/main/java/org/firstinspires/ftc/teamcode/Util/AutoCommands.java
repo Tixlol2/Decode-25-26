@@ -67,16 +67,13 @@ public class AutoCommands {
                 new FollowPath(
                         PedroComponent.follower().pathBuilder()
                                 .addPath(
-                                        new BezierCurve(
+                                        new BezierLine(
                                                 PedroComponent.follower().getPose(),
-                                                Poses.mirrorCoordinates(blueFarSpikeCP, RobotSubsystem.INSTANCE.getAllianceColor()),
                                                 loc == shootLocation.CLOSE ?
                                                         Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
                                                         Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
                                 )
-                                .setConstantHeadingInterpolation(
-                                        Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                                ).build()
+                                .setTangentHeadingInterpolation().setReversed().build()
                 ),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
@@ -84,7 +81,7 @@ public class AutoCommands {
 
     }
 
-    public static Command midSpikeShoot(shootLocation loc) {
+    public static Command midSpikeShoot(shootLocation loc, pathType type) {
 
         return new SequentialGroup(
 
@@ -106,6 +103,7 @@ public class AutoCommands {
                 ),
 
                 //Go to shooting pos based on input
+                new IfElseCommand(() -> type == pathType.CURVE,
                 new FollowPath(
                         PedroComponent.follower().pathBuilder()
                                 .addPath(
@@ -120,6 +118,19 @@ public class AutoCommands {
                                 .setConstantHeadingInterpolation(
                                         Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                                 ).build()
+
+                ),
+                        new FollowPath(
+                                PedroComponent.follower().pathBuilder()
+                                        .addPath(
+                                                new BezierCurve(
+                                                        PedroComponent.follower().getPose(),
+                                                        loc == shootLocation.CLOSE ?
+                                                                Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
+                                                                Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
+                                        )
+                                        .setTangentHeadingInterpolation().setReversed().build()
+                        )
                 ),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
@@ -158,9 +169,8 @@ public class AutoCommands {
                                                         Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
                                                         Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
                                 )
-                                .setConstantHeadingInterpolation(
-                                        Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                                ).build()
+                                .setTangentHeadingInterpolation().setReversed()
+                                .build()
                 ),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
@@ -348,6 +358,11 @@ public class AutoCommands {
     public enum cycleLocation {
         GATE,
         HP
+    }
+
+    public enum pathType {
+        CURVE,
+        LINE
     }
 
     public static Pose prevPose = new Pose();
