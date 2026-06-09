@@ -33,7 +33,7 @@ public class AutoCommands {
     public static Pose blueMiddleSpikeCP1 = new Pose(84.37906137184113, 65.32129963898916);
     public static Pose blueMiddleSpikeCP2 = new Pose(35.93140794223827, 58.516245487364635);
 
-    public static Pose blueCloseSpike = new Pose(19.090252707581225, 84.17328519855594, Math.toRadians(180));
+    public static Pose blueCloseSpike = new Pose(19.090252707581225, 87.17328519855594, Math.toRadians(180));
     public static Pose blueCloseSpikeCP1 = new Pose(74.75451263537907, 91.49458483754515);
     public static Pose blueCloseSpikeCP2 = new Pose(38.81588447653429, 81.96389891696751);
 
@@ -159,7 +159,7 @@ public class AutoCommands {
                                                 new FollowPath(
                                                         PedroComponent.follower().pathBuilder()
                                                                 .addPath(
-                                                                        new BezierCurve(
+                                                                        new BezierLine(
                                                                                 PedroComponent.follower().getPose(),
                                                                                 loc == shootLocation.CLOSE ?
                                                                                         Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :

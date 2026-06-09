@@ -121,7 +121,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 3:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false,2.5, 1.5),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false,3, 1.5),
                             SetAutoState(4)
                     ).schedule();
                 }
