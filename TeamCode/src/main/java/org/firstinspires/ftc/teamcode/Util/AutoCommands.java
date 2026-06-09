@@ -25,7 +25,7 @@ public class AutoCommands {
     public static Pose blueFarSpike = new Pose(13.37184115523466, 35.653429602888075, Math.toRadians(180));
     public static Pose blueFarSpikeCP = new Pose(57.17328519855595, 38.462093862815884);
 
-    public static Pose blueCloseShooting = new Pose(53.22743682310469, 84.24548736462094, Math.toRadians(180));
+    public static Pose blueCloseShooting = new Pose(60.22743682310469, 84.24548736462094, Math.toRadians(180));
 
     public static Pose blueFarShooting = new Pose(56.346570397111904, 8.173285198555952, Math.toRadians(180));
 
@@ -56,7 +56,7 @@ public class AutoCommands {
     public static Pose blueGateBumpLow = new Pose(17.42599277978339, 67.97472924187724, Math.toRadians(180));
     public static Pose blueGateBumpCPLow = new Pose(44.732851985559556, 68.543321299639);
 
-    public static PathChain path;
+
 
     public static Command farSpikeShoot(shootLocation loc, double intakeTime, double returnTime) {
 
