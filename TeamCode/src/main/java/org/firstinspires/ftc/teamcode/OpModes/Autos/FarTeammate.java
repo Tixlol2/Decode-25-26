@@ -73,7 +73,7 @@ public class FarTeammate extends NextFTCOpMode {
 
         }
         if(cycling && !CommandManager.INSTANCE.hasCommandsUsing("CYCLING")){
-            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.HP).schedule();
+            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.HP, 2.5, 1.5).schedule();
         }
         if(ActiveOpMode.getRuntime() > 29){
             CommandManager.INSTANCE.cancelAll();
@@ -116,7 +116,7 @@ public class FarTeammate extends NextFTCOpMode {
             case 2:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.humanPlayerShoot(),
+                            AutoCommands.humanPlayerShoot(2.5, 1.5),
                             SetAutoState(3)
                     ).schedule();
                 }

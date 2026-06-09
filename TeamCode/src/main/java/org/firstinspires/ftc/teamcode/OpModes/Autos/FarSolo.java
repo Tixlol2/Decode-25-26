@@ -67,7 +67,6 @@ public class FarSolo extends NextFTCOpMode {
 
         RobotSubsystem.inTele = false;
         RobotSubsystem.INSTANCE.updatingDist = true;
-        AutoCommands.constructPaths();
         autoState = 0;
     }
 
@@ -80,7 +79,7 @@ public class FarSolo extends NextFTCOpMode {
 
         }
         if (cycling && !CommandManager.INSTANCE.hasCommandsUsing("CYCLING")) {
-            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.GATE).schedule();
+            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.GATE, 3, 1).schedule();
         }
         if (ActiveOpMode.getRuntime() > 29 || (!cycling && autoState == -1)) {
             CommandManager.INSTANCE.cancelAll();
@@ -120,7 +119,7 @@ public class FarSolo extends NextFTCOpMode {
             case 2:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.FAR, Poses.blueFarStart),
+                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.FAR, 2.5, 1.5),
                             SetAutoState(3)
                     ).schedule();
                 }
@@ -129,7 +128,7 @@ public class FarSolo extends NextFTCOpMode {
             case 3:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.FAR, AutoCommands.pathType.LINE),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.FAR, AutoCommands.pathType.LINE, false, 2.5, 1.5),
                             SetAutoState(4)
                     ).schedule();
                 }
@@ -138,7 +137,7 @@ public class FarSolo extends NextFTCOpMode {
             case 4:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.GATE),
+                            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.GATE, 2.5, 1.5),
                             SetAutoState(5)
                     ).schedule();
                 }
@@ -147,7 +146,7 @@ public class FarSolo extends NextFTCOpMode {
             case 5:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.humanPlayerShoot(),
+                            AutoCommands.humanPlayerShoot(2.5, 1.5),
                             SetAutoState(-1)
                     ).schedule();
                 }

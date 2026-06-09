@@ -73,7 +73,7 @@ public class CloseTeammate extends NextFTCOpMode {
             prevPose = PedroComponent.follower().getPose();
         }
         if(cycling && !CommandManager.INSTANCE.hasCommandsUsing("CYCLING")){
-            AutoCommands.cycle(AutoCommands.shootLocation.CLOSE, AutoCommands.cycleLocation.GATE).schedule();
+            AutoCommands.cycle(AutoCommands.shootLocation.CLOSE, AutoCommands.cycleLocation.GATE, 5, 1).schedule();
         }
         if(ActiveOpMode.getRuntime() > 29){
             CommandManager.INSTANCE.cancelAll();
@@ -117,7 +117,7 @@ public class CloseTeammate extends NextFTCOpMode {
             case 2:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE),
+                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, false, 2.5, 1.5),
                             SetAutoState(3)
                     ).schedule();
                 }
