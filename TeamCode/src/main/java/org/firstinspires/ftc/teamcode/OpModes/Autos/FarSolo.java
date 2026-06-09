@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.CommandManager;
+import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
@@ -108,9 +110,13 @@ public class FarSolo extends NextFTCOpMode {
                 setAutoState(1);
                 break;
             case 1:
-                if (oldState != autoState) {
+                if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.shootPreload(AutoCommands.shootLocation.FAR, 0),
+                            new ParallelRaceGroup(
+                                    new Delay(5),
+                                    AutoCommands.init,
+                                    AutoCommands.shootPreload(AutoCommands.shootLocation.FAR, 2.5)
+                            ),
                             SetAutoState(2)
                     ).schedule();
                 }
