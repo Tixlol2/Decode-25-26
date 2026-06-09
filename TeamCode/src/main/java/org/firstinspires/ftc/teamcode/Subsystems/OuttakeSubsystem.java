@@ -83,10 +83,10 @@ public class OuttakeSubsystem implements Subsystem {
     private static final double G             = 9.81;
     private static final double INCHES_TO_M   = 0.0254;
 
-    public static double turretCubed = 0.0031;
-    public static double turretSquared = .65;
-    public static double turretLinear = 53;
-    public static double turretIntercept = 1160.75151;
+    public static double turretCubed = 0.00152109;
+    public static double turretSquared = 0.394082;
+    public static double turretLinear = 43.32841;
+    public static double turretIntercept = 879.14893;
     public static double hoodCubed = 0;
     public static double hoodSquared = 0.0000179625;
     public static double hoodLinear = 0.00483804;
