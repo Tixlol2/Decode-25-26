@@ -56,6 +56,7 @@ public class AutoCommands {
     public static Pose blueGateBumpLow = new Pose(17.42599277978339, 67.97472924187724, Math.toRadians(180));
     public static Pose blueGateBumpCPLow = new Pose(44.732851985559556, 68.543321299639);
 
+    public static double shootDelay = .5;
 
 
     public static Command farSpikeShoot(shootLocation loc, double intakeTime, double returnTime) {
@@ -67,7 +68,7 @@ public class AutoCommands {
                 new FollowPath(PedroComponent.follower().pathBuilder()
                         .addPath(
                                 new BezierCurve(
-                                        Poses.mirrorCoordinates(Poses.blueFarStart, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                        Poses.mirrorCoordinates(PedroComponent.follower().getPose(), RobotSubsystem.INSTANCE.getAllianceColor()),
                                         Poses.mirrorCoordinates(blueFarSpikeCP, RobotSubsystem.INSTANCE.getAllianceColor()),
                                         Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor())
                                 )
@@ -78,7 +79,7 @@ public class AutoCommands {
 
                 //Go to shooting pos based on input
                 new ParallelRaceGroup(
-                        new Delay(intakeTime),
+                        new Delay(returnTime),
                         new FollowPath(
                                 PedroComponent.follower().pathBuilder()
                                         .addPath(
@@ -91,6 +92,7 @@ public class AutoCommands {
                                         .setTangentHeadingInterpolation().setReversed().build()
                         )
                 ),
+                new Delay(shootDelay),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
         );
@@ -168,6 +170,7 @@ public class AutoCommands {
                                                                 .setTangentHeadingInterpolation().setReversed().build()
                                                 )
                                         )),
+                new Delay(shootDelay),
                                 RobotSubsystem.INSTANCE.AutoShoot(),
                                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
                         );
@@ -227,6 +230,7 @@ public class AutoCommands {
                                                         .setTangentHeadingInterpolation().setReversed()
                                                         .build()
                                         )),
+                new Delay(shootDelay),
                                 RobotSubsystem.INSTANCE.AutoShoot(),
                                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
                         );
@@ -291,6 +295,7 @@ public class AutoCommands {
                                                 Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                                         ).build()
                         )),
+                new Delay(shootDelay),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
         ).addRequirements("CYCLING");
@@ -379,9 +384,10 @@ public class AutoCommands {
                                                         PedroComponent.follower().getPose(),
                                                         Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor())
                                                 )
-                                        ).setConstantHeadingInterpolation(Math.toRadians(180)).build()
+                                        ).setConstantHeadingInterpolation(Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()).build()
 
                         )),
+                new Delay(shootDelay),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
         );
