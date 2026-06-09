@@ -109,8 +109,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 2:
                 if(oldState != autoState){
                     new SequentialGroup(
-//                            AutoCommands.gateBump(),
-                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE),
+                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, true,2.5, 1.5),
                             SetAutoState(3)
                     ).schedule();
                 }
@@ -119,7 +118,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 3:
                 if(oldState != autoState){
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false,2.5, 1.5),
                             SetAutoState(4)
                     ).schedule();
                 }
@@ -128,7 +127,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 4:
                 if(oldState != autoState){
                     new SequentialGroup(
-//                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.CLOSE),
+                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.CLOSE, 4, 1.5),
                             SetAutoState(5)
                     ).schedule();
                 }
