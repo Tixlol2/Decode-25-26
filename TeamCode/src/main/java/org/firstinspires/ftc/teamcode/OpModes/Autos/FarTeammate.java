@@ -57,8 +57,8 @@ public class FarTeammate extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         AutoCommands.startButton(AutoCommands.shootLocation.FAR).schedule();
-        autoState = 1;
-        OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME);
+
+        autoState = 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class FarTeammate extends NextFTCOpMode {
 
         }
         if (cycling && !CommandManager.INSTANCE.hasCommandsUsing("CYCLING")) {
-            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.HP, 2.5, 1.5).schedule();
+            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.HP, 2.5, 5).schedule();
         }
         if (ActiveOpMode.getRuntime() > 29) {
             CommandManager.INSTANCE.cancelAll();
@@ -98,11 +98,11 @@ public class FarTeammate extends NextFTCOpMode {
             case -1:
                 break;
             case 0:
-                AutoCommands.init.schedule();
                 setAutoState(1);
                 break;
             case 1:
                 if (oldState != autoState) {
+                    AutoCommands.setRPM(3350);
                     new SequentialGroup(
                             AutoCommands.shootPreload(AutoCommands.shootLocation.FAR, 0),
                             SetAutoState(2)
@@ -113,7 +113,7 @@ public class FarTeammate extends NextFTCOpMode {
             case 2:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.humanPlayerShoot(2.5, 1.5),
+                            AutoCommands.humanPlayerShoot(2.5, 3),
                             SetAutoState(3)
                     ).schedule();
                 }

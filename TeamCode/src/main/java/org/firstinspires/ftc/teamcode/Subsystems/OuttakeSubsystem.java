@@ -85,8 +85,8 @@ public class OuttakeSubsystem implements Subsystem {
 
     public static double turretCubed = 0;
     public static double turretSquared = 0;
-    public static double turretLinear = 11.44779;
-    public static double turretIntercept = 1681.35029;
+    public static double turretLinear = 14.85949;
+    public static double turretIntercept = 1360.7442;
     public static double hoodCubed = 0;
     public static double hoodSquared = 0.0000179625;
     public static double hoodLinear = 0.00483804;
@@ -119,7 +119,7 @@ public class OuttakeSubsystem implements Subsystem {
                         break;
                     case LAZY:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(lazyRPM)));
-                        hoodLinreg = false;
+//                        hoodLinreg = false;
 //                        debugHoodTargetPosition = .45;
                         break;
                     case INTERPOLATED:
@@ -143,7 +143,7 @@ public class OuttakeSubsystem implements Subsystem {
                     turretControl.setPDFL(pTurret, dTurret, fTurret, lTurret);
                     turretTargetAngle = debugTargetAngle;
                 }
-                turretTargetAngle = Math.max(-60, Math.min(280, turretTargetAngle)); //Negative is ccw
+                turretTargetAngle = Math.max(-30, Math.min(300, turretTargetAngle)); //Negative is ccw
                 turretControl.setTarget(angleToTicks(turretTargetAngle));
                 turretControl.update(getTurretPosition());
                 if (Math.abs(turretTargetAngle - getCurrentAngle()) > 1.5) {
@@ -166,7 +166,7 @@ public class OuttakeSubsystem implements Subsystem {
             } else if (launcherState == FlywheelState.REACTIVE) {
                 hoodTargetPosition = getTargetHoodPosition(RobotSubsystem.INSTANCE.getDistanceToGoalInches(), getCurrentVelocityRPM());
             }
-            hood.setPosition(hoodTargetPosition);
+            hood.setPosition(Math.max(Math.min(hoodTargetPosition, 1), 0));
 
             oldTurret = getTurretPosition();
 
@@ -186,6 +186,10 @@ public class OuttakeSubsystem implements Subsystem {
 
     public boolean isFlwheelGood(int tolerance) {
         return Math.abs(targetVeloRPM - getCurrentVelocityRPM()) < tolerance;
+    }
+
+    public void setLauncherState(FlywheelState state){
+        launcherState = state;
     }
 
     public static Command addUserAdded() {

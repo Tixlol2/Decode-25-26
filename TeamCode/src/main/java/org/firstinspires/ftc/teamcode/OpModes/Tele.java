@@ -38,7 +38,6 @@ public class Tele extends NextFTCOpMode {
 
     private boolean resetTurret = false;
 
-
     public static boolean farZone = false;
 
     public static Pose autoPose = new Pose();
@@ -142,15 +141,50 @@ public class Tele extends NextFTCOpMode {
 
 
         //Toggle things based on dpad
-        Gamepads.gamepad2().dpadUp().whenBecomesTrue(OuttakeSubsystem.addUserAdded());
-        Gamepads.gamepad2().dpadLeft().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
-        Gamepads.gamepad2().dpadDown().whenBecomesTrue(OuttakeSubsystem.subUserAdded());
-        Gamepads.gamepad2().dpadRight().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
+        Gamepads.gamepad2().dpadUp().whenBecomesTrue(() -> {
+            OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
+            if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
+                OuttakeSubsystem.lazyRPM = 2500;
+            } else {
+                OuttakeSubsystem.lazyRPM = 3300;
+            }
+        });
+        Gamepads.gamepad2().dpadLeft().whenBecomesTrue(() -> {
+            OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
 
-        Gamepads.gamepad2().leftBumper().whenBecomesTrue(() -> RobotSubsystem.INSTANCE.updatingDist = true)
-                .whenBecomesFalse(() -> RobotSubsystem.INSTANCE.updatingDist = false);
+            if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
+                OuttakeSubsystem.lazyRPM = 2600;
+            } else {
+                OuttakeSubsystem.lazyRPM = 3350;
 
-        Gamepads.gamepad2().leftStickButton().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.LIME));
+            }
+        });
+        Gamepads.gamepad2().dpadRight().whenBecomesTrue(() -> {
+            OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
+
+            if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
+                OuttakeSubsystem.lazyRPM = 2300;
+            } else {
+                OuttakeSubsystem.lazyRPM = 3250;
+
+            }
+        });
+        Gamepads.gamepad2().dpadDown().whenBecomesTrue(() -> {
+            OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
+
+            if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
+                OuttakeSubsystem.lazyRPM = 2200;
+            } else {
+                OuttakeSubsystem.lazyRPM = 3150;
+
+            }
+        });
+
+
+
+        Gamepads.gamepad2().leftStickButton().whenBecomesTrue(() -> RobotSubsystem.shootType = (RobotSubsystem.shootingType.CLOSE));
+        Gamepads.gamepad2().rightStickButton().whenBecomesTrue(() -> RobotSubsystem.shootType = (RobotSubsystem.shootingType.FAR));
+        Gamepads.gamepad2().start().whenBecomesTrue(() -> RobotSubsystem.shootType = RobotSubsystem.shootingType.LINREG);
 
         Gamepads.gamepad1().a().whenBecomesTrue(RobotSubsystem.INSTANCE.jiggle());
 
@@ -165,9 +199,12 @@ public class Tele extends NextFTCOpMode {
             follower().startTeleopDrive();
         });
 
+        Gamepads.gamepad2().leftBumper().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.GOAL));
+        Gamepads.gamepad2().rightBumper().whenBecomesTrue(OuttakeSubsystem.INSTANCE.SetTurretState(OuttakeSubsystem.TurretState.FORWARD));
+
         //Shooting command
         Gamepads.gamepad1().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.Shoot());
-        Gamepads.gamepad2().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.AutoShoot());
+//        Gamepads.gamepad2().rightBumper().whenBecomesTrue(RobotSubsystem.INSTANCE.AutoShoot());
 
 
     }

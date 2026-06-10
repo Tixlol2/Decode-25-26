@@ -11,30 +11,31 @@ import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.delays.Delay;
+import dev.nextftc.core.commands.delays.WaitUntil;
 import dev.nextftc.core.commands.groups.ParallelGroup;
 import dev.nextftc.core.commands.groups.ParallelRaceGroup;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
+import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
+import dev.nextftc.extensions.pedro.TurnTo;
 
 @Configurable
 public class AutoCommands {
 
-    public static Pose blueFarSpike = new Pose(13.37184115523466, 35.653429602888075, Math.toRadians(180));
-    public static Pose blueFarSpikeCP = new Pose(57.17328519855595, 38.462093862815884);
+    public static Pose blueFarSpike = new Pose(13.3718411552, 38.653429602888075, Math.toRadians(180));
+    public static Pose blueFarSpikeCP = new Pose(66.28720924918886, 30.7152584198);
 
-    public static Pose blueCloseShooting = new Pose(60.22743682310469, 84.24548736462094, Math.toRadians(180));
+    public static Pose blueCloseShooting = new Pose(47.22743682310469, 97.2454873646, Math.toRadians(90));
 
-    public static Pose blueFarShooting = new Pose(56.346570397111904, 8.173285198555952, Math.toRadians(180));
+    public static Pose blueFarShooting = new Pose(56.346570397111904, 8.173285198555952, Math.toRadians(90));
 
-    public static Pose blueMiddleSpike = new Pose(18.3971119133574, 60.25992779783393, Math.toRadians(180));
-    public static Pose blueMiddleSpikeCP1 = new Pose(84.37906137184113, 65.32129963898916);
-    public static Pose blueMiddleSpikeCP2 = new Pose(35.93140794223827, 58.516245487364635);
+    public static Pose blueMiddleSpike = new Pose(10.3971119134, 63.2599277978, Math.toRadians(180));
+    public static Pose blueMiddleSpikeCP1 = new Pose(70.03399899465339, 59.47806516473976);
 
-    public static Pose blueCloseSpike = new Pose(19.090252707581225, 87.17328519855594, Math.toRadians(180));
-    public static Pose blueCloseSpikeCP1 = new Pose(74.75451263537907, 91.49458483754515);
-    public static Pose blueCloseSpikeCP2 = new Pose(38.81588447653429, 81.96389891696751);
+    public static Pose blueCloseSpike = new Pose(20.0902527076, 87.17328519855594, Math.toRadians(180));
+    public static Pose blueCloseSpikeCP1 = new Pose(57.94438605310059, 85.41863547045658);
 
     public static Pose blueCloseCycle = new Pose(13.718411552346563, 59.91335740072203, Math.toRadians(160));
     public static Pose blueCloseCycleCP = new Pose(39.75090252707583, 52.85198555956682);
@@ -46,16 +47,16 @@ public class AutoCommands {
     public static Pose blueFarCycleCP1 = new Pose(1.906137184115518, 5.346570397111908);
     public static Pose blueFarCycleCP2 = new Pose(16.476534296028884, 27.646209386281587);
 
-    public static Pose blueClosePark = new Pose(52.01444043321301, 132.59205776173278);
+    public static Pose blueClosePark = new Pose(56.01444043321301, 132.59205776173278);
     public static Pose blueFarPark = new Pose(15.451263537906144, 11.465703971119035);
 
-    public static Pose blueGateBumpHigh = new Pose(15.797833935018032, 73.77617328519857, Math.toRadians(180));
-    public static Pose blueGateBumpCPHigh = new Pose(45.079422382671474, 77.38086642599279);
+    public static Pose blueGateBumpHigh = new Pose(17.0, 79.5, Math.toRadians(180));
+    public static Pose blueGateBumpCPHigh = new Pose(80, 77.38086642599279);
 
     public static Pose blueGateBumpLow = new Pose(17.42599277978339, 67.97472924187724, Math.toRadians(180));
     public static Pose blueGateBumpCPLow = new Pose(44.732851985559556, 68.543321299639);
 
-    public static double shootDelay = .5;
+    public static double shootDelay = .35;
 
 
     public static Command farSpikeShoot(shootLocation loc, double intakeTime, double returnTime) {
@@ -63,38 +64,10 @@ public class AutoCommands {
         return new SequentialGroup(
 
                 //From current pos, go to end of spike mark
-                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
-                new FollowPath(PedroComponent.follower().pathBuilder()
-                        .addPath(
-                                new BezierCurve(
-                                        Poses.mirrorCoordinates(PedroComponent.follower().getPose(), RobotSubsystem.INSTANCE.getAllianceColor()),
-                                        Poses.mirrorCoordinates(blueFarSpikeCP, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                        Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor())
-                                )
-                        )
-                        .setConstantHeadingInterpolation(
-                                Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                        ).build()),
+                intakeFar(intakeTime),
 
                 //Go to shooting pos based on input
-                new ParallelRaceGroup(
-                        new Delay(returnTime),
-                        new FollowPath(
-                                PedroComponent.follower().pathBuilder()
-                                        .addPath(
-                                                new BezierLine(
-                                                        PedroComponent.follower().getPose(),
-                                                        loc == shootLocation.CLOSE ?
-                                                                Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
-                                                                Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
-
-                                        ).setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(180)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
-                                        .build()
-                        )
-                ),
-                new Delay(shootDelay),
-                RobotSubsystem.INSTANCE.AutoShoot(),
-                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
+                shoot(loc, returnTime)
         );
 
     }
@@ -104,77 +77,12 @@ public class AutoCommands {
         return new SequentialGroup(
 
                 //From current pos, go to end of spike mark
-                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
-                new ParallelRaceGroup(
-                        new Delay(intakeTime),
-                        new FollowPath(
-                                PedroComponent.follower().pathBuilder()
-                                        .addPath(
-                                                new BezierCurve(
-                                                        PedroComponent.follower().getPose(),
-                                                        Poses.mirrorCoordinates(blueMiddleSpikeCP1, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                        Poses.mirrorCoordinates(blueMiddleSpikeCP2, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                        Poses.mirrorCoordinates(blueMiddleSpike, RobotSubsystem.INSTANCE.getAllianceColor())
-                                                )
-                                        )
-                                        .setConstantHeadingInterpolation(
-                                                Poses.mirrorCoordinates(blueMiddleSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                                        ).build()
-                        )
-                ),
+                midIntake(intakeTime),
                 new IfElseCommand(() -> bumpGate,
-                        new ParallelRaceGroup(
-                                new Delay(1.5),
-                                new FollowPath(
-                                        PedroComponent.follower().pathBuilder()
-                                                .addPath(
-                                                        new BezierCurve(
-                                                                PedroComponent.follower().getPose(),
-                                                                Poses.mirrorCoordinates(blueGateBumpCPLow, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                                Poses.mirrorCoordinates(blueGateBumpLow, RobotSubsystem.INSTANCE.getAllianceColor())
-                                                        )
-                                                ).setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(180)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
-                                                .build()
-                                ))),
+                        gateBump(1.5, false)
+                ),
                 //Go to shooting pos based on input
-                new IfElseCommand(() -> type == pathType.CURVE,
-                        new ParallelRaceGroup(
-                                new Delay(returnTime),
-                                new FollowPath(
-                                        PedroComponent.follower().pathBuilder()
-                                                .addPath(
-                                                        new BezierCurve(
-                                                                PedroComponent.follower().getPose(),
-                                                                Poses.mirrorCoordinates(blueMiddleSpikeCP1, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                                Poses.mirrorCoordinates(blueMiddleSpikeCP2, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                                loc == shootLocation.CLOSE ?
-                                                                        Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
-                                                                        Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
-                                                )
-                                                .setConstantHeadingInterpolation(
-                                                        Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                                                ).build()
-
-                                )),
-                        new ParallelRaceGroup(
-                                new Delay(returnTime),
-                                new FollowPath(
-                                        PedroComponent.follower().pathBuilder()
-                                                .addPath(
-                                                        new BezierLine(
-                                                                PedroComponent.follower().getPose(),
-                                                                loc == shootLocation.CLOSE ?
-                                                                        Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
-                                                                        Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
-                                                )
-                                                .setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(180)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
-                                                .build()
-
-                                )
-                        )),
-                new Delay(shootDelay),
-                RobotSubsystem.INSTANCE.AutoShoot(),
-                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
+                shoot(loc, returnTime)
         );
 
     }
@@ -184,58 +92,13 @@ public class AutoCommands {
         return new SequentialGroup(
 
                 //From current pos, go to end of spike mark
-                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
-                new ParallelRaceGroup(
-                        new Delay(intakeTime),
-                        new FollowPath(
-                                PedroComponent.follower().pathBuilder()
-                                        .addPath(
-                                                new BezierCurve(
-                                                        PedroComponent.follower().getPose(),
-                                                        Poses.mirrorCoordinates(blueCloseSpikeCP1, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                        Poses.mirrorCoordinates(blueCloseSpikeCP2, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                        Poses.mirrorCoordinates(blueCloseSpike, RobotSubsystem.INSTANCE.getAllianceColor())
-                                                )
-                                        )
-                                        .setConstantHeadingInterpolation(
-                                                Poses.mirrorCoordinates(blueCloseSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
-                                        ).build()
-                        )),
-
+                intakeClose(intakeTime),
                 new IfElseCommand(() -> bumpGate,
-                        new ParallelRaceGroup(
-                                new Delay(1.5),
-                                new FollowPath(
-                                        PedroComponent.follower().pathBuilder()
-                                                .addPath(
-                                                        new BezierCurve(
-                                                                PedroComponent.follower().getPose(),
-                                                                Poses.mirrorCoordinates(blueGateBumpCPHigh, RobotSubsystem.INSTANCE.getAllianceColor()),
-                                                                Poses.mirrorCoordinates(blueGateBumpHigh, RobotSubsystem.INSTANCE.getAllianceColor())
-                                                        )
-                                                ).setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(180)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
-                                                .build()
-                                ))),
+                        gateBump(1, true)
+                ),
 
                 //Go to shooting pos based on input
-                new ParallelRaceGroup(
-                        new Delay(returnTime),
-                        new FollowPath(
-                                PedroComponent.follower().pathBuilder()
-                                        .addPath(
-                                                new BezierLine(
-                                                        PedroComponent.follower().getPose(),
-                                                        loc == shootLocation.CLOSE ?
-                                                                Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
-                                                                Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
-
-                                        ).setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0, 0, Math.toRadians(180)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
-
-                                        .build()
-                        )),
-                new Delay(shootDelay),
-                RobotSubsystem.INSTANCE.AutoShoot(),
-                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
+                shoot(loc, returnTime)
         );
 
     }
@@ -298,6 +161,7 @@ public class AutoCommands {
                                                 Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
                                         ).build()
                         )),
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
                 new Delay(shootDelay),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
@@ -324,6 +188,7 @@ public class AutoCommands {
                                 )
                         )
                 ),
+                new Delay(shootDelay),
                 RobotSubsystem.INSTANCE.AutoShoot()
         );
     }
@@ -343,19 +208,38 @@ public class AutoCommands {
         );
     }
 
-    public static Command gateBump(double timer) {
+    public static Command parkShoot(shootLocation loc, double timer) {
+        return new SequentialGroup(
+                new ParallelRaceGroup(
+                        new Delay(timer),
+                        new FollowPath(
+                                PedroComponent.follower().pathBuilder()
+                                        .addPath(
+                                                new BezierLine(
+                                                        PedroComponent.follower().getPose(),
+                                                        loc == shootLocation.CLOSE ?
+                                                                Poses.mirrorCoordinates(blueClosePark, RobotSubsystem.INSTANCE.getAllianceColor()) :
+                                                                Poses.mirrorCoordinates(blueFarPark, RobotSubsystem.INSTANCE.getAllianceColor())
+                                                )
+                                        )
+                                        .setLinearHeadingInterpolation(PedroComponent.follower().getPose().getHeading(), Poses.mirrorCoordinates(blueCloseSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()).build()
+                        )),
+                RobotSubsystem.INSTANCE.AutoShoot()
+        );
+    }
+
+    public static Command gateBump(double timer, boolean high) {
         return new ParallelRaceGroup(
                 new Delay(timer),
-
                 new FollowPath(
                         PedroComponent.follower().pathBuilder()
                                 .addPath(
                                         new BezierLine(
                                                 PedroComponent.follower().getPose(),
-                                                Poses.mirrorCoordinates(blueGateBumpHigh, RobotSubsystem.INSTANCE.getAllianceColor())
+                                                Poses.mirrorCoordinates(high ? blueGateBumpHigh : blueGateBumpLow, RobotSubsystem.INSTANCE.getAllianceColor())
                                         )
                                 )
-                                .setConstantHeadingInterpolation(Math.toRadians(90))
+                                .setConstantHeadingInterpolation(Poses.mirrorCoordinates(new Pose(0,0, Math.toRadians(180)), RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
                                 .build()
                 )
         );
@@ -374,7 +258,7 @@ public class AutoCommands {
                                                         Poses.mirrorCoordinates(blueHumanPlayer, RobotSubsystem.INSTANCE.getAllianceColor())
                                                 )
                                         )
-                                        .setConstantHeadingInterpolation(Math.toRadians(180))
+                                        .setConstantHeadingInterpolation(Poses.mirrorCoordinates(blueHumanPlayer, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading())
                                         .build()
                         )),
 
@@ -390,6 +274,7 @@ public class AutoCommands {
                                         ).setConstantHeadingInterpolation(Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()).build()
 
                         )),
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
                 new Delay(shootDelay),
                 RobotSubsystem.INSTANCE.AutoShoot(),
                 IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
@@ -413,10 +298,137 @@ public class AutoCommands {
         });
     }
 
+    public static void setRPM(double rpm) {
+        OuttakeSubsystem.setTurretState(OuttakeSubsystem.TurretState.GOAL);
+        OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
+        OuttakeSubsystem.lazyRPM = rpm;
+    }
+
+    public static Command intakeFar(double intakeTime){
+        return new SequentialGroup(
+        IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
+                new ParallelRaceGroup(
+                        new Delay(intakeTime),
+                        new FollowPath(PedroComponent.follower().pathBuilder()
+                                .addPath(
+                                        new BezierCurve(
+                                                Poses.mirrorCoordinates(PedroComponent.follower().getPose(), RobotSubsystem.INSTANCE.getAllianceColor()),
+                                                Poses.mirrorCoordinates(blueFarSpikeCP, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                                Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor())
+                                        )
+                                )
+                                .setConstantHeadingInterpolation(
+                                        Poses.mirrorCoordinates(blueFarSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                                ).build())));
+    }
+
+    public static Command intakeClose(double intakeTime){
+        return new SequentialGroup(
+
+                //From current pos, go to end of spike mark
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
+                new ParallelRaceGroup(
+                        new Delay(intakeTime),
+                        new FollowPath(
+                                PedroComponent.follower().pathBuilder()
+                                        .addPath(
+                                                new BezierCurve(
+                                                        PedroComponent.follower().getPose(),
+                                                        Poses.mirrorCoordinates(blueCloseSpikeCP1, RobotSubsystem.INSTANCE.getAllianceColor()),
+//                                                        Poses.mirrorCoordinates(blueCloseSpikeCP2, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                                        Poses.mirrorCoordinates(blueCloseSpike, RobotSubsystem.INSTANCE.getAllianceColor())
+                                                )
+                                        )
+                                        .setConstantHeadingInterpolation(
+                                                Poses.mirrorCoordinates(blueCloseSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                                        ).build()
+                        )),
+        new ParallelRaceGroup(
+                new Delay(.35),
+                new FollowPath(
+                        PedroComponent.follower().pathBuilder()
+                                .addPath(
+                                        new BezierLine(
+                                                PedroComponent.follower().getPose(),
+                                                Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor())
+                                        )
+                                )
+                                .setConstantHeadingInterpolation(
+                                        Poses.mirrorCoordinates(blueCloseSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                                ).build()))
+        );
+    }
+
+    public static Command shoot(shootLocation loca, double timer){
+//        PedroComponent.follower().breakFollowing();
+        return new SequentialGroup(
+                new ParallelRaceGroup(
+                new Delay(timer),
+                new FollowPath(
+                        PedroComponent.follower().pathBuilder()
+                                .addPath(
+                                        new BezierLine(
+                                                PedroComponent.follower().getPose(),
+                                                loca == shootLocation.CLOSE ?
+                                                        Poses.mirrorCoordinates(blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()) :
+                                                        loca == shootLocation.PARK ?
+                                                                Poses.mirrorCoordinates(blueClosePark, RobotSubsystem.INSTANCE.getAllianceColor()) :
+                                                                Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
+                                )
+                                .setConstantHeadingInterpolation(
+                                        PedroComponent.follower().getPose().getHeading()
+                                ).build()
+
+                )),
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
+                new Delay(shootDelay),
+                RobotSubsystem.INSTANCE.AutoShoot(),
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF)
+        );
+    }
+
+    public static Command midIntake(double intakeTime){
+        return new SequentialGroup(
+
+                //From current pos, go to end of spike mark
+                IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.IN),
+                new ParallelRaceGroup(
+                        new Delay(intakeTime),
+                        new FollowPath(
+                                PedroComponent.follower().pathBuilder()
+                                        .addPath(
+                                                new BezierCurve(
+                                                        PedroComponent.follower().getPose(),
+                                                        Poses.mirrorCoordinates(blueMiddleSpikeCP1, RobotSubsystem.INSTANCE.getAllianceColor()),
+//                                                        Poses.mirrorCoordinates(blueMiddleSpikeCP2, RobotSubsystem.INSTANCE.getAllianceColor()),
+                                                        Poses.mirrorCoordinates(blueMiddleSpike, RobotSubsystem.INSTANCE.getAllianceColor())
+                                                )
+                                        )
+                                        .setConstantHeadingInterpolation(
+                                                Poses.mirrorCoordinates(blueMiddleSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                                        ).build()
+                        )
+                ),
+                new ParallelRaceGroup(
+                        new Delay(.5),
+                        new FollowPath(
+                                PedroComponent.follower().pathBuilder()
+                                        .addPath(
+                                                new BezierLine(
+                                                        PedroComponent.follower().getPose(),
+                                                        Poses.mirrorCoordinates(new Pose(22.3971119134, 63.2599277978), RobotSubsystem.INSTANCE.getAllianceColor())
+                                                )
+                                        )
+                                        .setConstantHeadingInterpolation(
+                                                Poses.mirrorCoordinates(blueMiddleSpike, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                                        ).build()
+                )));
+    }
 
     public enum shootLocation {
         CLOSE,
-        FAR
+        FAR,
+        PARK
     }
 
     public enum cycleLocation {

@@ -96,12 +96,9 @@ public class CloseSolo extends NextFTCOpMode {
                 break;
             case 1:
                 if (oldState != autoState) {
+                    AutoCommands.setRPM(2500);
                     new SequentialGroup(
-                            new ParallelRaceGroup(
-                                    new Delay(5),
-                                    AutoCommands.init,
-                                    AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE, 2.5)
-                            ),
+                            AutoCommands.shootPreload(AutoCommands.shootLocation.CLOSE, 2.5),
                             SetAutoState(2)
                     ).schedule();
                 }
@@ -110,7 +107,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 2:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, false, 2.5, 1.5),
+                            AutoCommands.closeSpikeShoot(AutoCommands.shootLocation.CLOSE, true, 2, 4),
                             SetAutoState(3)
                     ).schedule();
                 }
@@ -119,7 +116,9 @@ public class CloseSolo extends NextFTCOpMode {
             case 3:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false, 3, 1.5),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.CLOSE, AutoCommands.pathType.LINE, false, 3, 5),
+//                            AutoCommands.midIntake(3),
+//                            AutoCommands.shoot(AutoCommands.shootLocation.CLOSE, 2),
                             SetAutoState(4)
                     ).schedule();
                 }
@@ -128,7 +127,9 @@ public class CloseSolo extends NextFTCOpMode {
             case 4:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.CLOSE, 4, 1.5),
+//                            AutoCommands.intakeFar(2.75),
+//                            AutoCommands.midIntake(2),
+                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.PARK, 2.5, 4.5),
                             SetAutoState(5)
                     ).schedule();
                 }
@@ -137,7 +138,6 @@ public class CloseSolo extends NextFTCOpMode {
             case 5:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.park(AutoCommands.shootLocation.CLOSE),
                             SetAutoState(-1)
                     ).schedule();
                 }

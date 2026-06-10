@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.OpModes.Autos;
 
 
+import static org.firstinspires.ftc.teamcode.Util.AutoCommands.blueFarShooting;
+import static org.firstinspires.ftc.teamcode.Util.AutoCommands.shootDelay;
 import static dev.nextftc.extensions.pedro.PedroComponent.follower;
 
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.OuttakeSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.RobotSubsystem;
 import org.firstinspires.ftc.teamcode.Util.AutoCommands;
@@ -20,6 +24,7 @@ import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.commands.utility.InstantCommand;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
+import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.NextFTCOpMode;
@@ -61,14 +66,7 @@ public class FarSolo extends NextFTCOpMode {
 
     @Override
     public void onStartButtonPressed() {
-        OuttakeSubsystem.INSTANCE.resetTurret();
-        RobotSubsystem.INSTANCE.resetPattern();
-//        PedroComponent.follower().setStartingPose(Poses.mirrorCoordinates(Poses.blueFarStart, RobotSubsystem.INSTANCE.getAllianceColor()));
-
-        follower().setStartingPose((RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Poses.blueFarStart : Poses.redFarStart).withHeading(RobotSubsystem.INSTANCE.getAllianceColor() == RobotSubsystem.AllianceColor.BLUE ? Math.toRadians(180) : Math.toRadians(0)));
-
-        RobotSubsystem.inTele = false;
-        RobotSubsystem.INSTANCE.updatingDist = true;
+        AutoCommands.startButton(AutoCommands.shootLocation.FAR).schedule();
         autoState = 0;
     }
 
@@ -106,16 +104,15 @@ public class FarSolo extends NextFTCOpMode {
             case -1:
                 break;
             case 0:
-                AutoCommands.init.schedule();
                 setAutoState(1);
                 break;
             case 1:
                 if (oldState != autoState) {
+                    AutoCommands.setRPM(3100);
                     new SequentialGroup(
                             new ParallelRaceGroup(
                                     new Delay(5),
-                                    AutoCommands.init,
-                                    AutoCommands.shootPreload(AutoCommands.shootLocation.FAR, 2.5)
+                                    AutoCommands.shootPreload(AutoCommands.shootLocation.FAR, 0)
                             ),
                             SetAutoState(2)
                     ).schedule();
@@ -125,7 +122,25 @@ public class FarSolo extends NextFTCOpMode {
             case 2:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.farSpikeShoot(AutoCommands.shootLocation.FAR, 2.5, 1.5),
+                            AutoCommands.intakeFar(3),
+                                            new ParallelRaceGroup(
+                                                    new Delay(4),
+                                                    new FollowPath(
+                                                            PedroComponent.follower().pathBuilder()
+                                                                    .addPath(
+                                                                            new BezierLine(
+                                                                                    PedroComponent.follower().getPose(),
+                                                                                    Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
+                                                                    )
+                                                                    .setConstantHeadingInterpolation(
+                                                                            Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+                                                                    ).build()
+
+                                                    )),
+                                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OUT),
+                                            new Delay(shootDelay),
+                                            RobotSubsystem.INSTANCE.AutoShoot(),
+                                            IntakeSubsystem.INSTANCE.setActiveStateCommand(IntakeSubsystem.IntakeState.OFF),
                             SetAutoState(3)
                     ).schedule();
                 }
@@ -134,21 +149,21 @@ public class FarSolo extends NextFTCOpMode {
             case 3:
                 if (oldState != autoState) {
                     new SequentialGroup(
-                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.FAR, AutoCommands.pathType.LINE, false, 2.5, 1.5),
-                            SetAutoState(4)
-                    ).schedule();
-                }
-                oldState = autoState;
-                break;
-            case 4:
-                if (oldState != autoState) {
-                    new SequentialGroup(
-                            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.GATE, 2.5, 1.5),
+                            AutoCommands.midSpikeShoot(AutoCommands.shootLocation.FAR, AutoCommands.pathType.LINE, false, 4, 3),
                             SetAutoState(5)
                     ).schedule();
                 }
                 oldState = autoState;
                 break;
+//            case 4:
+//                if (oldState != autoState) {
+//                    new SequentialGroup(
+//                            AutoCommands.cycle(AutoCommands.shootLocation.FAR, AutoCommands.cycleLocation.GATE, 2.5, 1.5),
+//                            SetAutoState(5)
+//                    ).schedule();
+//                }
+//                oldState = autoState;
+//                break;
             case 5:
                 if (oldState != autoState) {
                     new SequentialGroup(

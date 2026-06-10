@@ -50,7 +50,7 @@ public class RobotSubsystem extends SubsystemGroup {
     }
 
     public static double goalOffset = 0;
-
+    public static shootingType shootType = shootingType.LINREG;
     public static boolean velOffset = false;
     public static double velOffsetK = -0.001;
 
@@ -95,6 +95,21 @@ public class RobotSubsystem extends SubsystemGroup {
         loopTimer.reset();
 
         updateDistanceAndAngle();
+
+        switch(shootType){
+            case LINREG:
+                OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.REACTIVE);
+                break;
+            case CLOSE:
+                OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
+//                OuttakeSubsystem.lazyRPM = 2500;
+                break;
+            case FAR:
+                OuttakeSubsystem.INSTANCE.setLauncherState(OuttakeSubsystem.FlywheelState.LAZY);
+//                OuttakeSubsystem.lazyRPM = 3100;
+                break;
+
+        }
 
         //Handles turret aiming
         if (allSlotsEmpty() && shotTimer.getTimeSeconds() > 2.5 && inTele) {
@@ -492,4 +507,9 @@ public class RobotSubsystem extends SubsystemGroup {
         SetAllSlotState(MainSlot.ServoState.DOWN).schedule();
     }
 
+    public enum shootingType {
+        CLOSE,
+        FAR,
+        LINREG
+    }
 }
