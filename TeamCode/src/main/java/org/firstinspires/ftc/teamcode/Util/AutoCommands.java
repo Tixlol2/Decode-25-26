@@ -27,7 +27,7 @@ public class AutoCommands {
     public static Pose blueFarSpike = new Pose(13.3718411552, 38.653429602888075, Math.toRadians(180));
     public static Pose blueFarSpikeCP = new Pose(66.28720924918886, 30.7152584198);
 
-    public static Pose blueCloseShooting = new Pose(47.22743682310469, 97.2454873646, Math.toRadians(90));
+    public static Pose blueCloseShooting = new Pose(47.22743682310469, 97.2454873646, Math.toRadians(115));
 
     public static Pose blueFarShooting = new Pose(56.346570397111904, 8.173285198555952, Math.toRadians(90));
 
@@ -47,7 +47,7 @@ public class AutoCommands {
     public static Pose blueFarCycleCP1 = new Pose(1.906137184115518, 5.346570397111908);
     public static Pose blueFarCycleCP2 = new Pose(16.476534296028884, 27.646209386281587);
 
-    public static Pose blueClosePark = new Pose(56.01444043321301, 132.59205776173278);
+    public static Pose blueClosePark = new Pose(56.01444043321301, 132.59205776173278, Math.toDegrees(180));
     public static Pose blueFarPark = new Pose(15.451263537906144, 11.465703971119035);
 
     public static Pose blueGateBumpHigh = new Pose(17.0, 79.5, Math.toRadians(180));
@@ -375,8 +375,10 @@ public class AutoCommands {
                                                                 Poses.mirrorCoordinates(blueClosePark, RobotSubsystem.INSTANCE.getAllianceColor()) :
                                                                 Poses.mirrorCoordinates(blueFarShooting, RobotSubsystem.INSTANCE.getAllianceColor()))
                                 )
-                                .setConstantHeadingInterpolation(
-                                        PedroComponent.follower().getPose().getHeading()
+                                .setLinearHeadingInterpolation(
+                                        PedroComponent.follower().getPose().getHeading(),
+                                        Poses.mirrorCoordinates(loca == shootLocation.PARK ? blueClosePark : blueCloseShooting, RobotSubsystem.INSTANCE.getAllianceColor()).getHeading()
+
                                 ).build()
 
                 )),

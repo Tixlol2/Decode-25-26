@@ -32,7 +32,7 @@ public class Constants {
 //                    new FilteredPIDFCoefficients(0.0075, 0, 0.000, 0.6, 0)
 //            )
 
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(.35, 0.07614212532152057, 0.0016333487522169475).withMaximumBrakingPower(.4));
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(.4, 0.07614212532152057, 0.0016333487522169475).withMaximumBrakingPower(.375));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName(UniConstants.DRIVE_FRONT_LEFT_STRING)

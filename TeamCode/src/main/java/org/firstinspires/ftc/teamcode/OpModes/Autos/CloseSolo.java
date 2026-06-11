@@ -138,6 +138,7 @@ public class CloseSolo extends NextFTCOpMode {
             case 5:
                 if (oldState != autoState) {
                     new SequentialGroup(
+//                            AutoCommands.park(AutoCommands.shootLocation.CLOSE),
                             SetAutoState(-1)
                     ).schedule();
                 }

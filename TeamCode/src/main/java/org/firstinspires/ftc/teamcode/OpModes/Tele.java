@@ -146,7 +146,7 @@ public class Tele extends NextFTCOpMode {
             if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
                 OuttakeSubsystem.lazyRPM = 2500;
             } else {
-                OuttakeSubsystem.lazyRPM = 3300;
+                OuttakeSubsystem.lazyRPM = 3250;
             }
         });
         Gamepads.gamepad2().dpadLeft().whenBecomesTrue(() -> {
@@ -165,7 +165,7 @@ public class Tele extends NextFTCOpMode {
             if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
                 OuttakeSubsystem.lazyRPM = 2300;
             } else {
-                OuttakeSubsystem.lazyRPM = 3250;
+                OuttakeSubsystem.lazyRPM = 3150;
 
             }
         });
@@ -175,7 +175,7 @@ public class Tele extends NextFTCOpMode {
             if(RobotSubsystem.shootType == RobotSubsystem.shootingType.CLOSE){
                 OuttakeSubsystem.lazyRPM = 2200;
             } else {
-                OuttakeSubsystem.lazyRPM = 3150;
+                OuttakeSubsystem.lazyRPM = 3050;
 
             }
         });

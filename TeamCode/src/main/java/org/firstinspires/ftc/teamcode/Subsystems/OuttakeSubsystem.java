@@ -125,7 +125,7 @@ public class OuttakeSubsystem implements Subsystem {
                     case INTERPOLATED:
                     case REACTIVE:
                         launcherControl.setGoal(new KineticState(0, toTicksPerSec(getTargetVelocityRPM(RobotSubsystem.INSTANCE.getDistanceToGoalInches()))));
-                        hoodLinreg = true;
+//                        hoodLinreg = true;
                         break;
 
                 }
